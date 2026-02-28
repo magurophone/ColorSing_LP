@@ -10,8 +10,8 @@ const DEMO_RANKING = [
   [3, '深海の歌姫', 30, './customer/demo-icons/user3.png'],
 ]
 const DEMO_GOALS = [
-  ['300k 達成でミックス音源プレゼント', '月末までに新曲をリリース'],
-  ['来月は歌ってみた企画', '特典配布イベント開催予定'],
+  ['300k', '400k'],
+  ['歌推し40人', '歌推し50人'],
 ]
 // BENEFIT_FIELDS: TITLE=0, LABEL=1, NAME=2, DESCRIPTION=3, TRACK_HISTORY=4
 const DEMO_BENEFITS = [
@@ -41,10 +41,10 @@ const DEMO_HISTORY = [
 const DEMO_EVENTS = {
   upcoming: {
     date: '20260315',
-    title: '🎵 Spring Singing Festival 2026',
-    setlist: '夜に駆ける\nADO - うた\n夜空ノムコウ',
+    title: 'Chill Night Festival 2026',
+    setlist: '変態紳士クラブ  - YOKAZE\niri             - Wonderland\nChilldspot      - ネオンを消して',
     imageUrl: '',
-    notes: '投げ銭・コメント大歓迎！',
+    notes: '',
   },
   past: [],
 }
