@@ -38,12 +38,20 @@ const DEMO_HISTORY = [
   { month: '202602', userName: '音符ちゃん♪',   tierKey: 'メンバーシップA', content: '月内リクエスト' },
   { month: '202601', userName: '深海の歌姫',    tierKey: '10k',         content: '歌枠チケット 2時間' },
 ]
+const DEMO_EVENT_POSTER = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <rect width="1200" height="500" fill="#08121e"/>
+  <rect x="16" y="16" width="1168" height="468" rx="4" fill="none" stroke="#183a58" stroke-width="2" stroke-dasharray="16 8"/>
+  <text x="600" y="220" font-family="sans-serif" font-size="56" fill="#2a4a68" text-anchor="middle">📸</text>
+  <text x="600" y="290" font-family="'Noto Sans JP',sans-serif" font-size="26" fill="#3a6a98" text-anchor="middle">イベントポスターをここに表示できます</text>
+  <text x="600" y="336" font-family="sans-serif" font-size="16" fill="#1e3a54" text-anchor="middle">Google Drive の画像 URL を設定すると表示されます</text>
+</svg>`)
 const DEMO_EVENTS = {
   upcoming: {
     date: '20260315',
     title: 'Chill Night Festival 2026',
     setlist: '変態紳士クラブ  - YOKAZE\niri             - Wonderland\nChilldspot      - ネオンを消して',
-    imageUrl: '',
+    imageUrl: DEMO_EVENT_POSTER,
     notes: '',
   },
   past: [],
