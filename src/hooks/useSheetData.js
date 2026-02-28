@@ -5,9 +5,9 @@ import { fetchSheetData, fetchIconData, fetchHistoryData, fetchEventData } from 
 // DEMO MODE — spreadsheetId === 'demo' のときにモックデータを返す
 // =====================================================================
 const DEMO_RANKING = [
-  [1, '星空リスナー☆', 70, '/customer/demo-icons/user1.png'],
-  [2, '音符ちゃん♪', 49, '/customer/demo-icons/user2.png'],
-  [3, '深海の歌姫', 30, '/customer/demo-icons/user3.png'],
+  [1, '星空リスナー☆', 70, './customer/demo-icons/user1.png'],
+  [2, '音符ちゃん♪', 49, './customer/demo-icons/user2.png'],
+  [3, '深海の歌姫', 30, './customer/demo-icons/user3.png'],
 ]
 const DEMO_GOALS = [
   ['300k 達成でミックス音源プレゼント', '月末までに新曲をリリース'],
@@ -50,9 +50,9 @@ const DEMO_EVENTS = {
 }
 const DEMO_ICONS = {
   '202501': [
-    { label: '星空リスナー☆', thumbnailUrl: '/customer/demo-icons/user1.png', originalUrl: '/customer/demo-icons/user1.png' },
-    { label: '音符ちゃん♪',   thumbnailUrl: '/customer/demo-icons/user2.png', originalUrl: '/customer/demo-icons/user2.png' },
-    { label: '深海の歌姫',    thumbnailUrl: '/customer/demo-icons/user3.png', originalUrl: '/customer/demo-icons/user3.png' },
+    { label: '星空リスナー☆', thumbnailUrl: './customer/demo-icons/user1.png', originalUrl: './customer/demo-icons/user1.png' },
+    { label: '音符ちゃん♪',   thumbnailUrl: './customer/demo-icons/user2.png', originalUrl: './customer/demo-icons/user2.png' },
+    { label: '深海の歌姫',    thumbnailUrl: './customer/demo-icons/user3.png', originalUrl: './customer/demo-icons/user3.png' },
   ],
   _orderedKeys: ['202501'],
 }
