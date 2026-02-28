@@ -33,35 +33,27 @@ function AdminApp() {
     () => localStorage.getItem('admin_theme') ?? 'dark'
   )
 
-  // ベースカラーをCSS変数に適用（サイト設定に追従）
-  useEffect(() => {
-    if (!config?.colors) return
-    const root = document.documentElement
-    root.style.setProperty('--base-deep-blue', config.colors.deepBlue)
-    root.style.setProperty('--base-ocean-teal', config.colors.oceanTeal)
-    root.style.setProperty('--base-light-blue', config.colors.lightBlue)
-    root.style.setProperty('--base-amber', config.colors.amber)
-    root.style.setProperty('--base-accent', config.colors.accent)
-    root.style.setProperty('--base-gold', config.colors.gold)
-  }, [config?.colors])
-
-  // 管理画面独自のライト/ダーク切り替え
+  // 管理画面独自のライト/ダーク切り替え（サイト設定とは独立したハードコード値）
   useEffect(() => {
     const root = document.documentElement
     if (adminTheme === 'light') {
       root.dataset.theme = 'light'
-      root.style.setProperty('--override-glass-bg', 'rgba(255, 255, 255, 0.5)')
+      root.style.setProperty('--base-deep-blue', '#F4F5F7')
+      root.style.setProperty('--base-ocean-teal', '#E8EAED')
+      root.style.setProperty('--base-light-blue', '#1a6ac8')
+      root.style.setProperty('--base-amber', '#b06000')
+      root.style.setProperty('--base-accent', '#c1121f')
+      root.style.setProperty('--override-glass-bg', 'rgba(255, 255, 255, 0.6)')
     } else {
       delete root.dataset.theme
-      const col = config?.colors?.deepBlue || '#0a1628'
-      if (/^#[0-9a-f]{6}$/i.test(col)) {
-        const r = parseInt(col.slice(1, 3), 16)
-        const g = parseInt(col.slice(3, 5), 16)
-        const b = parseInt(col.slice(5, 7), 16)
-        root.style.setProperty('--override-glass-bg', `rgba(${r},${g},${b},0.6)`)
-      }
+      root.style.setProperty('--base-deep-blue', '#0a1628')
+      root.style.setProperty('--base-ocean-teal', '#1b4965')
+      root.style.setProperty('--base-light-blue', '#8ab4f8')
+      root.style.setProperty('--base-amber', '#d4a574')
+      root.style.setProperty('--base-accent', '#c1121f')
+      root.style.removeProperty('--override-glass-bg')
     }
-  }, [adminTheme, config?.colors?.deepBlue])
+  }, [adminTheme])
 
   const toggleAdminTheme = () => {
     setAdminTheme(prev => {

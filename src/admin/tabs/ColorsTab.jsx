@@ -113,9 +113,6 @@ const ColorsTab = ({ config, updateConfig }) => {
   const popupHasChange = o.popupOverlayColor || (o.popupOverlayOpacity !== '' && o.popupOverlayOpacity != null)
   const menuLabelHasChange = o.menuCardLabelColor || (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
 
-  const brightness = config.colors?.brightness ?? 'dark'
-  const filteredPresets = COLOR_PRESETS.filter((p) => (p.brightness ?? 'dark') === brightness)
-
   return (
     <div>
       <h2 className="text-2xl font-body text-light-blue mb-6">カラー設定</h2>
@@ -142,23 +139,8 @@ const ColorsTab = ({ config, updateConfig }) => {
         <div>
           <p className="text-sm text-gray-400 mb-4">プリセットを選ぶか、個別にカスタマイズできます。ベースカラーはサイト全体の色調を決めます。</p>
 
-          {/* ダーク/ライト切り替え */}
-          <div className="flex rounded-lg overflow-hidden border border-white/20 mb-4 text-sm w-40">
-            {['dark', 'light'].map((mode) => (
-              <button
-                key={mode}
-                onClick={() => updateConfig('colors.brightness', mode)}
-                className={`flex-1 py-1.5 transition-colors ${
-                  brightness === mode ? 'bg-white/20 text-white' : 'text-gray-400 hover:text-gray-200'
-                }`}
-              >
-                {mode === 'dark' ? 'ダーク' : 'ライト'}
-              </button>
-            ))}
-          </div>
-
           <div className="flex flex-wrap gap-3 mb-8">
-            {filteredPresets.map((preset) => (
+            {COLOR_PRESETS.map((preset) => (
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
@@ -169,7 +151,16 @@ const ColorsTab = ({ config, updateConfig }) => {
                     <div key={i} className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: col }} />
                   ))}
                 </div>
-                <span className="text-gray-300">{preset.name}</span>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-gray-300 leading-tight">{preset.name}</span>
+                  <span className={`text-[9px] px-1.5 py-px rounded-full leading-tight ${
+                    (preset.brightness ?? 'dark') === 'light'
+                      ? 'bg-amber/25 text-amber/80'
+                      : 'bg-light-blue/20 text-light-blue/70'
+                  }`}>
+                    {(preset.brightness ?? 'dark') === 'light' ? 'ライト' : 'ダーク'}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
