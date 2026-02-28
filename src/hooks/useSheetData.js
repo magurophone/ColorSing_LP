@@ -1,6 +1,63 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { fetchSheetData, fetchIconData, fetchHistoryData, fetchEventData } from '../lib/sheets'
 
+// =====================================================================
+// DEMO MODE — spreadsheetId === 'demo' のときにモックデータを返す
+// =====================================================================
+const DEMO_RANKING = [
+  [1, '星空リスナー☆', 280, ''],
+  [2, '音符ちゃん♪', 195, ''],
+  [3, '深海の歌姫', 120, ''],
+]
+const DEMO_GOALS = [
+  ['300k 達成でミックス音源プレゼント', '月末までに新曲をリリース'],
+  ['来月は歌ってみた企画', '特典配布イベント開催予定'],
+]
+// BENEFIT_FIELDS: TITLE=0, LABEL=1, NAME=2, DESCRIPTION=3, TRACK_HISTORY=4
+const DEMO_BENEFITS = [
+  ['5k',          'Bronze',   '強制リクエスト権',    '枠内で好きな曲を1曲リクエストできます。',              ''],
+  ['10k',         'Silver',   '歌枠チケット',        '2時間分の歌枠チケットとして使用できます。',            ''],
+  ['20k',         'Gold',     'オープンチャット招待', '限定オープンチャットに招待されます。',                  ''],
+  ['30k',         'Platinum', 'アカペラ音源',        '1曲分のアカペラ音源をプレゼントします。',              ''],
+  ['50k',         'Diamond',  'ミックス音源',        '1曲分のミックス音源をプレゼントします。',              ''],
+  ['メンバーシップA', 'Member', '月内リクエスト対応', 'メンシプ期間中に好きな曲をリクエストできます。',       ''],
+]
+// 権利保有者データ: [name, col1=5k, col2=10k, col3=20k, col4=30k, col5=50k, col6=membership]
+const DEMO_RIGHTS = [
+  ['星空リスナー☆',  '2', '3', 'TRUE', '1', '',  'TRUE'],
+  ['音符ちゃん♪',   '1', '1', '',     '',  '',  'TRUE'],
+  ['深海の歌姫',    '3', '2', 'TRUE', '2', '1', ''],
+  ['サクラ音楽隊',  '1', '',  '',     '',  '',  ''],
+  ['月光セレナーデ', '2', '1', 'TRUE', '',  '',  ''],
+  ['波音コーラス',  '1', '',  '',     '',  '',  ''],
+  ['夜明けの歌声',  '1', '1', '',     '',  '',  'TRUE'],
+  ['虹色ハーモニー', '2', '',  '',     '',  '',  ''],
+]
+const DEMO_HISTORY = [
+  { month: '202602', userName: '星空リスナー☆',  tierKey: '5k',          content: '強制リクエスト1曲' },
+  { month: '202602', userName: '音符ちゃん♪',   tierKey: 'メンバーシップA', content: '月内リクエスト' },
+  { month: '202601', userName: '深海の歌姫',    tierKey: '10k',         content: '歌枠チケット 2時間' },
+]
+const DEMO_EVENTS = {
+  upcoming: {
+    date: '20260315',
+    title: '🎵 Spring Singing Festival 2026',
+    setlist: '夜に駆ける\nADO - うた\n夜空ノムコウ',
+    imageUrl: '',
+    notes: '投げ銭・コメント大歓迎！',
+  },
+  past: [],
+}
+const DEMO_ICONS = {
+  '202501': [
+    { label: '星空リスナー☆', thumbnailUrl: '', originalUrl: '' },
+    { label: '音符ちゃん♪',   thumbnailUrl: '', originalUrl: '' },
+    { label: '深海の歌姫',    thumbnailUrl: '', originalUrl: '' },
+  ],
+  _orderedKeys: ['202501'],
+}
+// =====================================================================
+
 export function useSheetData(sheetsConfig) {
   const [ranking, setRanking] = useState([])
   const [goals, setGoals] = useState([])
@@ -27,6 +84,21 @@ export function useSheetData(sheetsConfig) {
   const benefitsRange = ranges.benefits
 
   const loadData = useCallback(async () => {
+    // DEMO MODE
+    if (spreadsheetId === 'demo') {
+      setRanking(DEMO_RANKING)
+      setGoals(DEMO_GOALS)
+      setBenefits(DEMO_BENEFITS)
+      setRights(DEMO_RIGHTS)
+      setSpecialIndex(8)
+      setHistory(DEMO_HISTORY)
+      setEvents(DEMO_EVENTS)
+      setLastUpdate(new Date())
+      setLoading(false)
+      setError(null)
+      return
+    }
+
     if (!spreadsheetId) {
       setError('スプレッドシートIDが設定されていません。管理画面（admin.html）から設定してください。')
       setLoading(false)
@@ -104,6 +176,13 @@ export function useSheetData(sheetsConfig) {
   // アイコンデータ読み込み
   const loadIcons = useCallback(async () => {
     if (iconsLoadedRef.current || loadingIconsRef.current || !spreadsheetId) return
+
+    // DEMO MODE
+    if (spreadsheetId === 'demo') {
+      setIcons(DEMO_ICONS)
+      iconsLoadedRef.current = true
+      return
+    }
 
     loadingIconsRef.current = true
     setLoadingIcons(true)
