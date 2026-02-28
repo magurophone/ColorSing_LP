@@ -29,6 +29,47 @@ function AdminApp() {
   const [authenticated, setAuthenticated] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [saveMessage, setSaveMessage] = useState(null)
+  const [adminTheme, setAdminTheme] = useState(
+    () => localStorage.getItem('admin_theme') ?? 'dark'
+  )
+
+  // ベースカラーをCSS変数に適用（サイト設定に追従）
+  useEffect(() => {
+    if (!config?.colors) return
+    const root = document.documentElement
+    root.style.setProperty('--base-deep-blue', config.colors.deepBlue)
+    root.style.setProperty('--base-ocean-teal', config.colors.oceanTeal)
+    root.style.setProperty('--base-light-blue', config.colors.lightBlue)
+    root.style.setProperty('--base-amber', config.colors.amber)
+    root.style.setProperty('--base-accent', config.colors.accent)
+    root.style.setProperty('--base-gold', config.colors.gold)
+  }, [config?.colors])
+
+  // 管理画面独自のライト/ダーク切り替え
+  useEffect(() => {
+    const root = document.documentElement
+    if (adminTheme === 'light') {
+      root.dataset.theme = 'light'
+      root.style.setProperty('--override-glass-bg', 'rgba(255, 255, 255, 0.5)')
+    } else {
+      delete root.dataset.theme
+      const col = config?.colors?.deepBlue || '#0a1628'
+      if (/^#[0-9a-f]{6}$/i.test(col)) {
+        const r = parseInt(col.slice(1, 3), 16)
+        const g = parseInt(col.slice(3, 5), 16)
+        const b = parseInt(col.slice(5, 7), 16)
+        root.style.setProperty('--override-glass-bg', `rgba(${r},${g},${b},0.6)`)
+      }
+    }
+  }, [adminTheme, config?.colors?.deepBlue])
+
+  const toggleAdminTheme = () => {
+    setAdminTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      localStorage.setItem('admin_theme', next)
+      return next
+    })
+  }
 
   // パスワード保護チェック
   const needsAuth = config.admin?.password && !authenticated
@@ -160,6 +201,13 @@ function AdminApp() {
             <span className="text-light-blue/40 text-xs">›</span>
             <span className="text-light-blue text-xs font-bold truncate flex-1 min-w-0">{activeTabDef?.label}</span>
             <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={toggleAdminTheme}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all"
+                title={adminTheme === 'dark' ? 'ライトモードに切替' : 'ダークモードに切替'}
+              >
+                {adminTheme === 'light' ? '☀' : '🌙'}
+              </button>
               <a href="./index.html" target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" title="プレビュー">
                 <IconRenderer icon="monitor" size={15} />
               </a>
@@ -188,10 +236,17 @@ function AdminApp() {
 
         {/* PC: サイドバー */}
         <div className="hidden md:flex flex-col h-full">
-          <div className="px-5 py-5 border-b border-light-blue/15">
+          <div className="px-5 py-5 border-b border-light-blue/15 flex items-start justify-between">
             <h1 className="text-base font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-ocean-teal via-light-blue to-amber">
               管理画面
             </h1>
+            <button
+              onClick={toggleAdminTheme}
+              className="text-[13px] text-gray-400 hover:text-gray-200 transition-colors mt-0.5"
+              title={adminTheme === 'dark' ? 'ライトモードに切替' : 'ダークモードに切替'}
+            >
+              {adminTheme === 'light' ? '☀' : '🌙'}
+            </button>
           </div>
 
           <nav className="flex flex-col gap-0.5 p-3 flex-1">
