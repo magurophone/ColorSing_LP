@@ -171,6 +171,82 @@
         section { padding: 80px 0; }
         section.alt { background: #fff; border-top: 1px solid var(--color-secondary); border-bottom: 1px solid var(--color-secondary); }
 
+        /* ── Alternatives Compare ── */
+        .alt-compare {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 24px 0 20px;
+        }
+
+        @media (max-width: 600px) { .alt-compare { grid-template-columns: 1fr; } }
+
+        .alt-card {
+            background: #fff;
+            border: 1px solid #f0cfc8;
+            border-radius: var(--radius);
+            padding: 18px 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .alt-card-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #b84040;
+            margin-bottom: 6px;
+        }
+
+        .alt-card h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0cfc8;
+            padding-bottom: 8px;
+        }
+
+        .alt-card ul {
+            list-style: none;
+            font-size: 0.8rem;
+            color: #777;
+            line-height: 1.8;
+        }
+
+        .alt-card ul li::before {
+            content: '✕  ';
+            color: #d07070;
+            font-size: 0.75rem;
+        }
+
+        /* ── Visit CTA ── */
+        .visit-sec {
+            padding: 56px 0;
+            text-align: center;
+            border-top: 1px solid var(--color-secondary);
+        }
+
+        .visit-sec h2 { margin-bottom: 10px; }
+        .visit-sec p  { color: #777; font-size: 0.9rem; margin-bottom: 22px; }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1.5px solid var(--color-primary);
+            color: var(--color-primary);
+            background: transparent;
+            padding: 11px 28px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 700;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-outline:hover { background: var(--color-primary); color: #fff; }
+
         /* ── Problem ── */
         .prob-grid {
             display: grid;
@@ -425,6 +501,36 @@
                     <p>枠内アイコンの管理が煩雑で手が回らない</p>
                 </div>
             </div>
+            <p class="sec-desc" style="margin-bottom:12px;">他の方法を試してみたけど……</p>
+            <div class="alt-compare">
+                <div class="alt-card">
+                    <p class="alt-card-label">既存サービス（noteなど）</p>
+                    <h4>使いづらい</h4>
+                    <ul>
+                        <li>アイコンが縦一列に並ぶだけで見にくい</li>
+                        <li>自分のアイコンがどれかすぐわからない</li>
+                        <li>特典やランキングは別途管理が必要</li>
+                    </ul>
+                </div>
+                <div class="alt-card">
+                    <p class="alt-card-label">専用サイト制作依頼</p>
+                    <h4>コストが高すぎる</h4>
+                    <ul>
+                        <li>制作費が数十〜数百万円</li>
+                        <li>更新のたびに追加費用が発生</li>
+                        <li>サーバー代・保守費が継続的にかかる</li>
+                    </ul>
+                </div>
+                <div class="alt-card">
+                    <p class="alt-card-label">自作</p>
+                    <h4>現実的に難しい</h4>
+                    <ul>
+                        <li>プログラミングの知識が必要</li>
+                        <li>サーバーの契約・設定が必要</li>
+                        <li>デザイン・開発に膨大な時間がかかる</li>
+                    </ul>
+                </div>
+            </div>
             <div class="sol-bar">
                 スプレッドシートを更新するだけで、すべて自動反映されます
             </div>
@@ -540,6 +646,19 @@
                     <p class="val-box-note">制作会社経由なら500万円以上 ／ 機能を省いた場合でも120〜250万円</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Visit -->
+    <section class="visit-sec">
+        <div class="container">
+            <span class="sec-label">まずは気軽に</span>
+            <h2>配信に遊びに来てください</h2>
+            <p>特典に興味を持っていただけたら、ぜひ一度配信を覗いてみてください。<br>仲良くなってからメンバーシップを検討していただけると嬉しいです。</p>
+            <a href="https://web.colorsing.com/share/user?user_id=9f416ebb-bc97-4d24-8c38-9550c5040aa5" class="btn-outline" target="_blank" rel="noopener">
+                プロフィールを見る
+                <i class="ph ph-arrow-square-out"></i>
+            </a>
         </div>
     </section>
 
