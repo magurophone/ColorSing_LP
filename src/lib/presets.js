@@ -126,6 +126,7 @@ export const COLOR_PRESETS = [
   {
     // 深海の底から光が差すような落ち着いたネイビー
     name: '深海ブルー',
+    brightness: 'dark',
     colors: {
       deepBlue: '#08121e',
       oceanTeal: '#183a58',
@@ -138,6 +139,7 @@ export const COLOR_PRESETS = [
   {
     // 夜の桜をイメージした深みのある紫×ピンク
     name: '夜桜',
+    brightness: 'dark',
     colors: {
       deepBlue: '#100818',
       oceanTeal: '#281440',
@@ -150,6 +152,7 @@ export const COLOR_PRESETS = [
   {
     // 深紫水晶×黄金コントラスト、神秘的でリッチ
     name: 'アメジストナイト',
+    brightness: 'dark',
     colors: {
       deepBlue: '#0a0818',
       oceanTeal: '#1c1248',
@@ -162,6 +165,7 @@ export const COLOR_PRESETS = [
   {
     // 深い森×生命力、緑×金の自然なコントラスト
     name: 'エメラルドフォレスト',
+    brightness: 'dark',
     colors: {
       deepBlue: '#06100a',
       oceanTeal: '#0e2c18',
@@ -174,6 +178,7 @@ export const COLOR_PRESETS = [
   {
     // 漆黒×ゴールドの高級感、プレミアムな特別感
     name: 'ミッドナイトゴールド',
+    brightness: 'dark',
     colors: {
       deepBlue: '#0c0a04',
       oceanTeal: '#1e1808',
@@ -186,6 +191,7 @@ export const COLOR_PRESETS = [
   {
     // サイバーパンクな近未来感、黒×シアン×オレンジ
     name: 'ネオンシアン',
+    brightness: 'dark',
     colors: {
       deepBlue: '#040810',
       oceanTeal: '#081220',
@@ -198,6 +204,7 @@ export const COLOR_PRESETS = [
   {
     // 夕焼けの温かみと情熱、コーラル×ゴールデン
     name: 'サンセットドリーム',
+    brightness: 'dark',
     colors: {
       deepBlue: '#100808',
       oceanTeal: '#241010',
@@ -210,6 +217,7 @@ export const COLOR_PRESETS = [
   {
     // 北極の澄み切った氷と空、清潔感のあるクールブルー
     name: 'アークティックブルー',
+    brightness: 'dark',
     colors: {
       deepBlue: '#06080e',
       oceanTeal: '#0c1428',
@@ -217,6 +225,45 @@ export const COLOR_PRESETS = [
       amber: '#c0b8f0',
       accent: '#4080d8',
       gold: '#e8f4ff',
+    },
+  },
+  {
+    // promotion.html の配色 — ウォームオレンジ×クリーム白
+    name: 'ウォームサンシャイン',
+    brightness: 'light',
+    colors: {
+      deepBlue: '#FFFBF6',
+      oceanTeal: '#F0EAD6',
+      lightBlue: '#E87C35',
+      amber: '#C96A12',
+      accent: '#C84B2A',
+      gold: '#B8860B',
+    },
+  },
+  {
+    // 清涼感のある緑×白、自然・フレッシュ系
+    name: 'フレッシュミント',
+    brightness: 'light',
+    colors: {
+      deepBlue: '#F0FBF8',
+      oceanTeal: '#E0F4EE',
+      lightBlue: '#2A9D6A',
+      amber: '#E88C28',
+      accent: '#D44830',
+      gold: '#B8860B',
+    },
+  },
+  {
+    // やわらかな紫×白、エレガント・ドリーミー系
+    name: 'ラベンダードリーム',
+    brightness: 'light',
+    colors: {
+      deepBlue: '#FAF8FF',
+      oceanTeal: '#F0EAF8',
+      lightBlue: '#7C5CC8',
+      amber: '#D4845A',
+      accent: '#C84B7A',
+      gold: '#B8860B',
     },
   },
 ]

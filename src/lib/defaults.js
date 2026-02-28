@@ -38,6 +38,7 @@ const DEFAULT_CONFIG = {
     amber: '#d4a574',
     accent: '#c1121f',
     gold: '#ffd700',
+    brightness: 'dark',
   },
 
   colorOverrides: {

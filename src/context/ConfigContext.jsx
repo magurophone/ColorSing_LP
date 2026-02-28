@@ -91,6 +91,16 @@ export function ConfigProvider({ config, children }) {
     }
   }, [config?.colors, config?.colorOverrides])
 
+  // ライト/ダークテーマの切り替え
+  useEffect(() => {
+    const brightness = config?.colors?.brightness ?? 'dark'
+    if (brightness === 'light') {
+      document.documentElement.dataset.theme = 'light'
+    } else {
+      delete document.documentElement.dataset.theme
+    }
+  }, [config?.colors?.brightness])
+
   // ヘッダー画像をプリロード
   useEffect(() => {
     if (!config?.images) return

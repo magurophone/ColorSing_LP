@@ -52,6 +52,19 @@
 
 }
 
+/* ライトテーマ上書き */
+[data-theme="light"] {
+  /* glass-effect: ConfigContext が deepBlue ベースで --override-glass-bg を常に設定するため自動追従 */
+  /* テキスト色の color-mix ターゲットを white → ダーク系に上書き */
+  --color-name-text: var(--override-name-text, color-mix(in oklab, var(--base-light-blue) 35%, #2c1810));
+  --color-content-text: var(--override-content-text, color-mix(in oklab, var(--base-light-blue) 25%, #2c1810));
+  --color-sub-text: var(--override-sub-text, #6b5a4e);
+}
+
+[data-theme="light"] body {
+  color: #2c1810;
+}
+
 /* ベーススタイル */
 body {
   background: linear-gradient(180deg, var(--override-background-main, var(--base-deep-blue)), var(--override-background-mid, var(--base-ocean-teal)), var(--override-background-main, var(--base-deep-blue)));

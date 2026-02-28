@@ -75,6 +75,7 @@ const ColorsTab = ({ config, updateConfig }) => {
     Object.entries(preset.colors).forEach(([key, value]) => {
       updateConfig(`colors.${key}`, value)
     })
+    updateConfig('colors.brightness', preset.brightness ?? 'dark')
   }
 
   const o = config.colorOverrides || {}
@@ -112,6 +113,9 @@ const ColorsTab = ({ config, updateConfig }) => {
   const popupHasChange = o.popupOverlayColor || (o.popupOverlayOpacity !== '' && o.popupOverlayOpacity != null)
   const menuLabelHasChange = o.menuCardLabelColor || (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
 
+  const brightness = config.colors?.brightness ?? 'dark'
+  const filteredPresets = COLOR_PRESETS.filter((p) => (p.brightness ?? 'dark') === brightness)
+
   return (
     <div>
       <h2 className="text-2xl font-body text-light-blue mb-6">カラー設定</h2>
@@ -138,8 +142,23 @@ const ColorsTab = ({ config, updateConfig }) => {
         <div>
           <p className="text-sm text-gray-400 mb-4">プリセットを選ぶか、個別にカスタマイズできます。ベースカラーはサイト全体の色調を決めます。</p>
 
+          {/* ダーク/ライト切り替え */}
+          <div className="flex rounded-lg overflow-hidden border border-white/20 mb-4 text-sm w-40">
+            {['dark', 'light'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => updateConfig('colors.brightness', mode)}
+                className={`flex-1 py-1.5 transition-colors ${
+                  brightness === mode ? 'bg-white/20 text-white' : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                {mode === 'dark' ? 'ダーク' : 'ライト'}
+              </button>
+            ))}
+          </div>
+
           <div className="flex flex-wrap gap-3 mb-8">
-            {COLOR_PRESETS.map((preset) => (
+            {filteredPresets.map((preset) => (
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
