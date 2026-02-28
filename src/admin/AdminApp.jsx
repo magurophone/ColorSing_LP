@@ -36,14 +36,34 @@ function AdminApp() {
   // 管理画面独自のライト/ダーク切り替え（サイト設定とは独立したハードコード値）
   useEffect(() => {
     const root = document.documentElement
+    const loadFont = (id, url) => {
+      let link = document.getElementById(id)
+      if (url) {
+        if (!link) {
+          link = document.createElement('link')
+          link.id = id
+          link.rel = 'stylesheet'
+          document.head.appendChild(link)
+        }
+        link.href = url
+      } else if (link) {
+        link.remove()
+      }
+    }
     if (adminTheme === 'light') {
       root.dataset.theme = 'light'
-      root.style.setProperty('--base-deep-blue', '#F4F5F7')
-      root.style.setProperty('--base-ocean-teal', '#E8EAED')
-      root.style.setProperty('--base-light-blue', '#1a6ac8')
-      root.style.setProperty('--base-amber', '#b06000')
-      root.style.setProperty('--base-accent', '#c1121f')
-      root.style.setProperty('--override-glass-bg', 'rgba(255, 255, 255, 0.6)')
+      // promotion.html / ui-design skill 準拠カラー
+      root.style.setProperty('--base-deep-blue', '#FFFBF6')
+      root.style.setProperty('--base-ocean-teal', '#F0EAD6')
+      root.style.setProperty('--base-light-blue', '#E87C35')
+      root.style.setProperty('--base-amber', '#5D4037')
+      root.style.setProperty('--base-accent', '#FF6B6B')
+      root.style.setProperty('--override-glass-bg', 'rgba(255, 255, 255, 0.65)')
+      // ui-design skill 準拠フォント
+      root.style.setProperty('--font-display', "'Zen Kaku Gothic New', sans-serif")
+      root.style.setProperty('--font-body', "'Noto Sans JP', sans-serif")
+      document.body.style.fontFamily = "'Noto Sans JP', sans-serif"
+      loadFont('admin-font-light', 'https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&family=Noto+Sans+JP:wght@400;500;700&display=swap')
     } else {
       delete root.dataset.theme
       root.style.setProperty('--base-deep-blue', '#0a1628')
@@ -52,6 +72,10 @@ function AdminApp() {
       root.style.setProperty('--base-amber', '#d4a574')
       root.style.setProperty('--base-accent', '#c1121f')
       root.style.removeProperty('--override-glass-bg')
+      root.style.setProperty('--font-display', "'Playfair Display', serif")
+      root.style.setProperty('--font-body', "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif")
+      document.body.style.fontFamily = "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif"
+      loadFont('admin-font-light', '')
     }
   }, [adminTheme])
 
@@ -187,7 +211,7 @@ function AdminApp() {
         {/* モバイル: タイトル行 + タブスクロール */}
         <div className="md:hidden">
           <div className="flex items-center gap-3 px-4 py-2 border-b border-light-blue/15">
-            <span className="text-sm font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-ocean-teal via-light-blue to-amber whitespace-nowrap">
+            <span className="text-sm font-display font-black text-light-blue whitespace-nowrap">
               管理画面
             </span>
             <span className="text-light-blue/40 text-xs">›</span>
@@ -229,7 +253,7 @@ function AdminApp() {
         {/* PC: サイドバー */}
         <div className="hidden md:flex flex-col h-full">
           <div className="px-5 py-5 border-b border-light-blue/15 flex items-start justify-between">
-            <h1 className="text-base font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-ocean-teal via-light-blue to-amber">
+            <h1 className="text-base font-display font-black text-light-blue">
               管理画面
             </h1>
             <button
