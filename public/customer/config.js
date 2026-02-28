@@ -3,57 +3,92 @@
 
 window.DASHBOARD_CONFIG = {
   "brand": {
-    "name": "",
-    "sidebarTitle": "　color sing",
-    "footerText": "",
-    "footerSubText": "",
-    "footerNote": "",
-    "pageTitle": "サイト名を設定 - 特典管理",
-    "loadingEmoji": "🎵",
+    "name": "BAR MAGUROPHONE",
+    "sidebarTitle": "　color singer LP",
+    "footerText": "深海BAR MAGUROPHONE ",
+    "footerSubText": "単推し・最推し様・メンシプ様募集中です",
+    "footerNote": "ファンマ: 🐟🎧",
+    "pageTitle": "深海BAR MAGUROPHONE - 特典管理",
+    "loadingEmoji": "🐟",
     "loadingText": "Loading...",
+    "showHeader": true,
     "showTitle": true,
+    "titleStyle": "glass",
     "titleGradient": true,
-    "titleGradientDirection": "to-r"
+    "titleGradientDirection": "to-r",
+    "titleGlow": false,
+    "titlePosition": "center",
+    "titleSize": "medium",
+    "titleTextFill": "default",
+    "titleGlassBg": 0.25,
+    "titleGlassBlur": 9,
+    "titlePaddingY": 6,
+    "headerOverlayOpacity": 0,
+    "headerImageFit": "contain",
+    "headerHeight": "",
+    "headerHeightMobile": "",
+    "headerImageW": 0,
+    "headerImageH": 0,
+    "headerImageWMobile": 0,
+    "headerImageHMobile": 0
   },
   "colors": {
-    "deepBlue": "#0a1628",
-    "oceanTeal": "#1b4965",
-    "lightBlue": "#8ab4f8",
-    "amber": "#d4a574",
-    "accent": "#c1121f",
-    "gold": "#ffd700"
+    "deepBlue": "#08121e",
+    "oceanTeal": "#183a58",
+    "lightBlue": "#78a8f0",
+    "amber": "#e8b870",
+    "accent": "#d84030",
+    "gold": "#f8c840"
   },
   "colorOverrides": {
     "headerGradientStart": "",
     "headerGradientEnd": "",
+    "titleGradientStart": "",
+    "titleGradientMid": "",
+    "titleGradientEnd": "",
+    "cardBorder": "",
+    "cardBorderHover": "",
     "primaryText": "",
     "accentText": "",
-    "rank1Card": "",
-    "titleColor": ""
+    "rank1Card": "#b51a00",
+    "backgroundMain": "",
+    "backgroundMid": "",
+    "nameText": "",
+    "footerText": "",
+    "contentText": "",
+    "titleColor": "#8ab5f5",
+    "subText": "",
+    "popupOverlayColor": "",
+    "popupOverlayOpacity": "",
+    "menuCardLabelColor": "",
+    "menuCardLabelOpacity": ""
   },
   "fonts": {
-    "display": "'Playfair Display', serif",
-    "displayUrl": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap",
-    "body": "'M PLUS 2', sans-serif",
-    "bodyUrl": "https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@400;500;700&display=swap",
+    "display": "'Sacramento', cursive",
+    "displayUrl": "https://fonts.googleapis.com/css2?family=Sacramento:wght@400&display=swap",
+    "body": "'Noto Sans JP', sans-serif",
+    "bodyUrl": "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap",
     "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap"
   },
   "images": {
-    "headerDesktop": "",
-    "headerMobile": "",
+    "headerDesktop": "https://drive.google.com/file/d/1V2EJ54dpmxBzJDTYS5hT4Y7vcgbW29SH/view?usp=drivesdk",
+    "headerMobile": "https://drive.google.com/file/d/1yrdwxGNGZZoHYHnJo20oAcoB7tEiEXGK/view?usp=drivesdk",
     "favicon": "./customer/vite.svg"
   },
   "sheets": {
-    "spreadsheetId": "",
+    "spreadsheetId": "demo",
     "rankingSheetName": "目標管理・ランキング",
     "benefitsSheetName": "特典管理",
     "benefitsContentSheetName": "特典内容",
     "historySheetName": "特典履歴",
     "iconSheetName": "枠内アイコン",
+    "eventSheetName": "イベント",
     "ranges": {
       "ranking": "D2:G5",
       "goals": "A2:B10",
-      "benefits": "A2:E20"
+      "benefits": "A2:E20",
+      "rights": "A2:I1000",
+      "history": "A2:D1000"
     },
     "refreshIntervalMs": 300000,
     "dataSheetName": "data"
@@ -79,6 +114,13 @@ window.DASHBOARD_CONFIG = {
       "title": "ボトルキープ一覧"
     },
     {
+      "id": "events",
+      "label": "イベント",
+      "icon": "📖",
+      "enabled": true,
+      "title": "イベント"
+    },
+    {
       "id": "icons",
       "label": "枠内アイコン",
       "icon": "🖼️",
@@ -89,7 +131,7 @@ window.DASHBOARD_CONFIG = {
   "benefitTiers": [
     {
       "key": "1k",
-      "icon": "🖼️",
+      "icon": "🏠",
       "columnIndex": 0,
       "displayTemplate": "特典: {value}",
       "isMembership": false
@@ -136,19 +178,30 @@ window.DASHBOARD_CONFIG = {
       "icon": "👑",
       "columnIndex": 7,
       "displayTemplate": "月内リクエスト対応中",
-      "isMembership": true
+      "isMembership": true,
+      "useKey": false,
+      "accessKey": "",
+      "lockedContent": {
+        "text": ""
+      }
     },
     {
       "key": "メンバーシップB",
       "icon": "🌟",
       "columnIndex": 0,
       "displayTemplate": "特典: {value}",
-      "isMembership": true
+      "isMembership": true,
+      "useKey": false,
+      "accessKey": "",
+      "lockedContent": {
+        "text": ""
+      }
     }
   ],
   "home": {
     "rankingTitle": "Ranking",
     "pointsLabel": "歌推しPt",
+    "pointsUnit": "k",
     "targetsTitle": "Targets",
     "targetLabels": [
       "今旬の目標",
@@ -157,7 +210,20 @@ window.DASHBOARD_CONFIG = {
     "faq": {
       "enabled": true,
       "title": "📝 FAQ・注意事項",
-      "items": []
+      "items": [
+        {
+          "question": "特典の使用方法は？",
+          "answer": "枠内でリクエストするか、XのDMでお知らせください。"
+        },
+        {
+          "question": "10k以上の特典について",
+          "answer": "永続権利です。月が替わっても消えることがありません。"
+        },
+        {
+          "question": "メンバーシップ特典について",
+          "answer": "メンバーシップ特典で得られた10ｋ及び20ｋ特典は、それぞれの箇所に合算して記載しています。"
+        }
+      ]
     }
   },
   "menu": {
@@ -187,10 +253,10 @@ window.DASHBOARD_CONFIG = {
     "particleOpacity": 1
   },
   "deploy": {
-    "owner": "colorsing-dashboard",
-    "repo": "",
-    "branch": "main",
-    "token": ""
+    "owner": "magurophone",
+    "repo": "ColorSing_LP",
+    "branch": "magurophone",
+    "token": "rev:bqkuJMHlECWHXXOMlYHp37NSBJRhniwOzQBgR90LhGahzSyDzanDrEqMJ5I_u2DkncNKm09A0IMBSTQB11_tap_buhtig"
   },
   "admin": {
     "password": "",
