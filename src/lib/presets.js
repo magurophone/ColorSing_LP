@@ -3,7 +3,7 @@ export const BODY_FONT_PRESETS = [
   {
     name: 'Yu Gothic',
     category: 'ゴシック',
-    body: "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif",
+    body: "'Yu Gothic Medium', 'YuGothic', sans-serif",
     googleFontsUrl: null,
   },
   {

@@ -33,7 +33,7 @@
   --color-sub-text: var(--override-sub-text, #9ca3af);
 
   --font-display: 'Playfair Display', serif;
-  --font-body: 'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif;
+  --font-body: 'Yu Gothic Medium', 'YuGothic', sans-serif;
 
   --breakpoint-xs: 320px;
 
@@ -78,7 +78,7 @@ body {
   background-attachment: fixed;
   color: white;
   min-height: 100vh;
-  font-family: var(--font-body, 'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif);
+  font-family: var(--font-body, 'Yu Gothic Medium', 'YuGothic', sans-serif);
 }
 
 * {

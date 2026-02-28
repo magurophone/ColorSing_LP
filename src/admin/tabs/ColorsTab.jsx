@@ -155,8 +155,8 @@ const ColorsTab = ({ config, updateConfig }) => {
                   <span className="text-gray-300 leading-tight">{preset.name}</span>
                   <span className={`text-[9px] px-1.5 py-px rounded-full leading-tight ${
                     (preset.brightness ?? 'dark') === 'light'
-                      ? 'bg-amber/25 text-amber/80'
-                      : 'bg-light-blue/20 text-light-blue/70'
+                      ? 'bg-light-blue/20 text-light-blue/70'
+                      : 'bg-amber/25 text-amber/80'
                   }`}>
                     {(preset.brightness ?? 'dark') === 'light' ? 'ライト' : 'ダーク'}
                   </span>

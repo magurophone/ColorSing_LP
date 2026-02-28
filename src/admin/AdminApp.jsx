@@ -73,8 +73,8 @@ function AdminApp() {
       root.style.setProperty('--base-accent', '#c1121f')
       root.style.removeProperty('--override-glass-bg')
       root.style.setProperty('--font-display', "'Playfair Display', serif")
-      root.style.setProperty('--font-body', "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif")
-      document.body.style.fontFamily = "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif"
+      root.style.setProperty('--font-body', "'Yu Gothic Medium', 'YuGothic', sans-serif")
+      document.body.style.fontFamily = "'Yu Gothic Medium', 'YuGothic', sans-serif"
       loadFont('admin-font-light', '')
     }
   }, [adminTheme])

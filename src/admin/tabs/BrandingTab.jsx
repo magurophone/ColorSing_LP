@@ -374,7 +374,7 @@ const BrandingTab = ({ config, updateConfig }) => {
         label="本文フォント"
         value={config.fonts?.body}
         onChange={(v) => updateConfig('fonts.body', v)}
-        placeholder="'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif"
+        placeholder="'Yu Gothic Medium', 'YuGothic', sans-serif"
       />
       <Field
         label="本文フォントURL（Google Fonts）"

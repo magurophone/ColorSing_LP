@@ -68,7 +68,7 @@ const DEFAULT_CONFIG = {
   fonts: {
     display: "'Playfair Display', serif",
     displayUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap',
-    body: "'Yu Gothic Medium', 'YuGothic', 'Inter', sans-serif",
+    body: "'Yu Gothic Medium', 'YuGothic', sans-serif",
     bodyUrl: '',
   },
 
