@@ -19,6 +19,7 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin.html'),
         manual: resolve(__dirname, 'manual.html'),
         promotion: resolve(__dirname, 'promotion.html'),
+        features: resolve(__dirname, 'features.html'),
         monitor: resolve(__dirname, 'monitor.html'),
         setup: resolve(__dirname, 'setup.html'),
       },
