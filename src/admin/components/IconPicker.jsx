@@ -73,8 +73,25 @@ const HEROICONS_GROUPS = {
 
 const PH_WEIGHTS = ['thin', 'light', 'regular', 'bold', 'fill', 'duotone']
 
+const TABS = [
+  { id: 'emoji',    label: '絵文字',   color: 'amber' },
+  { id: 'lucide',   label: 'Lucide',   color: 'light-blue' },
+  { id: 'phosphor', label: 'Phosphor', color: 'violet' },
+  { id: 'tabler',   label: 'Tabler',   color: 'emerald' },
+  { id: 'heroicons',label: 'Heroicons',color: 'rose' },
+]
+
+const TAB_ACTIVE = {
+  amber:        'bg-amber/20 text-amber border border-amber/50',
+  'light-blue': 'bg-light-blue/20 text-light-blue border border-light-blue/50',
+  violet:       'bg-violet-500/20 text-violet-300 border border-violet-500/50',
+  emerald:      'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50',
+  rose:         'bg-rose-500/20 text-rose-300 border border-rose-500/50',
+}
+
 const IconPicker = ({ value, onChange, label }) => {
   const [open, setOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [pickerPos, setPickerPos] = useState({ top: 0, left: 0, width: 384 })
   const [tab, setTab] = useState('emoji')
   const [search, setSearch] = useState('')
@@ -85,24 +102,28 @@ const IconPicker = ({ value, onChange, label }) => {
 
   const handleToggle = () => {
     if (!open && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-      const w = Math.min(384, vw - 16)
-      const left = Math.max(8, Math.min(rect.left, vw - w - 8))
-      const PICKER_H = 380
-      const spaceBelow = vh - rect.bottom - 8
-      const top = spaceBelow >= PICKER_H
-        ? rect.bottom + 6
-        : Math.max(8, rect.top - PICKER_H - 6)
-      setPickerPos({ top, left, width: w })
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (!mobile) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+        const w = Math.min(384, vw - 16)
+        const left = Math.max(8, Math.min(rect.left, vw - w - 8))
+        const PICKER_H = 380
+        const spaceBelow = vh - rect.bottom - 8
+        const top = spaceBelow >= PICKER_H
+          ? rect.bottom + 6
+          : Math.max(8, rect.top - PICKER_H - 6)
+        setPickerPos({ top, left, width: w })
+      }
     }
     setOpen(prev => !prev)
   }
 
-  // クリック外で閉じる
+  // クリック外で閉じる（PC用）
   useEffect(() => {
-    if (!open) return
+    if (!open || isMobile) return
     const handleClickOutside = (e) => {
       if (
         dropdownRef.current && !dropdownRef.current.contains(e.target) &&
@@ -113,7 +134,7 @@ const IconPicker = ({ value, onChange, label }) => {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+  }, [open, isMobile])
 
   const activeGroups =
     tab === 'emoji' ? EMOJI_GROUPS :
@@ -132,21 +153,144 @@ const IconPicker = ({ value, onChange, label }) => {
     return result
   }, [search, activeGroups])
 
-  const TABS = [
-    { id: 'emoji',    label: '絵文字',   color: 'amber' },
-    { id: 'lucide',   label: 'Lucide',   color: 'light-blue' },
-    { id: 'phosphor', label: 'Phosphor', color: 'violet' },
-    { id: 'tabler',   label: 'Tabler',   color: 'emerald' },
-    { id: 'heroicons',label: 'Heroicons',color: 'rose' },
-  ]
+  // ピッカー本体（モバイル・PCで共通）
+  const pickerBody = (
+    <div
+      ref={dropdownRef}
+      className="glass-effect border border-light-blue/30 rounded-xl overflow-hidden shadow-xl"
+      style={isMobile ? { width: '100%', maxWidth: 400 } : { position: 'fixed', top: pickerPos.top, left: pickerPos.left, width: pickerPos.width, zIndex: 9999 }}
+    >
+      {/* ヘッダー: タブ切り替え + 閉じるボタン */}
+      <div className="p-2 border-b border-light-blue/20 flex gap-2 items-center">
+        <div className="flex gap-1 flex-1 flex-wrap">
+          {TABS.map(({ id, label: tabLabel, color }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => { setTab(id); setSearch('') }}
+              className={`px-2 py-0.5 rounded-lg text-[10px] transition-all ${
+                tab === id ? TAB_ACTIVE[color] : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {tabLabel}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="p-1.5 hover:bg-light-blue/10 rounded-lg transition-all text-gray-400 hover:text-white shrink-0"
+          title="閉じる"
+        >
+          <IconRenderer icon="x" size={16} />
+        </button>
+      </div>
 
-  const TAB_ACTIVE = {
-    amber:      'bg-amber/20 text-amber border border-amber/50',
-    'light-blue': 'bg-light-blue/20 text-light-blue border border-light-blue/50',
-    violet:     'bg-violet-500/20 text-violet-300 border border-violet-500/50',
-    emerald:    'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50',
-    rose:       'bg-rose-500/20 text-rose-300 border border-rose-500/50',
-  }
+      {/* Phosphorウェイト選択 */}
+      {tab === 'phosphor' && (
+        <div className="px-2 py-1.5 border-b border-light-blue/20 flex gap-1">
+          {PH_WEIGHTS.map(w => (
+            <button
+              key={w}
+              type="button"
+              onClick={() => setPhosphorWeight(w)}
+              className={`flex-1 py-0.5 rounded text-[9px] transition-all ${
+                phosphorWeight === w
+                  ? 'bg-violet-500/20 text-violet-300 border border-violet-500/50'
+                  : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              {w}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 検索（絵文字以外） */}
+      {tab !== 'emoji' && (
+        <div className="p-2 border-b border-light-blue/20">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="アイコン名で検索..."
+            className="w-full px-3 py-1.5 glass-effect border border-light-blue/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber text-xs"
+          />
+        </div>
+      )}
+
+      <div className="max-h-64 overflow-y-auto p-2">
+        {Object.entries(filteredGroups).map(([group, icons]) => (
+          <div key={group} className="mb-2">
+            <div className="text-[10px] text-gray-500 px-1 mb-1">{group}</div>
+            <div className="grid grid-cols-9 gap-1">
+              {icons.map(iconName => {
+                let iconValue, displayEl
+                if (tab === 'emoji') {
+                  iconValue = iconName
+                  displayEl = <span className="text-base leading-none">{iconName}</span>
+                } else if (tab === 'lucide') {
+                  iconValue = iconName
+                  displayEl = <IconRenderer icon={iconName} size={16} className="text-light-blue" />
+                } else if (tab === 'phosphor') {
+                  iconValue = `ph:${iconName}:${phosphorWeight}`
+                  displayEl = <IconRenderer icon={iconValue} size={16} className="text-violet-300" />
+                } else if (tab === 'tabler') {
+                  iconValue = `tb:${iconName}`
+                  displayEl = <IconRenderer icon={iconValue} size={16} className="text-emerald-300" />
+                } else {
+                  iconValue = `hi:${iconName}`
+                  displayEl = <IconRenderer icon={iconValue} size={16} className="text-rose-300" />
+                }
+
+                // Phosphorは名前が一致すればウェイト問わずハイライト
+                const isSelected = tab === 'phosphor'
+                  ? (value?.startsWith(`ph:${iconName}:`) || value === `ph:${iconName}`)
+                  : value === iconValue
+
+                return (
+                  <button
+                    key={iconName}
+                    type="button"
+                    onClick={() => { onChange(iconValue); setOpen(false) }}
+                    className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${
+                      isSelected
+                        ? 'bg-light-blue/20 border border-light-blue/50'
+                        : 'hover:bg-light-blue/10'
+                    }`}
+                    title={tab !== 'emoji' ? iconName : undefined}
+                  >
+                    {displayEl}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* カスタム入力 */}
+      <div className="p-2 border-t border-light-blue/20">
+        <div className="text-[10px] text-gray-500 mb-1">カスタム入力</div>
+        <div className="flex gap-1">
+          <input
+            type="text"
+            value={customEmoji}
+            onChange={(e) => setCustomEmoji(e.target.value)}
+            placeholder="絵文字 / lucide名 / ph:name:weight / tb:name / hi:name"
+            className="flex-1 px-2 py-1 glass-effect border border-light-blue/30 rounded text-white text-xs focus:outline-none focus:border-amber"
+          />
+          <button
+            type="button"
+            onClick={() => { if (customEmoji) { onChange(customEmoji); setCustomEmoji(''); setOpen(false) } }}
+            className="px-2 py-1 bg-amber/20 border border-amber/50 rounded text-amber text-xs"
+          >
+            決定
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div>
@@ -164,140 +308,18 @@ const IconPicker = ({ value, onChange, label }) => {
       </div>
 
       {open && createPortal(
-        <div
-          ref={dropdownRef}
-          style={{ position: 'fixed', top: pickerPos.top, left: pickerPos.left, width: pickerPos.width, zIndex: 9999 }}
-          className="glass-effect border border-light-blue/30 rounded-xl overflow-hidden shadow-xl">
-          {/* ヘッダー: タブ切り替え + 閉じるボタン */}
-          <div className="p-2 border-b border-light-blue/20 flex gap-2 items-center">
-            <div className="flex gap-1 flex-1 flex-wrap">
-              {TABS.map(({ id, label: tabLabel, color }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => { setTab(id); setSearch('') }}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] transition-all ${
-                    tab === id ? TAB_ACTIVE[color] : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {tabLabel}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="p-1.5 hover:bg-light-blue/10 rounded-lg transition-all text-gray-400 hover:text-white shrink-0"
-              title="閉じる"
-            >
-              <IconRenderer icon="x" size={16} />
-            </button>
+        isMobile ? (
+          // スマホ: 画面中央モーダル
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(0,0,0,0.55)' }}
+            onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false) }}
+          >
+            {pickerBody}
           </div>
-
-          {/* Phosphorウェイト選択 */}
-          {tab === 'phosphor' && (
-            <div className="px-2 py-1.5 border-b border-light-blue/20 flex gap-1">
-              {PH_WEIGHTS.map(w => (
-                <button
-                  key={w}
-                  type="button"
-                  onClick={() => setPhosphorWeight(w)}
-                  className={`flex-1 py-0.5 rounded text-[9px] transition-all ${
-                    phosphorWeight === w
-                      ? 'bg-violet-500/20 text-violet-300 border border-violet-500/50'
-                      : 'text-gray-500 hover:text-gray-300'
-                  }`}
-                >
-                  {w}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* 検索（絵文字以外） */}
-          {tab !== 'emoji' && (
-            <div className="p-2 border-b border-light-blue/20">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="アイコン名で検索..."
-                className="w-full px-3 py-1.5 glass-effect border border-light-blue/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber text-xs"
-              />
-            </div>
-          )}
-
-          <div className="max-h-64 overflow-y-auto p-2">
-            {Object.entries(filteredGroups).map(([group, icons]) => (
-              <div key={group} className="mb-2">
-                <div className="text-[10px] text-gray-500 px-1 mb-1">{group}</div>
-                <div className="grid grid-cols-9 gap-1">
-                  {icons.map(iconName => {
-                    let iconValue, displayEl
-                    if (tab === 'emoji') {
-                      iconValue = iconName
-                      displayEl = <span className="text-base leading-none">{iconName}</span>
-                    } else if (tab === 'lucide') {
-                      iconValue = iconName
-                      displayEl = <IconRenderer icon={iconName} size={16} className="text-light-blue" />
-                    } else if (tab === 'phosphor') {
-                      iconValue = `ph:${iconName}:${phosphorWeight}`
-                      displayEl = <IconRenderer icon={iconValue} size={16} className="text-violet-300" />
-                    } else if (tab === 'tabler') {
-                      iconValue = `tb:${iconName}`
-                      displayEl = <IconRenderer icon={iconValue} size={16} className="text-emerald-300" />
-                    } else {
-                      iconValue = `hi:${iconName}`
-                      displayEl = <IconRenderer icon={iconValue} size={16} className="text-rose-300" />
-                    }
-
-                    // Phosphorは名前が一致すればウェイト問わずハイライト
-                    const isSelected = tab === 'phosphor'
-                      ? (value?.startsWith(`ph:${iconName}:`) || value === `ph:${iconName}`)
-                      : value === iconValue
-
-                    return (
-                      <button
-                        key={iconName}
-                        type="button"
-                        onClick={() => { onChange(iconValue); setOpen(false) }}
-                        className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${
-                          isSelected
-                            ? 'bg-light-blue/20 border border-light-blue/50'
-                            : 'hover:bg-light-blue/10'
-                        }`}
-                        title={tab !== 'emoji' ? iconName : undefined}
-                      >
-                        {displayEl}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* カスタム入力 */}
-          <div className="p-2 border-t border-light-blue/20">
-            <div className="text-[10px] text-gray-500 mb-1">カスタム入力</div>
-            <div className="flex gap-1">
-              <input
-                type="text"
-                value={customEmoji}
-                onChange={(e) => setCustomEmoji(e.target.value)}
-                placeholder="絵文字 / lucide名 / ph:name:weight / tb:name / hi:name"
-                className="flex-1 px-2 py-1 glass-effect border border-light-blue/30 rounded text-white text-xs focus:outline-none focus:border-amber"
-              />
-              <button
-                type="button"
-                onClick={() => { if (customEmoji) { onChange(customEmoji); setCustomEmoji(''); setOpen(false) } }}
-                className="px-2 py-1 bg-amber/20 border border-amber/50 rounded text-amber text-xs"
-              >
-                決定
-              </button>
-            </div>
-          </div>
-        </div>,
+        ) : (
+          // PC: ボタン近傍に表示
+          pickerBody
+        ),
         document.body
       )}
     </div>
