@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import IconRenderer from '../../components/IconRenderer'
 
 // 絵文字プリセット（variation selector U+FE0F 付きで正しくカラー表示される）
@@ -86,9 +87,15 @@ const IconPicker = ({ value, onChange, label }) => {
     if (!open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       const vw = window.innerWidth
+      const vh = window.innerHeight
       const w = Math.min(384, vw - 16)
       const left = Math.max(8, Math.min(rect.left, vw - w - 8))
-      setPickerPos({ top: rect.bottom + 6, left, width: w })
+      const PICKER_H = 380
+      const spaceBelow = vh - rect.bottom - 8
+      const top = spaceBelow >= PICKER_H
+        ? rect.bottom + 6
+        : Math.max(8, rect.top - PICKER_H - 6)
+      setPickerPos({ top, left, width: w })
     }
     setOpen(prev => !prev)
   }
@@ -156,7 +163,7 @@ const IconPicker = ({ value, onChange, label }) => {
         </button>
       </div>
 
-      {open && (
+      {open && createPortal(
         <div
           ref={dropdownRef}
           style={{ position: 'fixed', top: pickerPos.top, left: pickerPos.left, width: pickerPos.width, zIndex: 9999 }}
@@ -290,7 +297,8 @@ const IconPicker = ({ value, onChange, label }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
