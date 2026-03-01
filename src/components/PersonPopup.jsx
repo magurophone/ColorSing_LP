@@ -91,9 +91,14 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
           {config.benefitTiers.map((tier) => {
             if (!tier.columnIndex || tier.columnIndex < 1) return null
             const value = person[tier.columnIndex]
-            if (!hasRight(value)) return null
 
             const benefit = getBenefitByTitle(tier.key)
+            const trackHistory = isTrackHistory(benefit?.[BENEFIT_FIELDS.TRACK_HISTORY])
+            const hasPastHistory = trackHistory && (historyByTier[tier.key]?.length ?? 0) > 0
+            const active = hasRight(value)
+
+            if (!active && !hasPastHistory) return null
+
             const displayText = tier.isBoolean
               ? tier.displayTemplate
               : tier.displayTemplate.replace('{value}', value)
@@ -101,8 +106,10 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
             return (
               <div
                 key={tier.key}
-                onClick={() => benefit && onSelectBenefit(benefit)}
-                className={`bg-deep-blue/50 p-4 md:p-6 rounded-xl border cursor-pointer hover:border-card-hover transition-all text-center flex flex-col overflow-hidden ${
+                onClick={() => active && benefit && onSelectBenefit(benefit)}
+                className={`bg-deep-blue/50 p-4 md:p-6 rounded-xl border transition-all text-center flex flex-col overflow-hidden ${
+                  active ? 'cursor-pointer hover:border-card-hover' : 'cursor-default opacity-70'
+                } ${
                   tier.isMembership
                     ? 'border-highlight/30 bg-gradient-to-r from-gold/10 to-transparent'
                     : 'border-card-border/20'
@@ -122,7 +129,10 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
                   <div className="flex items-center justify-center mb-2">
                     <IconRenderer icon={tier.icon} size={32} className="text-highlight" />
                   </div>
-                  <p className="text-content-text">{displayText}</p>
+                  {active
+                    ? <p className="text-content-text">{displayText}</p>
+                    : <p className="text-sub-text text-sm opacity-60">（使用済み）</p>
+                  }
                 </div>
 
                 {isTrackHistory(benefit?.[BENEFIT_FIELDS.TRACK_HISTORY]) && historyByTier[tier.key]?.length > 0 && (
