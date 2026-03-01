@@ -1,11 +1,36 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { hasRight, RIGHTS_NAME_INDEX } from '../components/PersonPopup'
+import { BENEFIT_FIELDS } from '../components/BenefitPopup'
 import IconRenderer from '../components/IconRenderer'
 
-const RightsView = ({ rights, onSelectPerson, specialIndex = 8 }) => {
+const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 8 }) => {
   const config = useConfig()
   const [searchTerm, setSearchTerm] = useState('')
+
+  // TRACK_HISTORY が有効なティアキーのセット
+  const trackHistoryTierKeys = useMemo(() => {
+    if (!benefits || !benefits.length) return new Set()
+    const keys = new Set()
+    for (const b of benefits) {
+      const title = String(b[BENEFIT_FIELDS.TITLE] || '').trim()
+      const flag = String(b[BENEFIT_FIELDS.TRACK_HISTORY] || '').trim().toUpperCase()
+      if (title && flag === 'TRUE') keys.add(title)
+    }
+    return keys
+  }, [benefits])
+
+  // TRACK_HISTORY 有効ティアに履歴がある人名セット
+  const namesWithHistory = useMemo(() => {
+    if (!history || !trackHistoryTierKeys.size) return new Set()
+    const names = new Set()
+    for (const entry of history) {
+      if (trackHistoryTierKeys.has(entry.tierKey) && entry.content) {
+        names.add(entry.userName)
+      }
+    }
+    return names
+  }, [history, trackHistoryTierKeys])
 
   // 権利のアイコンを取得（config.benefitTiers ベースで動的）
   const getRightsIcons = useCallback((person) => {
@@ -41,9 +66,9 @@ const RightsView = ({ rights, onSelectPerson, specialIndex = 8 }) => {
       const normalizedSpecial = specialValue.toUpperCase()
       const hasSpecial = normalizedSpecial !== '' && normalizedSpecial !== 'FALSE' && normalizedSpecial !== '0'
 
-      return hasAnyRight || hasSpecial
+      return hasAnyRight || hasSpecial || namesWithHistory.has(name)
     })
-  }, [sortedRights, searchTerm, config.benefitTiers])
+  }, [sortedRights, searchTerm, config.benefitTiers, namesWithHistory])
 
   const viewConfig = config.views.find(v => v.id === 'rights') || {}
 

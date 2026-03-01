@@ -115,7 +115,7 @@ function App() {
   const viewProps = {
     home: { ranking, goals, events },
     menu: { benefits, onSelectBenefit: setSelectedBenefit },
-    rights: { rights, onSelectPerson: setSelectedPerson, specialIndex },
+    rights: { rights, history, benefits, onSelectPerson: setSelectedPerson, specialIndex },
     icons: {
       icons, selectedMonth, setSelectedMonth,
       loading: loadingIcons, iconError,
