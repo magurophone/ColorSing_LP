@@ -304,7 +304,7 @@ function AdminApp() {
       </aside>
 
       {/* ─── メインコンテンツ ─── */}
-      <main className="flex-1 p-4 md:p-8 pt-[6.5rem] md:pt-8 pb-4 md:pb-8">
+      <main className="flex-1 p-4 md:p-8 pt-[7.5rem] md:pt-8 pb-4 md:pb-8">
         {saveMessage && (
           <div className="fixed top-4 right-4 z-50 glass-effect px-4 py-2 rounded-lg border border-amber/50 text-amber text-sm animate-shimmer">
             {saveMessage}
