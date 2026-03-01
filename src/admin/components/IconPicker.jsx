@@ -74,17 +74,33 @@ const PH_WEIGHTS = ['thin', 'light', 'regular', 'bold', 'fill', 'duotone']
 
 const IconPicker = ({ value, onChange, label }) => {
   const [open, setOpen] = useState(false)
+  const [pickerPos, setPickerPos] = useState({ top: 0, left: 0, width: 384 })
   const [tab, setTab] = useState('emoji')
   const [search, setSearch] = useState('')
   const [customEmoji, setCustomEmoji] = useState('')
   const [phosphorWeight, setPhosphorWeight] = useState('regular')
-  const pickerRef = useRef(null)
+  const buttonRef = useRef(null)
+  const dropdownRef = useRef(null)
+
+  const handleToggle = () => {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      const vw = window.innerWidth
+      const w = Math.min(384, vw - 16)
+      const left = Math.max(8, Math.min(rect.left, vw - w - 8))
+      setPickerPos({ top: rect.bottom + 6, left, width: w })
+    }
+    setOpen(prev => !prev)
+  }
 
   // クリック外で閉じる
   useEffect(() => {
     if (!open) return
     const handleClickOutside = (e) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+        buttonRef.current && !buttonRef.current.contains(e.target)
+      ) {
         setOpen(false)
       }
     }
@@ -126,12 +142,13 @@ const IconPicker = ({ value, onChange, label }) => {
   }
 
   return (
-    <div className="relative" ref={pickerRef}>
+    <div>
       <div className="flex items-center gap-2">
         {label && <label className="text-sm font-body text-light-blue">{label}</label>}
         <button
+          ref={buttonRef}
           type="button"
-          onClick={() => setOpen(!open)}
+          onClick={handleToggle}
           className="flex items-center gap-1.5 px-3 py-1.5 glass-effect border border-light-blue/30 rounded-lg hover:border-amber transition-all text-sm"
         >
           <IconRenderer icon={value} size={16} />
@@ -140,7 +157,10 @@ const IconPicker = ({ value, onChange, label }) => {
       </div>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-96 glass-effect border border-light-blue/30 rounded-xl overflow-hidden shadow-lg">
+        <div
+          ref={dropdownRef}
+          style={{ position: 'fixed', top: pickerPos.top, left: pickerPos.left, width: pickerPos.width, zIndex: 9999 }}
+          className="glass-effect border border-light-blue/30 rounded-xl overflow-hidden shadow-xl">
           {/* ヘッダー: タブ切り替え + 閉じるボタン */}
           <div className="p-2 border-b border-light-blue/20 flex gap-2 items-center">
             <div className="flex gap-1 flex-1 flex-wrap">

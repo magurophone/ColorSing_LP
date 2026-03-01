@@ -154,6 +154,15 @@ for repo in $REPOS; do
     fi
   fi
 
+  # deploy.yml のトリガーブランチを顧客リポ用に強制修正（新規・既存共通）
+  # テンプレートは magurophone ブランチをトリガーとするが、顧客リポは常に main
+  if [ -f ".github/workflows/deploy.yml" ]; then
+    if grep -q 'branches: \[magurophone\]' ".github/workflows/deploy.yml"; then
+      sed -i 's/branches: \[magurophone\]/branches: [main]/' ".github/workflows/deploy.yml"
+      git add ".github/workflows/deploy.yml"
+    fi
+  fi
+
   # 復元した差分をコミット
   if ! git diff --cached --quiet; then
     git commit -m "顧客固有ファイルを復元 (public/customer/, deploy.yml)" 2>/dev/null
