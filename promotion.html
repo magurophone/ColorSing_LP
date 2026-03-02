@@ -321,6 +321,30 @@
         .feat-card h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 8px; color: var(--color-accent); }
         .feat-card p  { font-size: 0.83rem; color: #666; line-height: 1.75; }
 
+        /* Featured feat-card (full-width with screenshot) */
+        .feat-card--featured {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        .feat-card--featured .feat-body { flex: 1; min-width: 0; }
+        .feat-card--featured .feat-ss {
+            flex: 0 0 auto;
+            width: min(400px, 44%);
+        }
+        .feat-card--featured .feat-ss img {
+            width: 100%;
+            display: block;
+            border-radius: 6px;
+            border: 1px solid var(--color-secondary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 640px) {
+            .feat-card--featured { flex-direction: column; }
+            .feat-card--featured .feat-ss { width: 100%; }
+        }
+
         /* ── Steps ── */
         .steps { max-width: 640px; }
 
@@ -536,7 +560,7 @@
                     <p class="vis-label">主な機能</p>
                     <ul class="vis-list">
                         <li class="vis-item">
-                            <span class="vis-item-left"><i class="ph ph-trophy"></i>前月ランキング表示</span>
+                            <span class="vis-item-left"><i class="ph ph-trophy"></i>ランキング・目標管理</span>
                             <span class="vis-item-val">スプシ連携</span>
                         </li>
                         <li class="vis-item">
@@ -628,10 +652,15 @@
             <h2>主な機能</h2>
             <p class="sec-desc">スプレッドシート連携で、管理の手間を大幅削減</p>
             <div class="feat-grid">
-                <div class="feat-card">
-                    <div class="feat-icon"><i class="ph ph-trophy"></i></div>
-                    <h3>前月ランキング表示</h3>
-                    <p>スプレッドシートと連携し、リスナーの歌推しポイントランキングを自動表示。メダル画像・目標ポイント設定にも対応。</p>
+                <div class="feat-card feat-card--featured">
+                    <div class="feat-body">
+                        <div class="feat-icon"><i class="ph ph-trophy"></i></div>
+                        <h3>ランキング・目標管理</h3>
+                        <p>スプレッドシートと連携し、リスナーの歌推しポイントランキングを自動表示。今月・今旬の達成目標も同じホーム画面でまとめて確認できます。</p>
+                    </div>
+                    <div class="feat-ss">
+                        <img src="./screenshot-home.png" alt="ホーム画面 — ランキングと目標管理" loading="lazy" />
+                    </div>
                 </div>
                 <div class="feat-card">
                     <div class="feat-icon"><i class="ph ph-gift"></i></div>
