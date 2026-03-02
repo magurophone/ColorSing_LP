@@ -220,6 +220,52 @@
             font-size: 0.75rem;
         }
 
+        /* ── Cases ── */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 32px;
+        }
+
+        @media (max-width: 720px) { .cases-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 420px) { .cases-grid { grid-template-columns: 1fr; } }
+
+        .case-card {
+            background: #fff;
+            border: 1px solid var(--color-secondary);
+            border-radius: var(--radius);
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .case-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 6px 20px rgba(232,124,53,0.1);
+        }
+
+        .case-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .case-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .case-link:hover { text-decoration: underline; }
+
         /* ── Visit CTA ── */
         .visit-sec {
             padding: 56px 0;
@@ -766,6 +812,41 @@
                         </div>
                     </div>
                 </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cases -->
+    <section class="alt">
+        <div class="container">
+            <span class="sec-label">Cases</span>
+            <h2>導入事例</h2>
+            <p class="sec-desc">実際にカラーシングライバーが運用しているサイトをご覧いただけます</p>
+            <div class="cases-grid">
+                <div class="case-card">
+                    <p class="case-name">まぐろふぉん</p>
+                    <a class="case-link" href="https://colorsing-dashboard.github.io/magurophone" target="_blank" rel="noopener">
+                        サイトを見る <i class="ph ph-arrow-square-out"></i>
+                    </a>
+                </div>
+                <div class="case-card">
+                    <p class="case-name">んぺっ🐧</p>
+                    <a class="case-link" href="https://colorsing-dashboard.github.io/npe" target="_blank" rel="noopener">
+                        サイトを見る <i class="ph ph-arrow-square-out"></i>
+                    </a>
+                </div>
+                <div class="case-card">
+                    <p class="case-name">ゆずにぃʕ •́؈•̀っ🍯</p>
+                    <a class="case-link" href="https://colorsing-dashboard.github.io/yuzukkuma" target="_blank" rel="noopener">
+                        サイトを見る <i class="ph ph-arrow-square-out"></i>
+                    </a>
+                </div>
+                <div class="case-card">
+                    <p class="case-name">あるま❤️‍🔥🏹</p>
+                    <a class="case-link" href="https://colorsing-dashboard.github.io/aruma" target="_blank" rel="noopener">
+                        サイトを見る <i class="ph ph-arrow-square-out"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
