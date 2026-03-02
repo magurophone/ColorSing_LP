@@ -3,8 +3,8 @@
 // =====================================================================
 
 export const DEMO_RANKING = [
-  [1, '星空リスナー☆', 70, './customer/demo-icons/user1.png'],
-  [2, '音符ちゃん♪', 49, './customer/demo-icons/user2.png'],
+  [1, '星空リスナー', 70, './customer/demo-icons/user1.png'],
+  [2, '音符ちゃん', 49, './customer/demo-icons/user2.png'],
   [3, '深海の歌姫', 30, './customer/demo-icons/user3.png'],
 ]
 
@@ -15,18 +15,18 @@ export const DEMO_GOALS = [
 
 // BENEFIT_FIELDS: TITLE=0, LABEL=1, NAME=2, DESCRIPTION=3, TRACK_HISTORY=4
 export const DEMO_BENEFITS = [
-  ['5k',          'Bronze',   '強制リクエスト権',    '枠内で好きな曲を1曲リクエストできます。',              ''],
-  ['10k',         'Silver',   '歌枠チケット',        '2時間分の歌枠チケットとして使用できます。',            ''],
-  ['20k',         'Gold',     'オープンチャット招待', '限定オープンチャットに招待されます。',                  ''],
-  ['30k',         'Platinum', 'アカペラ音源',        '1曲分のアカペラ音源をプレゼントします。',              ''],
-  ['50k',         'Diamond',  'ミックス音源',        '1曲分のミックス音源をプレゼントします。',              ''],
-  ['メンバーシップA', 'Member', '月内リクエスト対応', 'メンシプ期間中に好きな曲をリクエストできます。',       ''],
+  ['5k',          '強制リクエスト権',   '強制リクエスト権',    '枠内で好きな曲を1曲リクエストできます。',              ''],
+  ['10k',         '歌枠チケット',   '歌枠チケット',        '2時間分の歌枠チケットとして使用できます。',            ''],
+  ['20k',         'オープンチャット招待',     'オープンチャット招待', '限定オープンチャットに招待されます。',                  ''],
+  ['30k',         'アカペラ音源', 'アカペラ音源',        '1曲分のアカペラ音源をプレゼントします。',              ''],
+  ['50k',         'ミックス音源',  'ミックス音源',        '1曲分のミックス音源をプレゼントします。',              ''],
+  ['メンバーシップA', '月内リクエスト対応', '月内リクエスト対応', 'メンシプ期間中に好きな曲をリクエストできます。',       ''],
 ]
 
 // 権利保有者データ: [name, col1=5k, col2=10k, col3=20k, col4=30k, col5=50k, col6=membership]
 export const DEMO_RIGHTS = [
-  ['星空リスナー☆',  '2', '3', 'TRUE', '1', '',  'TRUE'],
-  ['音符ちゃん♪',   '1', '1', '',     '',  '',  'TRUE'],
+  ['星空リスナー',  '2', '3', 'TRUE', '1', '',  'TRUE'],
+  ['音符ちゃん',   '1', '1', '',     '',  '',  'TRUE'],
   ['深海の歌姫',    '3', '2', 'TRUE', '2', '1', ''],
   ['サクラ音楽隊',  '1', '',  '',     '',  '',  ''],
   ['月光セレナーデ', '2', '1', 'TRUE', '',  '',  ''],
@@ -36,8 +36,8 @@ export const DEMO_RIGHTS = [
 ]
 
 export const DEMO_HISTORY = [
-  { month: '202602', userName: '星空リスナー☆',  tierKey: '5k',          content: '強制リクエスト1曲' },
-  { month: '202602', userName: '音符ちゃん♪',   tierKey: 'メンバーシップA', content: '月内リクエスト' },
+  { month: '202602', userName: '星空リスナー',  tierKey: '5k',          content: '強制リクエスト1曲' },
+  { month: '202602', userName: '音符ちゃん',   tierKey: 'メンバーシップA', content: '月内リクエスト' },
   { month: '202601', userName: '深海の歌姫',    tierKey: '10k',         content: '歌枠チケット 2時間' },
 ]
 
@@ -63,8 +63,8 @@ export const DEMO_EVENTS = {
 
 export const DEMO_ICONS = {
   '202501': [
-    { label: '星空リスナー☆', thumbnailUrl: './customer/demo-icons/user1.png', originalUrl: './customer/demo-icons/user1.png' },
-    { label: '音符ちゃん♪',   thumbnailUrl: './customer/demo-icons/user2.png', originalUrl: './customer/demo-icons/user2.png' },
+    { label: '星空リスナー', thumbnailUrl: './customer/demo-icons/user1.png', originalUrl: './customer/demo-icons/user1.png' },
+    { label: '音符ちゃん',   thumbnailUrl: './customer/demo-icons/user2.png', originalUrl: './customer/demo-icons/user2.png' },
     { label: '深海の歌姫',    thumbnailUrl: './customer/demo-icons/user3.png', originalUrl: './customer/demo-icons/user3.png' },
   ],
   _orderedKeys: ['202501'],
