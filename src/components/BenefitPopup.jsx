@@ -1,16 +1,9 @@
 import { useState } from 'react'
 import { Lock } from '@phosphor-icons/react'
 import { useConfig } from '../context/ConfigContext'
+import { BENEFIT_FIELDS } from '../lib/rights'
 import IconRenderer from './IconRenderer'
 import LockedContentModal from './LockedContentModal'
-
-const BENEFIT_FIELDS = {
-  TITLE: 0,
-  LABEL: 1,
-  NAME: 2,
-  DESCRIPTION: 3,
-  TRACK_HISTORY: 4,
-}
 
 const BenefitPopup = ({ benefit, onClose }) => {
   const config = useConfig()
@@ -65,5 +58,4 @@ const BenefitPopup = ({ benefit, onClose }) => {
   )
 }
 
-export { BENEFIT_FIELDS }
 export default BenefitPopup

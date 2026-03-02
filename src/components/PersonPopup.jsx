@@ -1,26 +1,7 @@
 import { useMemo } from 'react'
 import { useConfig } from '../context/ConfigContext'
-import { BENEFIT_FIELDS } from './BenefitPopup'
+import { BENEFIT_FIELDS, RIGHTS_NAME_INDEX, hasRight, isTrackHistory } from '../lib/rights'
 import IconRenderer from './IconRenderer'
-
-const RIGHTS_NAME_INDEX = 0
-
-// 権利を持っているかチェック
-const hasRight = (value) => {
-  if (typeof value === 'string') {
-    const normalized = value.trim().toUpperCase()
-    if (normalized === 'TRUE') return true
-    const parsed = Number(normalized)
-    return Number.isFinite(parsed) && parsed > 0
-  }
-  return value > 0
-}
-
-const isTrackHistory = (value) => {
-  if (typeof value === 'boolean') return value
-  if (typeof value === 'string') return value.trim().toUpperCase() === 'TRUE'
-  return false
-}
 
 const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onSelectBenefit }) => {
   const config = useConfig()
@@ -174,5 +155,4 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
   )
 }
 
-export { hasRight, RIGHTS_NAME_INDEX }
 export default PersonPopup

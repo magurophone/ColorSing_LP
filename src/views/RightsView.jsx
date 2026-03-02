@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useConfig } from '../context/ConfigContext'
-import { hasRight, RIGHTS_NAME_INDEX } from '../components/PersonPopup'
-import { BENEFIT_FIELDS } from '../components/BenefitPopup'
+import { BENEFIT_FIELDS, RIGHTS_NAME_INDEX, hasRight } from '../lib/rights'
 import IconRenderer from '../components/IconRenderer'
 
 const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 8 }) => {

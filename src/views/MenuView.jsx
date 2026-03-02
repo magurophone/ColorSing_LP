@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Lock } from '@phosphor-icons/react'
 import { useConfig } from '../context/ConfigContext'
-import { BENEFIT_FIELDS } from '../components/BenefitPopup'
+import { BENEFIT_FIELDS } from '../lib/rights'
 import IconRenderer from '../components/IconRenderer'
 import LockedContentModal from '../components/LockedContentModal'
 
