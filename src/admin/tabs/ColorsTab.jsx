@@ -36,13 +36,37 @@ const ColorField = ({ label, value, onChange, onClear, description, pickerValue 
   </div>
 )
 
-// CSS color-mix() の近似計算（ピッカー表示用）
+// CSS color-mix(in oklab) の近似計算（ピッカー表示用）
 const blendWithWhite = (hex, ratio) => {
   if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return '#ffffff'
-  const r = Math.round(parseInt(hex.slice(1, 3), 16) * ratio + 255 * (1 - ratio))
-  const g = Math.round(parseInt(hex.slice(3, 5), 16) * ratio + 255 * (1 - ratio))
-  const b = Math.round(parseInt(hex.slice(5, 7), 16) * ratio + 255 * (1 - ratio))
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+  // sRGB → Linear
+  const toLinear = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  const lr = toLinear(parseInt(hex.slice(1, 3), 16) / 255)
+  const lg = toLinear(parseInt(hex.slice(3, 5), 16) / 255)
+  const lb = toLinear(parseInt(hex.slice(5, 7), 16) / 255)
+  // Linear RGB → OKLAB
+  const l_ = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
+  const m_ = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
+  const s_ = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
+  const L = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_
+  const A = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+  const B = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+  // White in OKLAB = [1, 0, 0]. Blend in OKLAB space.
+  const bL = L * ratio + (1 - ratio)
+  const bA = A * ratio
+  const bB = B * ratio
+  // OKLAB → Linear RGB
+  const bl_ = bL + 0.3963377774 * bA + 0.2158037573 * bB
+  const bm_ = bL - 0.1055613458 * bA - 0.0638541728 * bB
+  const bs_ = bL - 0.0894841775 * bA - 1.2914855480 * bB
+  const rl = bl_ ** 3, rm = bm_ ** 3, rs = bs_ ** 3
+  const rr =  4.0767416621 * rl - 3.3077115913 * rm + 0.2309699292 * rs
+  const rg = -1.2684380046 * rl + 2.6097574011 * rm - 0.3413193965 * rs
+  const rb = -0.0041960863 * rl - 0.7034186147 * rm + 1.7076147010 * rs
+  // Linear → sRGB → clamp → hex
+  const toSRGB = c => Math.max(0, Math.min(1, c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055))
+  const out = [rr, rg, rb].map(c => Math.round(toSRGB(c) * 255).toString(16).padStart(2, '0'))
+  return `#${out.join('')}`
 }
 
 // rgba プレビュー計算（opacity = 0〜1 の不透明度）

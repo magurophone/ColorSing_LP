@@ -1,28 +1,10 @@
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
+import { formatEventDate, isEventEnded } from '../lib/utils'
 import CountUp from '../components/CountUp'
 import closedImg from '../assets/closed.png'
 
 const RANKING_FIELDS = { RANK: 0, NAME: 1, POINTS: 2, IMAGE: 3 }
-
-const formatEventDate = (dateStr) => {
-  const s = String(dateStr).replace(/\D/g, '')
-  if (s.length === 8) {
-    const y = s.slice(0, 4)
-    const m = parseInt(s.slice(4, 6), 10)
-    const d = parseInt(s.slice(6, 8), 10)
-    return `${y}年${m}月${d}日`
-  }
-  return dateStr
-}
-
-const isEventEnded = (dateStr) => {
-  const s = String(dateStr).replace(/\D/g, '')
-  if (s.length !== 8) return false
-  const t = new Date()
-  const today = `${t.getFullYear()}${String(t.getMonth() + 1).padStart(2, '0')}${String(t.getDate()).padStart(2, '0')}`
-  return s < today
-}
 
 const HomeView = ({ ranking, goals, events }) => {
   const config = useConfig()

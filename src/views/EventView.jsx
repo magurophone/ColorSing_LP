@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
-
-const formatEventDate = (dateStr) => {
-  const s = String(dateStr).replace(/\D/g, '')
-  if (s.length === 8) {
-    const y = s.slice(0, 4)
-    const m = parseInt(s.slice(4, 6), 10)
-    const d = parseInt(s.slice(6, 8), 10)
-    return `${y}年${m}月${d}日`
-  }
-  return dateStr
-}
+import { formatEventDate } from '../lib/utils'
 
 const SetlistBlock = ({ text }) => {
   if (!text) return null

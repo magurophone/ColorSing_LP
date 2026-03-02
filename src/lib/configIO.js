@@ -94,10 +94,8 @@ export function loadConfig() {
       if (stored) {
         const parsed = JSON.parse(stored)
         // benefitTiers は localStorage を正とする（管理画面での削除を永続化）
+        // deepMerge は配列を丸ごと上書きするため、benefitTiers も自動的に localStorage の値が使われる
         config = deepMerge(config, parsed)
-        if (parsed.benefitTiers) {
-          config.benefitTiers = parsed.benefitTiers
-        }
         // views配列: localStorage のマージ後もIDベースで補完（defaultsの新ビューが消えないように）
         if (Array.isArray(config.views)) {
           const existingIds = new Set(config.views.map(v => v.id))
