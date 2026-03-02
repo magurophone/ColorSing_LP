@@ -411,6 +411,90 @@
         }
         .val-box-note  { font-size: 0.76rem; color: #aaa; }
 
+        /* ── Value Detail ── */
+        .val-detail {
+            margin-top: 12px;
+            border: 1px solid var(--color-secondary);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .val-detail summary {
+            padding: 11px 16px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            background: #fff;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .val-detail summary::-webkit-details-marker { display: none; }
+
+        .val-detail summary i {
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .val-detail[open] summary i { transform: rotate(180deg); }
+
+        .val-detail-body {
+            padding: 18px 20px;
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-secondary);
+        }
+
+        .val-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.79rem;
+            margin-bottom: 14px;
+        }
+
+        .val-table th {
+            background: #fff5ee;
+            padding: 7px 10px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--color-accent);
+            border-bottom: 2px solid var(--color-secondary);
+            white-space: nowrap;
+        }
+
+        .val-table th:last-child { text-align: right; }
+
+        .val-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f2e8de;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .val-table td:last-child { text-align: right; white-space: nowrap; }
+
+        .val-table tfoot td {
+            border-bottom: none;
+            font-weight: 700;
+            background: #fff5ee;
+            color: var(--color-accent);
+        }
+
+        .val-calc {
+            background: #fff;
+            border: 1px solid var(--color-secondary);
+            border-radius: var(--radius);
+            padding: 13px 16px;
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.95;
+        }
+
+        .val-calc strong { color: var(--color-accent); }
+
         /* ── CTA ── */
         .cta-sec {
             padding: 80px 0;
@@ -642,9 +726,45 @@
                 </div>
                 <div class="val-box">
                     <p class="val-box-lbl">同等のシステムを技術者に開発依頼した場合</p>
-                    <p class="val-box-price">450〜600万円</p>
-                    <p class="val-box-note">制作会社経由なら800万円以上 ／ 機能を省いた場合でも150〜300万円</p>
+                    <p class="val-box-price">400〜500万円</p>
+                    <p class="val-box-note">制作会社経由なら700万円以上 ／ 機能を省いた場合でも120〜180万円</p>
                 </div>
+                <details class="val-detail">
+                    <summary>見積もり根拠の詳細を見る <i class="ph ph-caret-down"></i></summary>
+                    <div class="val-detail-body">
+                        <table class="val-table">
+                            <thead>
+                                <tr>
+                                    <th>フェーズ</th>
+                                    <th>内容</th>
+                                    <th>工数（h）</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>A</td><td>要件定義・設計（5ビュー＋管理8タブ＋スプシ設計）</td><td>35〜45</td></tr>
+                                <tr><td>B</td><td>基盤構築（マルチページ構成・設定永続化レイヤー）</td><td>18〜25</td></tr>
+                                <tr><td>C</td><td>Google Sheets API連携（gviz形式・6シート並列・リトライ）</td><td>22〜28</td></tr>
+                                <tr><td>D</td><td>GitHub API連携（6段階git操作・自動デプロイ・同期）</td><td>28〜35</td></tr>
+                                <tr><td>E</td><td>管理画面 8タブ（UI密度が最も高い部分）</td><td>85〜95</td></tr>
+                                <tr><td>F</td><td>メインダッシュボード 5ビュー＋ポップアップ</td><td>40〜50</td></tr>
+                                <tr><td>G</td><td>UIコンポーネント（Header 3モード・パーティクル等）</td><td>30〜38</td></tr>
+                                <tr><td>H</td><td>カラーシステム（OKLAB変換・CSS変数・テーマ切替）</td><td>12〜18</td></tr>
+                                <tr><td>I</td><td>セットアップ・マニュアルApp</td><td>18〜22</td></tr>
+                                <tr><td>J</td><td>品質保証・テスト・修正対応</td><td>25〜35</td></tr>
+                                <tr><td>K</td><td>デプロイ基盤（GitHub Actions・一括配布スクリプト）</td><td>10〜12</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr><td colspan="2">合計</td><td>323〜403</td></tr>
+                            </tfoot>
+                        </table>
+                        <div class="val-calc">
+                            単価: <strong>¥9,000〜12,000 / h</strong>（Reactシニアフリーランス・日本市場相場）<br>
+                            計算: 323h × ¥9,000 ＝ 約290万 〜 403h × ¥12,000 ＝ 約483万<br>
+                            採用レンジ: <strong>400〜500万円</strong>（中央値 約430万円）<br>
+                            制作会社経由: フリーランス直接の <strong>1.8〜2倍</strong> が業界標準マークアップ
+                        </div>
+                    </div>
+                </details>
             </div>
         </div>
     </section>
