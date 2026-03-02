@@ -1,4 +1,5 @@
 import { useConfig } from '../context/ConfigContext'
+import { hexToRgba } from '../lib/utils'
 
 const PARTICLES = [
   { left: '5%',  size: 35, delay: -8,  duration: 12 },
@@ -24,14 +25,6 @@ const StarShape = ({ size, color }) => (
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 )
-
-const hexToRgba = (hex, alpha) => {
-  if (!hex) return null
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
 
 const KEYFRAMES_CSS = `
 @keyframes particleRise {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { loadConfig, saveConfig, deepMerge, saveConfigMeta } from '../lib/configIO'
+import { restoreToken } from '../lib/utils'
 import DEFAULT_CONFIG from '../lib/defaults'
 import IconRenderer from '../components/IconRenderer'
 import BrandingTab from './tabs/BrandingTab'
@@ -156,7 +157,7 @@ function AdminApp() {
     setConfig(prev => {
       const synced = deepMerge(DEFAULT_CONFIG, remoteConfig)
       if (synced.deploy?.token?.startsWith('rev:')) {
-        synced.deploy.token = synced.deploy.token.slice(4).split('').reverse().join('')
+        synced.deploy.token = restoreToken(synced.deploy.token)
       }
       if (prev.deploy?.token && !prev.deploy.token.startsWith('rev:')) {
         synced.deploy = { ...synced.deploy, token: prev.deploy.token }

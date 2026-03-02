@@ -1,4 +1,5 @@
 import DEFAULT_CONFIG from './defaults'
+import { reverseToken, restoreToken } from './utils'
 
 // パス第1セグメント（リポジトリ名）でキーを分離。同一ドメインの複数顧客が混在しないように
 const _repoSlug = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') || 'default'
@@ -76,7 +77,7 @@ export function loadBaseConfig() {
 
   // 反転トークンを復元
   if (merged.deploy?.token?.startsWith('rev:')) {
-    merged.deploy.token = merged.deploy.token.slice(4).split('').reverse().join('')
+    merged.deploy.token = restoreToken(merged.deploy.token)
   }
 
   return merged
@@ -143,7 +144,7 @@ export function generateConfigJS(config) {
   // deploy.token は GitHub シークレットスキャンを回避するため反転して保存
   if (cleanConfig.deploy?.token && !cleanConfig.deploy.token.startsWith('rev:')) {
     cleanConfig.deploy = { ...cleanConfig.deploy }
-    cleanConfig.deploy.token = 'rev:' + cleanConfig.deploy.token.split('').reverse().join('')
+    cleanConfig.deploy.token = reverseToken(cleanConfig.deploy.token)
   }
 
   const json = JSON.stringify(cleanConfig, null, 2)

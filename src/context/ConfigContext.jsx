@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect } from 'react'
 import { convertDriveUrl } from '../lib/sheets'
+import { hexToRgba } from '../lib/utils'
 
 const ConfigContext = createContext(null)
 
@@ -55,11 +56,9 @@ export function ConfigProvider({ config, children }) {
         ? o.glassBgColor
         : config.colors.deepBlue
       const a = (o.glassBgOpacity !== '' && o.glassBgOpacity != null) ? o.glassBgOpacity : 0.6
-      if (col && /^#[0-9a-f]{6}$/i.test(col)) {
-        const r = parseInt(col.slice(1, 3), 16)
-        const g = parseInt(col.slice(3, 5), 16)
-        const b = parseInt(col.slice(5, 7), 16)
-        root.style.setProperty('--override-glass-bg', `rgba(${r}, ${g}, ${b}, ${a})`)
+      const glassBgRgba = hexToRgba(col, a)
+      if (glassBgRgba) {
+        root.style.setProperty('--override-glass-bg', glassBgRgba)
       }
     }
 
@@ -71,21 +70,16 @@ export function ConfigProvider({ config, children }) {
       const a = (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
         ? o.menuCardLabelOpacity
         : 0.1
-      if (col && /^#[0-9a-f]{6}$/i.test(col)) {
-        const r = parseInt(col.slice(1, 3), 16)
-        const g = parseInt(col.slice(3, 5), 16)
-        const b = parseInt(col.slice(5, 7), 16)
-        root.style.setProperty('--menu-card-label-bg', `rgba(${r}, ${g}, ${b}, ${a})`)
+      const menuLabelRgba = hexToRgba(col, a)
+      if (menuLabelRgba) {
+        root.style.setProperty('--menu-card-label-bg', menuLabelRgba)
       }
     }
 
     // popup overlay 背景色
-    if (o.popupOverlayColor && /^#[0-9a-f]{6}$/i.test(o.popupOverlayColor)) {
-      const r = parseInt(o.popupOverlayColor.slice(1, 3), 16)
-      const g = parseInt(o.popupOverlayColor.slice(3, 5), 16)
-      const b = parseInt(o.popupOverlayColor.slice(5, 7), 16)
-      const a = o.popupOverlayOpacity ?? 0.7
-      root.style.setProperty('--popup-overlay-bg', `rgba(${r}, ${g}, ${b}, ${a})`)
+    const popupRgba = hexToRgba(o.popupOverlayColor, o.popupOverlayOpacity ?? 0.7)
+    if (popupRgba) {
+      root.style.setProperty('--popup-overlay-bg', popupRgba)
     } else {
       root.style.removeProperty('--popup-overlay-bg')
     }
