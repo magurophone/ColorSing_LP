@@ -64,7 +64,7 @@ export const DEMO_EVENTS = {
 export const DEMO_ICONS = {
   '202501': [
     { label: '星空リスナー', thumbnailUrl: './customer/demo-icons/user1.png', originalUrl: './customer/demo-icons/user1.png' },
-    { label: '音符ちゃん',   thumbnailUrl: './customer/demo-icons/user2.png', originalUrl: './customer/demo-icons/user2.png' },
+    { label: '音符ちゃん',   thumbnailUrl: './customer/demo-icons/otofuchan-icon.png', originalUrl: './customer/demo-icons/otofuchan-icon.png' },
     { label: '深海の歌姫',    thumbnailUrl: './customer/demo-icons/user3.png', originalUrl: './customer/demo-icons/user3.png' },
   ],
   _orderedKeys: ['202501'],
