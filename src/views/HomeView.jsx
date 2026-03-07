@@ -44,7 +44,7 @@ const UpcomingGallery = ({ urls, title, ended }) => {
         ))}
       </div>
       {ended && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <img
             src={closedImg}
             alt="CLOSED"
