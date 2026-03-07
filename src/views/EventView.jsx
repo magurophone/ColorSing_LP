@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
 import { formatEventDate } from '../lib/utils'
@@ -12,21 +12,59 @@ const SetlistBlock = ({ text }) => {
   )
 }
 
+const ImageGallery = ({ urls, title }) => {
+  const scrollRef = useRef(null)
+  const [idx, setIdx] = useState(0)
+
+  const handleScroll = () => {
+    const el = scrollRef.current
+    if (!el) return
+    setIdx(Math.round(el.scrollLeft / el.offsetWidth))
+  }
+
+  return (
+    <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {urls.map((url, i) => (
+          <img
+            key={i}
+            src={convertDriveUrl(url, 600)}
+            alt={`${title} ${i + 1}`}
+            className="w-full h-full object-cover shrink-0 snap-center"
+            loading="lazy"
+            draggable={false}
+          />
+        ))}
+      </div>
+      {urls.length > 1 && (
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+          {urls.map((_, i) => (
+            <span
+              key={i}
+              className={`w-1 h-1 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const PastEventCard = ({ event }) => {
   const [open, setOpen] = useState(false)
-  const imgSrc = event.imageUrl ? convertDriveUrl(event.imageUrl, 600) : null
+  const urls = event.imageUrls?.length > 0
+    ? event.imageUrls
+    : event.imageUrl ? [event.imageUrl] : []
 
   return (
     <div className="glass-effect rounded-xl border border-card-border/30 overflow-hidden">
       <div className="flex gap-4 md:gap-6 p-4 md:p-5">
-        {imgSrc && (
-          <img
-            src={imgSrc}
-            alt={event.title}
-            className="w-20 h-28 md:w-28 md:h-40 object-cover rounded-lg shrink-0"
-            loading="lazy"
-          />
-        )}
+        {urls.length > 0 && <ImageGallery urls={urls} title={event.title} />}
         <div className="flex-1 min-w-0">
           {event.date && (
             <div className="text-xs md:text-sm text-gray-500 mb-1">{formatEventDate(event.date)}</div>

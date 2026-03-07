@@ -87,30 +87,44 @@ export const fetchHistoryData = async (spreadsheetId, historySheetName, range = 
 
 // イベントデータを読み込む
 // A列:日付(yyyymmdd), B列:タイトル, C列:セットリスト, D列:画像URL, E列:備考
+// 同じ日付+タイトルの行を同一イベントとして集約し、画像を最大5枚のギャラリーにまとめる
 // 3行目: 開催予定イベント / 7行目以降: 開催済みイベント
 export const fetchEventData = async (spreadsheetId, sheetName) => {
-  const toEvent = (row) => ({
+  const toRow = (row) => ({
     date: String(row[0] || ''),
     title: String(row[1] || ''),
     setlist: String(row[2] || ''),
-    imageUrl: String(row[3] || ''),
+    imageUrl: String(row[3] || '').trim(),
     notes: String(row[4] || ''),
   })
 
   const isDate8 = (v) => /^\d{8}$/.test(String(v || '').replace(/\D/g, ''))
+
+  const groupByEvent = (rows) => {
+    const map = new Map()
+    for (const row of rows) {
+      if (!row.title || !isDate8(row.date)) continue
+      const key = `${row.date}__${row.title}`
+      if (!map.has(key)) {
+        map.set(key, { ...row, imageUrls: [] })
+      }
+      const ev = map.get(key)
+      if (row.imageUrl && ev.imageUrls.length < 5) ev.imageUrls.push(row.imageUrl)
+    }
+    return [...map.values()].map(ev => ({ ...ev, imageUrl: ev.imageUrls[0] || '' }))
+  }
 
   const [upcomingRows, pastRows] = await Promise.all([
     fetchSheetData(spreadsheetId, sheetName, 'A3:E3', 3, { allRows: true }),
     fetchSheetData(spreadsheetId, sheetName, 'A7:E', 3, { allRows: true }),
   ])
 
-  const upcoming = upcomingRows.length > 0 && upcomingRows[0][1]
-    ? toEvent(upcomingRows[0])
+  const upcomingRow = upcomingRows.length > 0 ? toRow(upcomingRows[0]) : null
+  const upcoming = upcomingRow?.title
+    ? { ...upcomingRow, imageUrls: upcomingRow.imageUrl ? [upcomingRow.imageUrl] : [] }
     : null
 
-  const past = pastRows
-    .map(row => toEvent(row))
-    .filter(e => e.title && isDate8(e.date))
+  const past = groupByEvent(pastRows.map(toRow))
     .sort((a, b) => b.date.localeCompare(a.date))
 
   return { upcoming, past }

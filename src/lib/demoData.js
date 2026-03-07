@@ -56,6 +56,7 @@ export const DEMO_EVENTS = {
     title: 'Chill Night Festival 2026',
     setlist: '変態紳士クラブ  - YOKAZE\niri             - Wonderland\nChilldspot      - ネオンを消して',
     imageUrl: DEMO_EVENT_POSTER,
+    imageUrls: [DEMO_EVENT_POSTER],
     notes: '',
   },
   past: [],
