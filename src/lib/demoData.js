@@ -50,13 +50,22 @@ const DEMO_EVENT_POSTER = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
   <text x="450" y="676" font-family="sans-serif" font-size="16" fill="#1e3a54" text-anchor="middle">Google Drive の画像 URL を設定すると表示されます</text>
 </svg>`)
 
+const DEMO_EVENT_POSTER2 = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#0e1a08"/>
+  <rect x="16" y="16" width="868" height="1168" rx="4" fill="none" stroke="#2a4818" stroke-width="2" stroke-dasharray="16 8"/>
+  <text x="450" y="560" font-family="sans-serif" font-size="56" fill="#2a4a28" text-anchor="middle">📸</text>
+  <text x="450" y="630" font-family="'Noto Sans JP',sans-serif" font-size="26" fill="#3a6a38" text-anchor="middle">2枚目の画像サンプル</text>
+  <text x="450" y="676" font-family="sans-serif" font-size="16" fill="#1e3a1e" text-anchor="middle">スプシ4行目 D列に URL を入力</text>
+</svg>`)
+
 export const DEMO_EVENTS = {
   upcoming: {
     date: '20260315',
     title: 'Chill Night Festival 2026',
     setlist: '変態紳士クラブ  - YOKAZE\niri             - Wonderland\nChilldspot      - ネオンを消して',
     imageUrl: DEMO_EVENT_POSTER,
-    imageUrls: [DEMO_EVENT_POSTER],
+    imageUrls: [DEMO_EVENT_POSTER, DEMO_EVENT_POSTER2],
     notes: '',
   },
   past: [],
