@@ -15,7 +15,6 @@ const SetlistBlock = ({ text }) => {
 const ImageGallery = ({ urls, title }) => {
   const scrollRef = useRef(null)
   const [idx, setIdx] = useState(0)
-  const drag = useRef({ active: false, startX: 0, scrollLeft: 0 })
 
   const handleScroll = () => {
     const el = scrollRef.current
@@ -23,35 +22,18 @@ const ImageGallery = ({ urls, title }) => {
     setIdx(Math.round(el.scrollLeft / el.offsetWidth))
   }
 
-  const onPointerDown = (e) => {
-    if (e.pointerType !== 'mouse') return
+  const goTo = (i) => {
     const el = scrollRef.current
     if (!el) return
-    drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft }
-    el.setPointerCapture(e.pointerId)
-  }
-
-  const onPointerMove = (e) => {
-    if (e.pointerType !== 'mouse' || !drag.current.active) return
-    const el = scrollRef.current
-    if (!el) return
-    el.scrollLeft = drag.current.scrollLeft - (e.clientX - drag.current.startX)
-  }
-
-  const onPointerUp = (e) => {
-    if (e.pointerType !== 'mouse') return
-    drag.current.active = false
+    el.scrollTo({ left: i * el.offsetWidth, behavior: 'smooth' })
   }
 
   return (
-    <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40">
+    <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40 group">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg cursor-grab active:cursor-grabbing select-none"
+        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg select-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {urls.map((url, i) => (
@@ -66,14 +48,28 @@ const ImageGallery = ({ urls, title }) => {
         ))}
       </div>
       {urls.length > 1 && (
-        <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 pointer-events-none">
-          {urls.map((_, i) => (
-            <span
-              key={i}
-              className={`w-1 h-1 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`}
-            />
-          ))}
-        </div>
+        <>
+          {idx > 0 && (
+            <button
+              onClick={() => goTo(idx - 1)}
+              className="absolute left-0.5 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-5 h-5 rounded-full bg-black/60 text-white leading-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >‹</button>
+          )}
+          {idx < urls.length - 1 && (
+            <button
+              onClick={() => goTo(idx + 1)}
+              className="absolute right-0.5 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-5 h-5 rounded-full bg-black/60 text-white leading-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >›</button>
+          )}
+          <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+            {urls.map((_, i) => (
+              <span
+                key={i}
+                className={`w-1 h-1 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
