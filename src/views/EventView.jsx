@@ -13,38 +13,43 @@ const SetlistBlock = ({ text }) => {
 }
 
 const ImageGallery = ({ urls, title }) => {
-  const scrollRef = useRef(null)
   const [idx, setIdx] = useState(0)
+  const touchStart = useRef(null)
 
-  const handleScroll = () => {
-    const el = scrollRef.current
-    if (!el) return
-    setIdx(Math.round(el.scrollLeft / el.offsetWidth))
+  const goTo = (i) => setIdx(Math.max(0, Math.min(urls.length - 1, i)))
+
+  const onTouchStart = (e) => { touchStart.current = e.touches[0].clientX }
+  const onTouchEnd = (e) => {
+    if (touchStart.current === null) return
+    const delta = touchStart.current - e.changedTouches[0].clientX
+    if (Math.abs(delta) > 40) goTo(idx + (delta > 0 ? 1 : -1))
+    touchStart.current = null
   }
 
-  const goTo = (i) => {
-    const el = scrollRef.current
-    if (!el) return
-    el.scrollTo({ left: i * el.offsetWidth, behavior: 'smooth' })
-  }
+  const pct = 100 / urls.length
 
   return (
-    <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40 group">
+    <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40 group overflow-hidden rounded-lg">
       <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg select-none"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="flex h-full"
+        style={{
+          width: `${urls.length * 100}%`,
+          transform: `translateX(-${idx * pct}%)`,
+          transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         {urls.map((url, i) => (
-          <img
-            key={i}
-            src={convertDriveUrl(url, 600)}
-            alt={`${title} ${i + 1}`}
-            className="w-full h-full object-cover shrink-0 snap-center"
-            loading="lazy"
-            draggable={false}
-          />
+          <div key={i} className="h-full" style={{ width: `${pct}%` }}>
+            <img
+              src={convertDriveUrl(url, 600)}
+              alt={`${title} ${i + 1}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              draggable={false}
+            />
+          </div>
         ))}
       </div>
       {urls.length > 1 && (
