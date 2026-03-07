@@ -150,11 +150,43 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
   return { upcoming, past }
 }
 
+// 枠内アイコンシートをCSV形式で取得（gvizの型推論でカテゴリ名がnullになる問題を回避）
+const fetchIconSheetCsv = async (spreadsheetId, sheetName, retries = 3) => {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+    try {
+      const response = await fetch(url, { signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text()
+      // CSV パース（ダブルクォート囲みに対応）
+      return text.split('\n').slice(1).map(line => {
+        const cols = []
+        let cur = '', inQ = false
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i]
+          if (c === '"') { inQ = !inQ }
+          else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = '' }
+          else { cur += c }
+        }
+        cols.push(cur.trim())
+        return cols
+      }).filter(row => row.some(c => c !== ''))
+    } catch (err) {
+      clearTimeout(timeoutId)
+      if (attempt === retries - 1) throw err
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
+    }
+  }
+}
+
 // 枠内アイコンデータを読み込む（A列:yyyymmまたはカテゴリ名, B列:ユーザー名, C列:画像URL）
 export const fetchIconData = async (spreadsheetId, iconSheetName) => {
   const iconData = {}
   const orderedKeys = []
-  const data = await fetchSheetData(spreadsheetId, iconSheetName, null, 3, { skipHeader: true, useFormattedStrings: true })
+  const data = await fetchIconSheetCsv(spreadsheetId, iconSheetName)
 
   if (!data || data.length < 1) {
     return iconData
