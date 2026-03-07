@@ -41,7 +41,10 @@ export const fetchSheetData = async (spreadsheetId, sheetName, range = null, ret
         throw new Error('Invalid data structure from Google Sheets')
       }
 
-      return json.table.rows.map(row => (row.c ?? []).map(cell => cell?.v ?? ''))
+      const extractCell = options.useFormattedStrings
+        ? (cell) => cell == null ? '' : (cell.v != null ? String(cell.v) : (cell.f ?? ''))
+        : (cell) => cell?.v ?? ''
+      return json.table.rows.map(row => (row.c ?? []).map(extractCell))
     } catch (error) {
       clearTimeout(timeoutId)
       console.error(`Error fetching ${sheetName}${range ? ` (${range})` : ''} (attempt ${attempt + 1}/${retries}):`, error)
@@ -141,7 +144,7 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
     upcoming = { ...upcomingRow, imageUrls }
   }
 
-  const past = groupByEvent(pastRows.map(toRow))
+  const past = groupByEvent(pastRows)
     .sort((a, b) => b.date.localeCompare(a.date))
 
   return { upcoming, past }
@@ -151,7 +154,7 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
 export const fetchIconData = async (spreadsheetId, iconSheetName) => {
   const iconData = {}
   const orderedKeys = []
-  const data = await fetchSheetData(spreadsheetId, iconSheetName, null, 3, { skipHeader: true })
+  const data = await fetchSheetData(spreadsheetId, iconSheetName, null, 3, { skipHeader: true, useFormattedStrings: true })
 
   if (!data || data.length < 1) {
     return iconData

@@ -90,24 +90,47 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
 
   return (
     <div className="space-y-6">
-      {/* 月/カテゴリ タブ */}
-      <div className="overflow-x-auto">
-        <div className="flex gap-2 pb-2 min-w-max">
-          {availableMonths.map((month) => (
-            <button
-              key={month}
-              onClick={() => handleMonthChange(month)}
-              className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
-                selectedMonth === month
-                  ? 'bg-primary/20 border border-primary/50 text-primary'
-                  : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
-              }`}
-            >
-              {formatKey(month)}
-            </button>
-          ))}
+      {/* 月タブ */}
+      {availableMonths.filter(isYYYYMM).length > 0 && (
+        <div className="overflow-x-auto">
+          <div className="flex gap-2 pb-1 min-w-max">
+            {availableMonths.filter(isYYYYMM).map((month) => (
+              <button
+                key={month}
+                onClick={() => handleMonthChange(month)}
+                className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+                  selectedMonth === month
+                    ? 'bg-primary/20 border border-primary/50 text-primary'
+                    : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
+                }`}
+              >
+                {formatKey(month)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* カテゴリタブ */}
+      {availableMonths.filter(k => !isYYYYMM(k)).length > 0 && (
+        <div className="overflow-x-auto">
+          <div className="flex gap-2 pb-1 min-w-max">
+            {availableMonths.filter(k => !isYYYYMM(k)).map((month) => (
+              <button
+                key={month}
+                onClick={() => handleMonthChange(month)}
+                className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+                  selectedMonth === month
+                    ? 'bg-primary/20 border border-primary/50 text-primary'
+                    : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
+                }`}
+              >
+                {formatKey(month)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {selectedMonth && (
         <>
