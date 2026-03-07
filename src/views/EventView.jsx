@@ -24,6 +24,7 @@ const ImageGallery = ({ urls, title }) => {
   }
 
   const onPointerDown = (e) => {
+    if (e.pointerType !== 'mouse') return
     const el = scrollRef.current
     if (!el) return
     drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft }
@@ -31,13 +32,16 @@ const ImageGallery = ({ urls, title }) => {
   }
 
   const onPointerMove = (e) => {
-    if (!drag.current.active) return
+    if (e.pointerType !== 'mouse' || !drag.current.active) return
     const el = scrollRef.current
     if (!el) return
     el.scrollLeft = drag.current.scrollLeft - (e.clientX - drag.current.startX)
   }
 
-  const onPointerUp = () => { drag.current.active = false }
+  const onPointerUp = (e) => {
+    if (e.pointerType !== 'mouse') return
+    drag.current.active = false
+  }
 
   return (
     <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40">
