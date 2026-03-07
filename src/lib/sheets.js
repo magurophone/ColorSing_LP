@@ -115,14 +115,20 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
   }
 
   const [upcomingRows, pastRows] = await Promise.all([
-    fetchSheetData(spreadsheetId, sheetName, 'A3:E3', 3, { allRows: true }),
+    fetchSheetData(spreadsheetId, sheetName, 'A3:E6', 3, { allRows: true }),
     fetchSheetData(spreadsheetId, sheetName, 'A7:E', 3, { allRows: true }),
   ])
 
   const upcomingRow = upcomingRows.length > 0 ? toRow(upcomingRows[0]) : null
-  const upcoming = upcomingRow?.title
-    ? { ...upcomingRow, imageUrls: upcomingRow.imageUrl ? [upcomingRow.imageUrl] : [] }
-    : null
+  let upcoming = null
+  if (upcomingRow?.title) {
+    const imageUrls = upcomingRow.imageUrl ? [upcomingRow.imageUrl] : []
+    for (const raw of upcomingRows.slice(1)) {
+      const r = toRow(raw)
+      if (!r.title && r.imageUrl && imageUrls.length < 5) imageUrls.push(r.imageUrl)
+    }
+    upcoming = { ...upcomingRow, imageUrls }
+  }
 
   const past = groupByEvent(pastRows.map(toRow))
     .sort((a, b) => b.date.localeCompare(a.date))

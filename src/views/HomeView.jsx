@@ -1,8 +1,82 @@
+import { useRef, useState } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
 import { formatEventDate, isEventEnded } from '../lib/utils'
 import CountUp from '../components/CountUp'
 import closedImg from '../assets/closed.png'
+
+const UpcomingGallery = ({ urls, title, ended }) => {
+  const [idx, setIdx] = useState(0)
+  const touchStart = useRef(null)
+
+  const goTo = (i) => setIdx(Math.max(0, Math.min(urls.length - 1, i)))
+  const onTouchStart = (e) => { touchStart.current = e.touches[0].clientX }
+  const onTouchEnd = (e) => {
+    if (touchStart.current === null) return
+    const delta = touchStart.current - e.changedTouches[0].clientX
+    if (Math.abs(delta) > 40) goTo(idx + (delta > 0 ? 1 : -1))
+    touchStart.current = null
+  }
+
+  const pct = 100 / urls.length
+
+  return (
+    <div className="relative overflow-hidden group">
+      <div
+        className="flex"
+        style={{
+          width: `${urls.length * 100}%`,
+          transform: `translateX(-${idx * pct}%)`,
+          transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {urls.map((url, i) => (
+          <div key={i} style={{ width: `${pct}%` }}>
+            <img
+              src={convertDriveUrl(url, 1200)}
+              alt={`${title} ${i + 1}`}
+              className={`w-full object-cover${ended ? ' brightness-50' : ''}`}
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+      {ended && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img
+            src={closedImg}
+            alt="CLOSED"
+            className="w-2/3 md:w-1/2 max-w-sm select-none pointer-events-none"
+            style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,1)) drop-shadow(0 0 16px rgba(0,0,0,1)) drop-shadow(0 2px 24px rgba(0,0,0,1)) drop-shadow(0 0 50px rgba(0,0,0,1)) drop-shadow(0 0 80px rgba(0,0,0,0.8))' }}
+          />
+        </div>
+      )}
+      {urls.length > 1 && (
+        <>
+          {idx > 0 && (
+            <button
+              onClick={() => goTo(idx - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white text-lg leading-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >‹</button>
+          )}
+          {idx < urls.length - 1 && (
+            <button
+              onClick={() => goTo(idx + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white text-lg leading-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >›</button>
+          )}
+          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+            {urls.map((_, i) => (
+              <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 const RANKING_FIELDS = { RANK: 0, NAME: 1, POINTS: 2, IMAGE: 3 }
 
@@ -77,24 +151,12 @@ const HomeView = ({ ranking, goals, events }) => {
           const ended = events.upcoming.date ? isEventEnded(events.upcoming.date) : false
           return (
           <div className={`glass-effect rounded-2xl border overflow-hidden ${ended ? 'border-card-border/30' : 'border-amber/40'}`}>
-            {events.upcoming.imageUrl && (
-              <div className="relative">
-                <img
-                  src={convertDriveUrl(events.upcoming.imageUrl, 1200)}
-                  alt={events.upcoming.title}
-                  className={`w-full object-cover${ended ? ' brightness-50' : ''}`}
-                />
-                {ended && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <img
-                      src={closedImg}
-                      alt="CLOSED"
-                      className="w-2/3 md:w-1/2 max-w-sm select-none pointer-events-none"
-                      style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,1)) drop-shadow(0 0 16px rgba(0,0,0,1)) drop-shadow(0 2px 24px rgba(0,0,0,1)) drop-shadow(0 0 50px rgba(0,0,0,1)) drop-shadow(0 0 80px rgba(0,0,0,0.8))' }}
-                    />
-                  </div>
-                )}
-              </div>
+            {events.upcoming.imageUrls?.length > 0 && (
+              <UpcomingGallery
+                urls={events.upcoming.imageUrls}
+                title={events.upcoming.title}
+                ended={ended}
+              />
             )}
             <div className={`p-5 md:p-8 text-center${ended ? ' opacity-40' : ''}`}>
               {events.upcoming.date && (
