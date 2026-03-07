@@ -110,7 +110,7 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
         map.set(key, { ...row, imageUrls: [] })
       }
       const ev = map.get(key)
-      if (row.imageUrl && ev.imageUrls.length < 5) ev.imageUrls.push(row.imageUrl)
+      if (row.imageUrl && ev.imageUrls.length < 10) ev.imageUrls.push(row.imageUrl)
     }
     return [...map.values()].map(ev => ({ ...ev, imageUrl: ev.imageUrls[0] || '' }))
   }
@@ -127,7 +127,7 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
   for (const raw of allPastRows) {
     const r = toRow(raw)
     if (!r.date && !r.title && r.imageUrl) {
-      if (extraUpcomingUrls.length < 4) extraUpcomingUrls.push(r.imageUrl)
+      if (extraUpcomingUrls.length < 9) extraUpcomingUrls.push(r.imageUrl)
     } else {
       pastRows.push(r)
     }
@@ -137,7 +137,7 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
   let upcoming = null
   if (upcomingRow?.title) {
     const imageUrls = upcomingRow.imageUrl ? [upcomingRow.imageUrl] : []
-    imageUrls.push(...extraUpcomingUrls.slice(0, 5 - imageUrls.length))
+    imageUrls.push(...extraUpcomingUrls.slice(0, 10 - imageUrls.length))
     upcoming = { ...upcomingRow, imageUrls }
   }
 
