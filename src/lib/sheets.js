@@ -88,7 +88,8 @@ export const fetchHistoryData = async (spreadsheetId, historySheetName, range = 
 // イベントデータを読み込む
 // A列:日付(yyyymmdd), B列:タイトル, C列:セットリスト, D列:画像URL, E列:備考
 // 同じ日付+タイトルの行を同一イベントとして集約し、画像を最大5枚のギャラリーにまとめる
-// 3行目: 開催予定イベント / 7行目以降: 開催済みイベント
+// 3行目: 開催予定イベント
+// 7行目以降: 開催済みイベント欄（A/B/C空白・D列のみURLの行は次回イベントの追加画像として扱う）
 export const fetchEventData = async (spreadsheetId, sheetName) => {
   const toRow = (row) => ({
     date: String(row[0] || ''),
@@ -114,19 +115,29 @@ export const fetchEventData = async (spreadsheetId, sheetName) => {
     return [...map.values()].map(ev => ({ ...ev, imageUrl: ev.imageUrls[0] || '' }))
   }
 
-  const [upcomingRows, pastRows] = await Promise.all([
-    fetchSheetData(spreadsheetId, sheetName, 'A3:E6', 3, { allRows: true }),
+  const [upcomingRows, allPastRows] = await Promise.all([
+    fetchSheetData(spreadsheetId, sheetName, 'A3:E3', 3, { allRows: true }),
     fetchSheetData(spreadsheetId, sheetName, 'A7:E', 3, { allRows: true }),
   ])
+
+  // A7:E の中で date/title が空かつ imageUrl がある行 → 次回イベントの追加画像
+  // それ以外 → 開催済みイベント
+  const extraUpcomingUrls = []
+  const pastRows = []
+  for (const raw of allPastRows) {
+    const r = toRow(raw)
+    if (!r.date && !r.title && r.imageUrl) {
+      if (extraUpcomingUrls.length < 4) extraUpcomingUrls.push(r.imageUrl)
+    } else {
+      pastRows.push(r)
+    }
+  }
 
   const upcomingRow = upcomingRows.length > 0 ? toRow(upcomingRows[0]) : null
   let upcoming = null
   if (upcomingRow?.title) {
     const imageUrls = upcomingRow.imageUrl ? [upcomingRow.imageUrl] : []
-    for (const raw of upcomingRows.slice(1)) {
-      const r = toRow(raw)
-      if (!r.title && r.imageUrl && imageUrls.length < 5) imageUrls.push(r.imageUrl)
-    }
+    imageUrls.push(...extraUpcomingUrls.slice(0, 5 - imageUrls.length))
     upcoming = { ...upcomingRow, imageUrls }
   }
 
