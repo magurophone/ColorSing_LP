@@ -15,6 +15,7 @@ const SetlistBlock = ({ text }) => {
 const ImageGallery = ({ urls, title }) => {
   const scrollRef = useRef(null)
   const [idx, setIdx] = useState(0)
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0 })
 
   const handleScroll = () => {
     const el = scrollRef.current
@@ -22,12 +23,31 @@ const ImageGallery = ({ urls, title }) => {
     setIdx(Math.round(el.scrollLeft / el.offsetWidth))
   }
 
+  const onPointerDown = (e) => {
+    const el = scrollRef.current
+    if (!el) return
+    drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft }
+    el.setPointerCapture(e.pointerId)
+  }
+
+  const onPointerMove = (e) => {
+    if (!drag.current.active) return
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollLeft = drag.current.scrollLeft - (e.clientX - drag.current.startX)
+  }
+
+  const onPointerUp = () => { drag.current.active = false }
+
   return (
     <div className="relative shrink-0 w-20 h-28 md:w-28 md:h-40">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory rounded-lg cursor-grab active:cursor-grabbing select-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {urls.map((url, i) => (
