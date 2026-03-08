@@ -166,7 +166,8 @@ export const fetchIconData = async (spreadsheetId, iconSheetName) => {
   const orderedKeys = []
   // useColTypes: A列がnumber型なら cell.f（フォーマット済み文字列）で取得
   // → "202601"はそのまま文字列で、"まつり"はf値で取得できる
-  const data = await fetchSheetData(spreadsheetId, iconSheetName, null, 3, { skipHeader: true, useColTypes: true })
+  const allRows = await fetchSheetData(spreadsheetId, iconSheetName, null, 3, { useColTypes: true })
+  const data = allRows.slice(1) // 1行目（ヘッダー行）をスキップ
 
   if (!data || data.length < 1) {
     return iconData
