@@ -282,12 +282,18 @@ const SS_SHEET_DATA = [
     name: '枠内アイコン',
     img: './manual/ss-icon-sheet.png',
     content: () => (
-      <div className="space-y-3">
-        <Cell range="A列" label="月またはカテゴリ"
-          desc="すべて6桁の数字（yyyymm）なら月別表示。それ以外の文字列（例: メンバーシップ限定、月間トップリスナー）ならカテゴリ別表示になります。" />
-        <Cell range="B列" desc="ユーザー名" />
-        <Cell range="C列" desc="Google Drive の画像URL（共有リンク）" />
-      </div>
+      <>
+        <div className="space-y-3">
+          <Cell range="A列" label="月またはカテゴリ"
+            desc="すべて6桁の数字（yyyymm）なら月別表示。それ以外の文字列（例: まつり、メンバーシップ限定）ならカテゴリ別表示になります。" />
+          <Cell range="B列" desc="ユーザー名" />
+          <Cell range="C列" desc="Google Drive の画像URL（共有リンク）" />
+        </div>
+        <Note type="danger">
+          A列は必ず「書式なしテキスト」に設定してください。設定しないとカテゴリ名（まつり等）が読み込まれません。{'\n'}
+          設定方法: A列を選択 →「表示形式」→「数字」→「書式なしテキスト」
+        </Note>
+      </>
     ),
   },
   {
@@ -296,11 +302,31 @@ const SS_SHEET_DATA = [
     content: () => (
       <>
         <div className="space-y-3">
-          <Cell range="A3:E3" label="次回（開催予定）イベント"
+          <Cell range="A3:E3" label="次回（開催予定）イベント — 3行目"
             desc="A列: 開催日（yyyymmdd形式、例: 20260315） / B列: タイトル / C列: セットリスト（改行で複数行入力可） / D列: ポスター画像URL（Google Drive） / E列: 備考" />
-          <Cell range="A7:E（行上限なし）" label="開催済みイベント履歴（7行目以降）"
+          <Cell range="A7:E（行上限なし）" label="開催済みイベント履歴 — 7行目以降"
             desc="フォーマットは3行目と同じ。新しいイベントを3行目に書き、終わったら7行目以降に移します。4〜6行目は空白のままにしてください。" />
         </div>
+
+        <H3>画像を複数枚追加する（各イベント最大10枚）</H3>
+        <p className="text-gray-400 text-xs mb-3">ポスター画像は1イベントにつき最大10枚まで設定できます。</p>
+
+        <p className="text-gray-300 text-xs font-bold mb-1">● 次回イベントに画像を追加する</p>
+        <p className="text-gray-400 text-xs mb-2">3行目のD列に1枚目のURLを入力。2枚目以降は7行目以降の行に A・B・C列を空白のまま D列だけにURLを入力します。</p>
+        <div className="bg-black/30 rounded-lg border border-light-blue/10 p-3 font-mono text-xs text-gray-400 mb-4 space-y-1">
+          <p><span className="text-amber">行3:</span> 20260315　タイトル　セットリスト　<span className="text-light-blue">https://画像1</span>　備考</p>
+          <p><span className="text-amber">行7:</span> （空白）　（空白）　（空白）　<span className="text-light-blue">https://画像2</span></p>
+          <p><span className="text-amber">行8:</span> （空白）　（空白）　（空白）　<span className="text-light-blue">https://画像3</span></p>
+        </div>
+
+        <p className="text-gray-300 text-xs font-bold mb-1">● 過去イベントに画像を追加する</p>
+        <p className="text-gray-400 text-xs mb-2">同じ日付＋タイトルの行を複数追加し、D列に1枚ずつURLを入力します。</p>
+        <div className="bg-black/30 rounded-lg border border-light-blue/10 p-3 font-mono text-xs text-gray-400 mb-4 space-y-1">
+          <p><span className="text-amber">行7:</span> 20260215　イベント名　セットリスト　<span className="text-light-blue">https://画像1</span>　備考</p>
+          <p><span className="text-amber">行8:</span> 20260215　イベント名　（空白）　<span className="text-light-blue">https://画像2</span></p>
+          <p><span className="text-amber">行9:</span> 20260215　イベント名　（空白）　<span className="text-light-blue">https://画像3</span></p>
+        </div>
+
         <Note type="info">
           ポスター画像はGoogle DriveにアップロードしてURLを貼り付けます（「アイコン・メダル画像の設定」タブ参照）。画像がない場合は D列を空白にしてください。
         </Note>
