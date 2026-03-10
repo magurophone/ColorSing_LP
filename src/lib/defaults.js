@@ -169,6 +169,10 @@ const DEFAULT_CONFIG = {
     password: '',
     developerKey: '',
   },
+
+  iconGallery: {
+    accessKey: '',
+  },
 }
 
 export default DEFAULT_CONFIG

@@ -1,31 +1,40 @@
 import { useState, useMemo, useEffect } from 'react'
+import { Lock } from '@phosphor-icons/react'
 import { useConfig } from '../context/ConfigContext'
 
-// yyyymm形式かどうかをキー個別に判定（全体でなく1キーずつ）
-const isYYYYMM = (key) => /^\d{6}$/.test(key)
+const LOCK_PREFIX = '🔒'
+const SESSION_KEY = 'iconGalleryUnlocked'
+
+const isYYYYMM = (key) => /^\d{6}$/.test(key.replace(LOCK_PREFIX, ''))
+const isLocked = (key) => key.startsWith(LOCK_PREFIX)
+const displayKey = (key) => key.replace(LOCK_PREFIX, '')
 
 const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconError }) => {
   const config = useConfig()
+  const accessKey = config.iconGallery?.accessKey || ''
   const [searchTerm, setSearchTerm] = useState('')
   const [popupUser, setPopupUser] = useState(null)
+  const [lockModalKey, setLockModalKey] = useState(null)
+  const [keyInput, setKeyInput] = useState('')
+  const [keyError, setKeyError] = useState(false)
+  const [unlockedKeys, setUnlockedKeys] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]') } catch { return [] }
+  })
 
   const availableMonths = useMemo(() => {
     const keys = Object.keys(icons).filter(k => k !== '_orderedKeys' && icons[k].length > 0)
-    // yyyymmキーは降順、文字列キーは_orderedKeysの順序を維持してyyyymmの後ろに並べる
-    const monthKeys = keys.filter(isYYYYMM).sort().reverse()
+    const monthKeys = keys.filter(k => isYYYYMM(k)).sort((a, b) => displayKey(b).localeCompare(displayKey(a)))
     const orderedKeys = icons._orderedKeys || keys
     const categoryKeys = orderedKeys.filter(k => !isYYYYMM(k) && icons[k] && icons[k].length > 0)
     return [...monthKeys, ...categoryKeys]
   }, [icons])
 
-  // 選択中の月/カテゴリの全ユーザー（名前順）
   const allUsers = useMemo(() => {
     if (!selectedMonth || !icons[selectedMonth]) return []
     const uniqueUsers = [...new Set(icons[selectedMonth].map(item => item.label))]
     return uniqueUsers.sort((a, b) => a.localeCompare(b, 'ja'))
   }, [selectedMonth, icons])
 
-  // 検索フィルター適用後のユーザー
   const filteredUsers = useMemo(() => {
     if (!searchTerm) return allUsers
     return allUsers.filter(user => user.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -43,20 +52,54 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
     return () => document.removeEventListener('keydown', handleEscape)
   }, [popupUser])
 
-  const handleMonthChange = (month) => {
-    setSelectedMonth(month)
+  useEffect(() => {
+    if (!lockModalKey) return
+    const handleEscape = (e) => { if (e.key === 'Escape') closeLockModal() }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [lockModalKey])
+
+  const handleMonthChange = (key) => {
+    if (isLocked(key) && accessKey && !unlockedKeys.includes(key)) {
+      setLockModalKey(key)
+      setKeyInput('')
+      setKeyError(false)
+      return
+    }
+    setSelectedMonth(key)
     setSearchTerm('')
     setPopupUser(null)
   }
 
+  const closeLockModal = () => {
+    setLockModalKey(null)
+    setKeyInput('')
+    setKeyError(false)
+  }
+
+  const verifyKey = () => {
+    if (keyInput === accessKey) {
+      const next = [...unlockedKeys, lockModalKey]
+      setUnlockedKeys(next)
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(next))
+      setSelectedMonth(lockModalKey)
+      setSearchTerm('')
+      setPopupUser(null)
+      closeLockModal()
+    } else {
+      setKeyError(true)
+    }
+  }
+
   const formatKey = (key) => {
-    if (!key) return ''
-    if (isYYYYMM(key)) {
-      const year = key.substring(0, 4)
-      const m = parseInt(key.substring(4, 6), 10)
+    const k = displayKey(key)
+    if (!k) return ''
+    if (/^\d{6}$/.test(k)) {
+      const year = k.substring(0, 4)
+      const m = parseInt(k.substring(4, 6), 10)
       return `${year}年${m}月`
     }
-    return key
+    return k
   }
 
   if (loading) {
@@ -88,46 +131,44 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
 
   const popupIcons = popupUser ? getIconsForUser(popupUser) : []
 
+  const renderTab = (key) => {
+    const locked = isLocked(key) && accessKey && !unlockedKeys.includes(key)
+    const active = selectedMonth === key
+    return (
+      <button
+        key={key}
+        onClick={() => handleMonthChange(key)}
+        className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
+          active
+            ? 'bg-primary/20 border border-primary/50 text-primary'
+            : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
+        }`}
+      >
+        {locked && <Lock size={13} weight="fill" className="opacity-70 flex-shrink-0" />}
+        {formatKey(key)}
+      </button>
+    )
+  }
+
+  const monthTabs = availableMonths.filter(k => isYYYYMM(k))
+  const categoryTabs = availableMonths.filter(k => !isYYYYMM(k))
+
   return (
     <div className="space-y-6">
       {/* 月タブ */}
-      {availableMonths.filter(isYYYYMM).length > 0 && (
+      {monthTabs.length > 0 && (
         <div className="overflow-x-auto">
           <div className="flex gap-2 pb-1 min-w-max">
-            {availableMonths.filter(isYYYYMM).map((month) => (
-              <button
-                key={month}
-                onClick={() => handleMonthChange(month)}
-                className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
-                  selectedMonth === month
-                    ? 'bg-primary/20 border border-primary/50 text-primary'
-                    : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
-                }`}
-              >
-                {formatKey(month)}
-              </button>
-            ))}
+            {monthTabs.map(renderTab)}
           </div>
         </div>
       )}
 
       {/* カテゴリタブ */}
-      {availableMonths.filter(k => !isYYYYMM(k)).length > 0 && (
+      {categoryTabs.length > 0 && (
         <div className="overflow-x-auto">
           <div className="flex gap-2 pb-1 min-w-max">
-            {availableMonths.filter(k => !isYYYYMM(k)).map((month) => (
-              <button
-                key={month}
-                onClick={() => handleMonthChange(month)}
-                className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
-                  selectedMonth === month
-                    ? 'bg-primary/20 border border-primary/50 text-primary'
-                    : 'glass-effect border border-card-border/20 text-sub-text hover:text-primary hover:border-card-border/40'
-                }`}
-              >
-                {formatKey(month)}
-              </button>
-            ))}
+            {categoryTabs.map(renderTab)}
           </div>
         </div>
       )}
@@ -210,6 +251,50 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ロック解除モーダル */}
+      {lockModalKey && (
+        <div
+          onClick={closeLockModal}
+          className="fixed inset-0 flex items-center justify-center p-4 z-[70]"
+          style={{ backgroundColor: 'var(--popup-overlay-bg)' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-effect rounded-2xl p-6 border border-gold/30 box-glow-soft max-w-sm w-full relative"
+          >
+            <button
+              onClick={closeLockModal}
+              className="absolute top-4 right-4 text-xl text-sub-text hover:text-white transition-colors"
+            >
+              ×
+            </button>
+
+            <div className="flex items-center gap-2 mb-4">
+              <Lock size={20} className="text-gold" weight="fill" />
+              <span className="text-gold font-bold font-body">{formatKey(lockModalKey)}</span>
+            </div>
+
+            <p className="text-sm text-gray-300 mb-3">アクセスキーを入力してください</p>
+            <input
+              type="password"
+              value={keyInput}
+              onChange={(e) => setKeyInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && verifyKey()}
+              className="w-full px-3 py-2 glass-effect border border-gold/40 rounded-lg text-white text-sm focus:outline-none focus:border-gold mb-2"
+              placeholder="アクセスキー"
+              autoFocus
+            />
+            {keyError && <p className="text-red-400 text-xs mb-2">アクセスキーが違います</p>}
+            <button
+              onClick={verifyKey}
+              className="w-full py-2 bg-gold/20 hover:bg-gold/30 border border-gold/50 rounded-lg text-gold text-sm font-bold transition-all"
+            >
+              確認
+            </button>
           </div>
         </div>
       )}

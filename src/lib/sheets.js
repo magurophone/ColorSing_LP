@@ -173,8 +173,11 @@ export const fetchIconData = async (spreadsheetId, iconSheetName) => {
     return iconData
   }
 
+  let lastKey = ''
   data.forEach(row => {
-    const key = String(row[0] || '')
+    const rawKey = String(row[0] || '')
+    if (rawKey) lastKey = rawKey
+    const key = lastKey
     const userName = row[1]
     const imageUrl = row[2]
 
