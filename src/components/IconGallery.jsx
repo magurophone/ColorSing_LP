@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Lock, Eye, EyeSlash } from '@phosphor-icons/react'
+import { Lock } from '@phosphor-icons/react'
 import { useConfig } from '../context/ConfigContext'
 
 const LOCK_PREFIX = '🔒'
@@ -29,7 +29,6 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
   const [lockModalKey, setLockModalKey] = useState(null)
   const [keyInput, setKeyInput] = useState('')
   const [keyError, setKeyError] = useState(false)
-  const [keyVisible, setKeyVisible] = useState(false)
   const [unlockedKeys, setUnlockedKeys] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]') } catch { return [] }
   })
@@ -292,24 +291,15 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
             </div>
 
             <p className="text-sm text-gray-300 mb-3">アクセスキーを入力してください</p>
-            <div className="relative mb-2">
-              <input
-              type={keyVisible ? 'text' : 'password'}
+            <input
+              type="text"
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && verifyKey()}
-              className="w-full px-3 py-2 pr-9 glass-effect border border-gold/40 rounded-lg text-white text-sm focus:outline-none focus:border-gold"
+              className="w-full px-3 py-2 glass-effect border border-gold/40 rounded-lg text-white text-sm focus:outline-none focus:border-gold mb-2"
               placeholder="アクセスキー"
               autoFocus
             />
-              <button
-                type="button"
-                onClick={() => setKeyVisible(v => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-              >
-                {keyVisible ? <EyeSlash size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
             {keyError && <p className="text-red-400 text-xs mb-2">アクセスキーが違います</p>}
             <button
               onClick={verifyKey}

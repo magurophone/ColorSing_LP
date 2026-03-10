@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Lock, Eye, EyeSlash } from '@phosphor-icons/react'
+import { Lock } from '@phosphor-icons/react'
 import { convertDriveUrl } from '../lib/sheets'
 
 const LockedContentModal = ({ tier, onClose }) => {
   const [input, setInput] = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState(false)
-  const [visible, setVisible] = useState(false)
   const content = tier.lockedContent || {}
   const imageUrl = content.imageUrl ? convertDriveUrl(content.imageUrl, 800) : null
 
@@ -44,24 +43,15 @@ const LockedContentModal = ({ tier, onClose }) => {
         {!unlocked ? (
           <div>
             <p className="text-sm text-gray-300 mb-3">アクセスキーを入力してください</p>
-            <div className="relative mb-2">
-              <input
-                type={visible ? 'text' : 'password'}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && verify()}
-                className="w-full px-3 py-2 pr-9 glass-effect border border-gold/40 rounded-lg text-white text-sm focus:outline-none focus:border-gold"
-                placeholder="アクセスキー"
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setVisible(v => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-              >
-                {visible ? <EyeSlash size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && verify()}
+              className="w-full px-3 py-2 glass-effect border border-gold/40 rounded-lg text-white text-sm focus:outline-none focus:border-gold mb-2"
+              placeholder="アクセスキー"
+              autoFocus
+            />
             {error && <p className="text-red-400 text-xs mb-2">アクセスキーが違います</p>}
             <button
               onClick={verify}
