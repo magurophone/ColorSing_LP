@@ -100,14 +100,7 @@ const SheetsTab = ({ config, updateConfig }) => {
           placeholder="枠内アイコン"
           description="枠内アイコンデータのシート名"
         />
-        <Field
-          label="アイコンギャラリー アクセスキー"
-          value={config.iconGallery?.accessKey || ''}
-          onChange={(v) => updateConfig('iconGallery.accessKey', v)}
-          placeholder="（未設定の場合はロックなし）"
-          description="🔒で始まるカテゴリタブに必要なアクセスキー"
-        />
-        <Field
+<Field
           label="イベントシート名"
           value={config.sheets.eventSheetName}
           onChange={(v) => updateConfig('sheets.eventSheetName', v)}

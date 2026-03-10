@@ -5,13 +5,25 @@ import { useConfig } from '../context/ConfigContext'
 const LOCK_PREFIX = '🔒'
 const SESSION_KEY = 'iconGalleryUnlocked'
 
-const isYYYYMM = (key) => /^\d{6}$/.test(key.replace(LOCK_PREFIX, ''))
+const isYYYYMM = (key) => /^\d{6}$/.test(getRawName(key))
 const isLocked = (key) => key.startsWith(LOCK_PREFIX)
-const displayKey = (key) => key.replace(LOCK_PREFIX, '')
+// 🔒カテゴリ名:key → "カテゴリ名"
+const getRawName = (key) => {
+  const k = key.replace(LOCK_PREFIX, '')
+  const idx = k.indexOf(':')
+  return idx >= 0 ? k.substring(0, idx) : k
+}
+// 🔒カテゴリ名:key → "key"（なければnull）
+const getCategoryKey = (key) => {
+  if (!isLocked(key)) return null
+  const k = key.replace(LOCK_PREFIX, '')
+  const idx = k.indexOf(':')
+  return idx >= 0 ? k.substring(idx + 1) : null
+}
+const displayKey = getRawName
 
 const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconError }) => {
   const config = useConfig()
-  const accessKey = config.iconGallery?.accessKey || ''
   const [searchTerm, setSearchTerm] = useState('')
   const [popupUser, setPopupUser] = useState(null)
   const [lockModalKey, setLockModalKey] = useState(null)
@@ -60,7 +72,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
   }, [lockModalKey])
 
   const handleMonthChange = (key) => {
-    if (isLocked(key) && accessKey && !unlockedKeys.includes(key)) {
+    if (isLocked(key) && getCategoryKey(key) && !unlockedKeys.includes(key)) {
       setLockModalKey(key)
       setKeyInput('')
       setKeyError(false)
@@ -78,7 +90,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
   }
 
   const verifyKey = () => {
-    if (keyInput === accessKey) {
+    if (keyInput === getCategoryKey(lockModalKey)) {
       const next = [...unlockedKeys, lockModalKey]
       setUnlockedKeys(next)
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(next))
@@ -132,7 +144,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
   const popupIcons = popupUser ? getIconsForUser(popupUser) : []
 
   const renderTab = (key) => {
-    const locked = isLocked(key) && accessKey && !unlockedKeys.includes(key)
+    const locked = isLocked(key) && getCategoryKey(key) && !unlockedKeys.includes(key)
     const active = selectedMonth === key
     return (
       <button
