@@ -86,15 +86,21 @@ const ContentTab = ({ config, updateConfig }) => {
       <hr className="border-light-blue/20 my-8" />
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-body text-amber">FAQ・注意事項</h3>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <span className="text-xs text-gray-500">表示</span>
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={config.home?.faq?.enabled !== false}
-              onChange={(e) => updateConfig('home.faq.enabled', e.target.checked)}
-              className="sr-only"
-            />
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-xs text-gray-500">折りたたむ</span>
+            <div
+              onClick={() => updateConfig('home.faq.accordion', config.home?.faq?.accordion === false)}
+              className={`relative w-10 h-5 rounded-full cursor-pointer transition-colors ${config.home?.faq?.accordion !== false ? 'bg-amber/70' : 'bg-gray-600'}`}
+            >
+              <div
+                className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-200"
+                style={{ left: config.home?.faq?.accordion !== false ? '1.25rem' : '0.125rem' }}
+              />
+            </div>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-xs text-gray-500">表示</span>
             <div
               onClick={() => updateConfig('home.faq.enabled', config.home?.faq?.enabled === false)}
               className={`relative w-10 h-5 rounded-full cursor-pointer transition-colors ${config.home?.faq?.enabled !== false ? 'bg-amber/70' : 'bg-gray-600'}`}
@@ -104,8 +110,8 @@ const ContentTab = ({ config, updateConfig }) => {
                 style={{ left: config.home?.faq?.enabled !== false ? '1.25rem' : '0.125rem' }}
               />
             </div>
-          </div>
-        </label>
+          </label>
+        </div>
       </div>
       <Field
         label="FAQセクションタイトル"

@@ -5,6 +5,38 @@ import { formatEventDate, isEventEnded } from '../lib/utils'
 import CountUp from '../components/CountUp'
 import closedImg from '../assets/closed.png'
 
+const FaqSection = ({ faq }) => {
+  const accordion = faq.accordion !== false
+  const [open, setOpen] = useState({})
+  const toggle = (i) => setOpen(prev => ({ ...prev, [i]: !prev[i] }))
+
+  return (
+    <section className="max-w-4xl mx-auto">
+      <h2 className="text-2xl md:text-4xl font-body mb-8 text-center text-glow-soft text-highlight">{faq.title}</h2>
+      <div className="glass-effect rounded-2xl p-8 border border-card-border/30 space-y-2">
+        {faq.items.map((item, i) => (
+          <div key={`faq-${i}-${item.question}`} className="border-b border-card-border/20 last:border-0 pb-2 last:pb-0">
+            {accordion ? (
+              <button
+                className="w-full text-left flex items-center justify-between gap-2 py-2 text-xl font-body text-highlight"
+                onClick={() => toggle(i)}
+              >
+                <span>▸ {item.question}</span>
+                <span className="text-base shrink-0 transition-transform duration-200" style={{ transform: open[i] ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span>
+              </button>
+            ) : (
+              <h3 className="text-xl font-body text-highlight mb-2 py-2">▸ {item.question}</h3>
+            )}
+            {(!accordion || open[i]) && (
+              <p className="text-content-text ml-6 pb-2">{item.answer}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 const UpcomingGallery = ({ urls, title, ended }) => {
   const [idx, setIdx] = useState(0)
   const touchStart = useRef(null)
@@ -202,17 +234,7 @@ const HomeView = ({ ranking, goals, events }) => {
 
       {/* FAQ */}
       {config.home.faq.enabled !== false && config.home.faq.items.length > 0 && (
-        <section className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-4xl font-body mb-8 text-center text-glow-soft text-highlight">{config.home.faq.title}</h2>
-          <div className="glass-effect rounded-2xl p-8 border border-card-border/30 space-y-6">
-            {config.home.faq.items.map((item, index) => (
-              <div key={`faq-${index}-${item.question}`}>
-                <h3 className="text-xl font-body text-highlight mb-2">▸ {item.question}</h3>
-                <p className="text-content-text ml-6">{item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <FaqSection faq={config.home.faq} />
       )}
     </>
   )
