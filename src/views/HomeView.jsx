@@ -125,7 +125,7 @@ const HomeView = ({ ranking, goals, events }) => {
           {ranking.slice(0, 3).map((person, index) => (
             <div
               key={`${person[RANKING_FIELDS.NAME] ?? 'rank'}-${index}`}
-              className={`glass-effect rounded-2xl p-4 md:p-8 border transition-all hover:scale-105 water-shimmer ${index === 0 ? 'box-glow-soft' : 'border-card-border/30'}`}
+              className={`glass-effect rounded-2xl p-4 md:p-8 border transition-all hover:scale-105 water-shimmer flex flex-col ${index === 0 ? 'box-glow-soft' : 'border-card-border/30'}`}
               style={index === 0 ? { borderColor: `var(--color-rank1-card, var(--base-accent))` } : undefined}
             >
               <div className="mb-2 md:mb-4 flex justify-center">
@@ -137,7 +137,7 @@ const HomeView = ({ ranking, goals, events }) => {
                   />
                 )}
               </div>
-              <div className="text-xs md:text-2xl font-body mb-1 md:mb-2 text-name-text break-words">{person[RANKING_FIELDS.NAME]}</div>
+              <div className="text-xs md:text-2xl font-body mb-1 md:mb-2 text-name-text break-words flex-1">{person[RANKING_FIELDS.NAME]}</div>
               <div
                 className={`text-2xl md:text-4xl font-black ${index !== 0 ? 'text-highlight' : ''}`}
                 style={index === 0 ? { color: `var(--color-rank1-card, var(--base-accent))` } : undefined}
