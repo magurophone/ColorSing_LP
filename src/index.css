@@ -59,8 +59,6 @@
   --color-name-text: var(--override-name-text, color-mix(in oklab, var(--base-light-blue) 35%, #2c1810));
   --color-content-text: var(--override-content-text, color-mix(in oklab, var(--base-light-blue) 25%, #2c1810));
   --color-sub-text: var(--override-sub-text, #6b5a4e);
-  /* ポップアップオーバーレイ: ダークテーマの黒→ライトでは暖色グレーに軽減 */
-  --popup-overlay-bg: var(--override-popup-overlay-bg, rgba(120, 100, 110, 0.45));
 }
 
 [data-theme="light"] body {

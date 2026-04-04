@@ -92,12 +92,15 @@ export function ConfigProvider({ config, children }) {
       }
     }
 
-    // popup overlay 背景色
-    const popupRgba = hexToRgba(o.popupOverlayColor, o.popupOverlayOpacity ?? 0.7)
-    if (popupRgba) {
-      root.style.setProperty('--popup-overlay-bg', popupRgba)
-    } else {
-      root.style.removeProperty('--popup-overlay-bg')
+    // popup overlay 背景色（ライトテーマ未設定時は oceanTeal ベース 55%、ダーク未設定時は黒 70%）
+    {
+      const col = o.popupOverlayColor
+        || (isLight ? config.colors.oceanTeal : '#000000')
+      const a = o.popupOverlayOpacity ?? (isLight ? 0.55 : 0.7)
+      const popupRgba = hexToRgba(col, a)
+      if (popupRgba) {
+        root.style.setProperty('--popup-overlay-bg', popupRgba)
+      }
     }
   }, [config?.colors, config?.colorOverrides])
 
