@@ -102,11 +102,13 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   // ヘッダー非表示モード（コンパクト表示）
   if (config.brand.showHeader === false) {
     return (
-      <div className="w-full px-6 py-4 flex items-center justify-between gap-4">
+      <div className="w-full relative px-6 py-4">
         {config.brand.showTitle !== false && (
-          <TitleText config={config} glowClass={glowClass} compact />
+          <div className="text-center">
+            <TitleText config={config} glowClass={glowClass} compact />
+          </div>
         )}
-        <div className="flex items-center gap-3 ml-auto shrink-0">
+        <div className="absolute top-4 right-4 flex items-center gap-3">
           {lastUpdate && (
             <div className="hidden md:block text-xs text-sub-text">
               {config.ui.lastUpdate}: {lastUpdate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
@@ -130,12 +132,18 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   const titlePos = config.brand.titlePosition || 'center'
   const posClass = TITLE_POS[titlePos] || TITLE_POS.center
   const isCenter = titlePos === 'center'
+  const desktopSrc = convertDriveUrl(config.images.headerDesktop, 1600)
+  const mobileSrc  = convertDriveUrl(config.images.headerMobile || config.images.headerDesktop, 800)
+  const hasImage = desktopSrc || mobileSrc
+
   const imgW  = config.brand.headerImageW
   const imgH  = config.brand.headerImageH
   const imgWM = config.brand.headerImageWMobile
   const imgHM = config.brand.headerImageHMobile
-  const heightDesktop = config.brand.headerHeight || '600px'
-  const heightMobile  = config.brand.headerHeightMobile || '400px'
+  const defaultHeightDesktop = hasImage ? '600px' : '120px'
+  const defaultHeightMobile  = hasImage ? '400px' : '80px'
+  const heightDesktop = config.brand.headerHeight || defaultHeightDesktop
+  const heightMobile  = config.brand.headerHeightMobile || defaultHeightMobile
 
   useEffect(() => {
     const id = 'header-cs-style'
@@ -149,14 +157,11 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
     const mobile  = (imgWM && imgHM) ? `aspect-ratio:${imgWM}/${imgHM}` : `height:${heightMobile}`
     const desktop = (imgW  && imgH)  ? `aspect-ratio:${imgW}/${imgH}`   : `height:${heightDesktop}`
     el.textContent = `.header-cs{${mobile}}@media(min-width:768px){.header-cs{${desktop}}}`
-  }, [imgW, imgH, imgWM, imgHM, heightDesktop, heightMobile])
-
-  const desktopSrc = convertDriveUrl(config.images.headerDesktop, 1600)
-  const mobileSrc  = convertDriveUrl(config.images.headerMobile || config.images.headerDesktop, 800)
+  }, [imgW, imgH, imgWM, imgHM, heightDesktop, heightMobile, hasImage])
 
   return (
     <div
-      className={`${imgFit !== 'contain' ? 'header-cs ' : ''}w-full relative overflow-hidden`}
+      className={`${imgFit !== 'contain' || !hasImage ? 'header-cs ' : ''}w-full relative overflow-hidden`}
       style={{
         background: hasHeaderBg
           ? `linear-gradient(to bottom, var(--color-header-gradient-end, var(--color-deep-blue)), var(--color-header-gradient-start, var(--color-ocean-teal)) 50%, var(--color-header-gradient-end, var(--color-deep-blue)))`
@@ -190,8 +195,12 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
           ></div>
         </>
       )}
-      <div className="absolute inset-0 bg-black" style={{ opacity: overlayOpacity }}></div>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuNSIgZmlsbD0icmdiYSgxMzgsIDE4MCwgMjQ4LCAwLjA1KSIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9InJnYmEoMTM4LCAxODAsIDI0OCwgMC4wOCkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDEzOCwgMTgwLCAyNDgsIDAuMDMpIi8+PC9zdmc+')] opacity-20 animate-float"></div>
+      {(hasImage || hasHeaderBg) && (
+        <>
+          <div className="absolute inset-0 bg-black" style={{ opacity: overlayOpacity }}></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuNSIgZmlsbD0icmdiYSgxMzgsIDE4MCwgMjQ4LCAwLjA1KSIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9InJnYmEoMTM4LCAxODAsIDI0OCwgMC4wOCkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDEzOCwgMTgwLCAyNDgsIDAuMDMpIi8+PC9zdmc+')] opacity-20 animate-float"></div>
+        </>
+      )}
       {config.brand.showTitle !== false && (
         <div className={`absolute inset-0 flex ${posClass}`}>
           <div className={`${isCenter ? 'text-center' : ''} px-4`}>
