@@ -67,6 +67,8 @@ const DEFAULT_CONFIG = {
     popupOverlayOpacity: '',
     menuCardLabelColor: '',
     menuCardLabelOpacity: '',
+    tierCardBgColor: '',
+    tierCardBgOpacity: '',
   },
 
   fonts: {

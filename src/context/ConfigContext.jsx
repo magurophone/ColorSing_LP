@@ -49,13 +49,15 @@ export function ConfigProvider({ config, children }) {
       }
     })
 
+    const isLight = config.colors.brightness === 'light'
+
     // glass-effect 背景色（カラーピッカー色 + 不透明度スライダーを rgba に変換）
     // 未設定時も base deepBlue を基準に常に計算することで preset 変更に追従させる
     {
       const col = (o.glassBgColor && /^#[0-9a-f]{6}$/i.test(o.glassBgColor))
         ? o.glassBgColor
         : config.colors.deepBlue
-      const a = (o.glassBgOpacity !== '' && o.glassBgOpacity != null) ? o.glassBgOpacity : 0.6
+      const a = (o.glassBgOpacity !== '' && o.glassBgOpacity != null) ? o.glassBgOpacity : (isLight ? 0.85 : 0.6)
       const glassBgRgba = hexToRgba(col, a)
       if (glassBgRgba) {
         root.style.setProperty('--override-glass-bg', glassBgRgba)
@@ -73,6 +75,20 @@ export function ConfigProvider({ config, children }) {
       const menuLabelRgba = hexToRgba(col, a)
       if (menuLabelRgba) {
         root.style.setProperty('--menu-card-label-bg', menuLabelRgba)
+      }
+    }
+
+    // tier card 背景色（未設定時は deepBlue 50% / ライトテーマは白 55%）
+    {
+      const col = (o.tierCardBgColor && /^#[0-9a-f]{6}$/i.test(o.tierCardBgColor))
+        ? o.tierCardBgColor
+        : (isLight ? '#ffffff' : config.colors.deepBlue)
+      const a = (o.tierCardBgOpacity !== '' && o.tierCardBgOpacity != null)
+        ? o.tierCardBgOpacity
+        : (isLight ? 0.55 : 0.5)
+      const tierCardRgba = hexToRgba(col, a)
+      if (tierCardRgba) {
+        root.style.setProperty('--tier-card-bg', tierCardRgba)
       }
     }
 

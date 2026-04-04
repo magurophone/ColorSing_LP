@@ -90,6 +90,7 @@ const ColorsTab = ({ config, updateConfig }) => {
       'titleGradientStart', 'titleGradientMid', 'titleGradientEnd',
       'primaryText', 'accentText', 'nameText', 'contentText', 'footerText', 'titleColor',
       'glassBgColor', 'glassBgOpacity',
+      'tierCardBgColor', 'tierCardBgOpacity',
       'popupOverlayColor', 'popupOverlayOpacity',
       'menuCardLabelColor', 'menuCardLabelOpacity',
       'backgroundMain', 'backgroundMid', 'cardBorder', 'cardBorderHover', 'rank1Card',
@@ -130,10 +131,12 @@ const ColorsTab = ({ config, updateConfig }) => {
   }
 
   const glassSlider = opacitySlider('glassBgOpacity', 0.6)
+  const tierCardSlider = opacitySlider('tierCardBgOpacity', 0.5)
   const popupSlider = opacitySlider('popupOverlayOpacity', 0.7)
   const menuLabelSlider = opacitySlider('menuCardLabelOpacity', 0.1)
 
   const glassHasChange = o.glassBgColor || (o.glassBgOpacity !== '' && o.glassBgOpacity != null)
+  const tierCardHasChange = o.tierCardBgColor || (o.tierCardBgOpacity !== '' && o.tierCardBgOpacity != null)
   const popupHasChange = o.popupOverlayColor || (o.popupOverlayOpacity !== '' && o.popupOverlayOpacity != null)
   const menuLabelHasChange = o.menuCardLabelColor || (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
 
@@ -347,6 +350,42 @@ const ColorsTab = ({ config, updateConfig }) => {
               <div
                 className="w-10 h-10 rounded-lg border border-light-blue/30"
                 style={{ backgroundColor: toRgba(o.menuCardLabelColor || o.accentText || c.amber || '#d4a574', 1 - menuLabelSlider.sliderValue) }}
+              />
+            </div>
+          </div>
+
+          {/* ティアカード背景色（色 + 透明度） */}
+          <div className="mb-5">
+            <label className="block text-sm font-body text-light-blue mb-1">特典ティアカード背景色</label>
+            <p className="text-xs text-gray-500 mb-2">個人特典ポップアップのティアカード背景色。未設定 → 背景メイン色ベース、透明度50%</p>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="color"
+                value={o.tierCardBgColor || c.deepBlue || '#0a1628'}
+                onChange={(e) => updateConfig('colorOverrides.tierCardBgColor', e.target.value)}
+                className="w-12 h-10 rounded-lg border border-light-blue/30 cursor-pointer bg-transparent"
+              />
+              <span className="text-xs text-gray-400 w-16">透明度</span>
+              <input
+                type="range"
+                min="0" max="1" step="0.05"
+                value={tierCardSlider.sliderValue}
+                onChange={tierCardSlider.onChange}
+                className="flex-1"
+              />
+              <span className="text-xs text-gray-300 w-10 text-right">
+                {tierCardSlider.displayPct}%
+              </span>
+              {tierCardHasChange && (
+                <button
+                  onClick={() => { updateConfig('colorOverrides.tierCardBgColor', ''); updateConfig('colorOverrides.tierCardBgOpacity', '') }}
+                  className="px-3 py-2 text-xs text-gray-400 hover:text-tuna-red transition-all"
+                  title="リセット"
+                >クリア</button>
+              )}
+              <div
+                className="w-10 h-10 rounded-lg border border-light-blue/30"
+                style={{ backgroundColor: toRgba(o.tierCardBgColor || c.deepBlue || '#0a1628', 1 - tierCardSlider.sliderValue) }}
               />
             </div>
           </div>

@@ -88,7 +88,8 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
               <div
                 key={tier.key}
                 onClick={() => active && benefit && onSelectBenefit(benefit)}
-                className={`bg-deep-blue/50 p-4 md:p-6 rounded-xl border transition-all text-center flex flex-col overflow-hidden ${
+                style={{ backgroundColor: 'var(--tier-card-bg)' }}
+                className={`p-4 md:p-6 rounded-xl border transition-all text-center flex flex-col overflow-hidden ${
                   active ? 'cursor-pointer hover:border-card-hover' : 'cursor-default opacity-70'
                 } ${
                   tier.isMembership

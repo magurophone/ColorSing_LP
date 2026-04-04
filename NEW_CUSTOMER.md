@@ -82,7 +82,23 @@ gh run list --repo colorsing-dashboard/{username} --limit 3
 
 全て `completed success` になったら完了。
 
-### Step 7: ユーザーに共有
+### Step 7: GitHub PAT 生成・設定（手動・自動化不可）
+
+この手順だけは毎回手動で行う必要がある。
+
+1. GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token
+2. 設定:
+   - Token name: `{username}`
+   - Expiration: 1年
+   - Resource owner: `colorsing-dashboard`
+   - Repository access: Only select repositories → `{username}`
+   - Permissions:
+     - Contents: **Read and write**
+     - Pages: **Read and write**
+3. Generate → トークンをコピー
+4. 管理画面（`https://colorsing-dashboard.github.io/{username}/admin.html`）→ デプロイタブ → Token に貼り付け → 保存 → デプロイ実行
+
+### Step 8: ユーザーに共有
 
 ```
 サイトURL:   https://colorsing-dashboard.github.io/{username}/
@@ -144,6 +160,7 @@ darkテーマの場合:
 □ GitHub Pages 有効化（API経由）
 □ config.js 作成・push（全設定反映済み）
 □ デプロイ成功確認
+□ GitHub PAT 生成 → 管理画面のデプロイタブに設定 → デプロイ実行（※唯一の手動手順）
 □ サイトURL・管理画面URL・パスワードをユーザーに共有待ち
 □ 残作業メモ（スプシID未設定、FAQ後日追記 等）
 ```
