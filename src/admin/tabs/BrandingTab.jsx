@@ -6,6 +6,7 @@ import Field from '../components/Field'
 const BrandingTab = ({ config, updateConfig }) => {
   const [showDisplayPicker, setShowDisplayPicker] = useState(false)
   const [showBodyPicker, setShowBodyPicker] = useState(false)
+  const [showGlassMaterial, setShowGlassMaterial] = useState(false)
 
   const applyDisplayPreset = (preset) => {
     updateConfig('fonts.display', preset.fonts.display)
@@ -189,6 +190,66 @@ const BrandingTab = ({ config, updateConfig }) => {
                   onChange={(e) => updateConfig('brand.titlePaddingY', +e.target.value)}
                   className="w-full accent-amber"
                 />
+              </div>
+
+              {/* 素材感の詳細設定 */}
+              <div className="mt-3 border border-light-blue/20 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowGlassMaterial(!showGlassMaterial)}
+                  className="w-full px-3 py-2 text-left text-xs text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all flex items-center justify-between"
+                >
+                  <span>素材感の詳細設定</span>
+                  <span className="text-[10px]">{showGlassMaterial ? '▲' : '▼'}</span>
+                </button>
+                {showGlassMaterial && (
+                  <div className="px-3 pb-3 space-y-3 border-t border-light-blue/10">
+                    <div className="pt-2">
+                      <label className="block text-xs text-gray-500 mb-1">
+                        素材の色味（ガラスティント）：{Math.round((config.brand.glassTint ?? 0.08) * 100)}%
+                      </label>
+                      <input type="range" min="0" max="30" step="1"
+                        value={Math.round((config.brand.glassTint ?? 0.08) * 100)}
+                        onChange={(e) => updateConfig('brand.glassTint', +e.target.value / 100)}
+                        className="w-full accent-amber"
+                      />
+                      <p className="text-[10px] text-gray-600 mt-0.5">実際のガラスが持つ微かな青緑の色味</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        反射の強さ：{Math.round((config.brand.glassReflection ?? 0.35) * 100)}%
+                      </label>
+                      <input type="range" min="0" max="80" step="5"
+                        value={Math.round((config.brand.glassReflection ?? 0.35) * 100)}
+                        onChange={(e) => updateConfig('brand.glassReflection', +e.target.value / 100)}
+                        className="w-full accent-amber"
+                      />
+                      <p className="text-[10px] text-gray-600 mt-0.5">表面の光の反射（左上からの光源）</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        スペキュラ（光沢線）：{Math.round((config.brand.glassSpecular ?? 0.7) * 100)}%
+                      </label>
+                      <input type="range" min="0" max="100" step="5"
+                        value={Math.round((config.brand.glassSpecular ?? 0.7) * 100)}
+                        onChange={(e) => updateConfig('brand.glassSpecular', +e.target.value / 100)}
+                        className="w-full accent-amber"
+                      />
+                      <p className="text-[10px] text-gray-600 mt-0.5">上辺の鋭い光の線</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        エッジの厚み：{config.brand.glassEdge ?? 30}px
+                      </label>
+                      <input type="range" min="0" max="60" step="5"
+                        value={config.brand.glassEdge ?? 30}
+                        onChange={(e) => updateConfig('brand.glassEdge', +e.target.value)}
+                        className="w-full accent-amber"
+                      />
+                      <p className="text-[10px] text-gray-600 mt-0.5">端に向かって素材色が濃くなる範囲</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

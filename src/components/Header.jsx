@@ -47,19 +47,58 @@ const TitleText = ({ config, glowClass, compact = false }) => {
           : { color: 'var(--color-title, var(--color-primary))' }
     )}
 
+    const isDark = (config.colors.brightness || 'dark') === 'dark'
+    // ライトテーマ: 暗い色でコントラストを出す / ダークテーマ: 明るい色で光を表現
+    const tintRgb = isDark ? '180,220,255' : '80,120,160'
+    const tintAmount = config.brand.glassTint ?? 0.08
+    const reflection = config.brand.glassReflection ?? 0.75
+    const specular = config.brand.glassSpecular ?? 0.95
+    const edgeSpread = config.brand.glassEdge ?? 60
+
+    // ライトテーマでは効果を強調（白背景で見えるように）
+    const t = isDark ? tintAmount : tintAmount * 2.5
+    const r = reflection
+    const sp = specular
+    const borderAlpha = isDark
+      ? [t * 3, t * 2.2, t * 1, t * 0.6]
+      : [Math.min(t * 4, 0.8), Math.min(t * 3, 0.6), Math.min(t * 1.5, 0.3), Math.min(t * 1, 0.2)]
+
     return (
       <div className="inline-block">
         <div
-          className="px-6 rounded-xl"
+          className="px-6 rounded-xl relative overflow-hidden"
           style={{
-            backgroundColor: `rgba(0,0,0,${glassBg})`,
             backdropFilter: `blur(${glassBlur}px)`,
+            WebkitBackdropFilter: `blur(${glassBlur}px)`,
+            borderTop: `1px solid rgba(${tintRgb},${borderAlpha[0]})`,
+            borderLeft: `1px solid rgba(${tintRgb},${borderAlpha[1]})`,
+            borderRight: `1px solid rgba(${tintRgb},${borderAlpha[2]})`,
+            borderBottom: `1px solid rgba(${tintRgb},${borderAlpha[3]})`,
+            boxShadow: [
+              isDark ? '0 8px 32px rgba(0,0,0,0.25)' : `0 4px 20px rgba(${tintRgb},0.08)`,
+              isDark ? '0 2px 8px rgba(0,0,0,0.15)' : `0 1px 6px rgba(${tintRgb},0.06)`,
+              `inset 0 0 ${edgeSpread}px rgba(${tintRgb},${t * (isDark ? 0.5 : 0.6)})`,
+            ].join(', '),
             paddingTop: `${paddingY}px`,
             paddingBottom: `${paddingY}px`,
           }}
         >
+          {/* 素材層: エッジに向かって素材色が濃くなる */}
+          <div className="absolute inset-0 rounded-xl" style={{
+            background: `radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(${tintRgb},${t * 1.5}) 100%)`,
+          }} />
+          {/* 反射層 */}
+          <div className="absolute inset-0 rounded-xl" style={{
+            background: isDark
+              ? `linear-gradient(145deg, rgba(255,255,255,${r}) 0%, transparent 35%, transparent 65%, rgba(255,255,255,${r * 0.2}) 100%)`
+              : `linear-gradient(145deg, rgba(255,255,255,${r * 1.5}) 0%, transparent 30%, transparent 60%, rgba(255,255,255,${r * 0.3}) 100%)`,
+          }} />
+          {/* スペキュラハイライト */}
+          <div className="absolute top-0 left-[8%] right-[8%] h-[1px]" style={{
+            background: `linear-gradient(90deg, transparent, rgba(255,255,255,${sp * 0.85}) 30%, rgba(255,255,255,${sp}) 50%, rgba(255,255,255,${sp * 0.85}) 70%, transparent)`,
+          }} />
           <h1
-            className={textFill === 'gradient' ? `${baseClass} bg-clip-text text-transparent` : baseClass}
+            className={`relative ${textFill === 'gradient' ? `${baseClass} bg-clip-text text-transparent` : baseClass}`}
             style={h1Style}
           >
             {config.brand.name}
@@ -140,8 +179,12 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   const imgH  = config.brand.headerImageH
   const imgWM = config.brand.headerImageWMobile
   const imgHM = config.brand.headerImageHMobile
-  const defaultHeightDesktop = hasImage ? '600px' : '120px'
-  const defaultHeightMobile  = hasImage ? '400px' : '80px'
+  const paddingY = config.brand.titlePaddingY ?? 12
+  // 画像なし: タイトルのpadding + フォントサイズ + 上下余白で自動算出
+  const noImageDesktop = `calc(${paddingY * 2}px + 5rem + 48px)`
+  const noImageMobile  = `calc(${paddingY * 2}px + 3rem + 32px)`
+  const defaultHeightDesktop = hasImage ? '600px' : noImageDesktop
+  const defaultHeightMobile  = hasImage ? '400px' : noImageMobile
   const heightDesktop = config.brand.headerHeight || defaultHeightDesktop
   const heightMobile  = config.brand.headerHeightMobile || defaultHeightMobile
 

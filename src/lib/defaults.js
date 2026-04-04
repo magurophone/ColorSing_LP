@@ -29,6 +29,10 @@ const DEFAULT_CONFIG = {
     headerImageH: 0,
     headerImageWMobile: 0,
     headerImageHMobile: 0,
+    glassTint: 0.08,
+    glassReflection: 0.75,
+    glassSpecular: 0.95,
+    glassEdge: 60,
   },
 
   colors: {
