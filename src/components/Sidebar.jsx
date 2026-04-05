@@ -8,7 +8,10 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
   const glowClass = config.brand.titleGlow !== false ? 'text-glow-soft' : ''
 
   return (
-    <aside className="hidden md:fixed md:flex md:flex-col md:left-0 md:top-0 md:bottom-0 md:w-64 glass-effect border-r border-card-border/30 z-40 p-6">
+    <aside
+      style={{ backgroundColor: 'var(--sidebar-bg, var(--override-glass-bg, rgba(10, 22, 40, 0.6)))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+      className="hidden md:fixed md:flex md:flex-col md:left-0 md:top-0 md:bottom-0 md:w-64 border-r border-card-border/30 z-40 p-6"
+    >
       <div className="mb-8">
         {config.brand.titleGradient !== false ? (
           <h1

@@ -71,6 +71,10 @@ const DEFAULT_CONFIG = {
     tierCardBgOpacity: '',
     menuCardBgColor: '',
     menuCardBgOpacity: '',
+    sidebarBgColor: '',
+    sidebarBgOpacity: '',
+    bottomNavBgColor: '',
+    bottomNavBgOpacity: '',
   },
 
   fonts: {

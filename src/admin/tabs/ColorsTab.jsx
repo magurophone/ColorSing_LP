@@ -92,6 +92,8 @@ const ColorsTab = ({ config, updateConfig }) => {
       'glassBgColor', 'glassBgOpacity',
       'tierCardBgColor', 'tierCardBgOpacity',
       'menuCardBgColor', 'menuCardBgOpacity',
+      'sidebarBgColor', 'sidebarBgOpacity',
+      'bottomNavBgColor', 'bottomNavBgOpacity',
       'popupOverlayColor', 'popupOverlayOpacity',
       'menuCardLabelColor', 'menuCardLabelOpacity',
       'backgroundMain', 'backgroundMid', 'cardBorder', 'cardBorderHover', 'rank1Card',
@@ -134,12 +136,16 @@ const ColorsTab = ({ config, updateConfig }) => {
   const glassSlider = opacitySlider('glassBgOpacity', 0.6)
   const tierCardSlider = opacitySlider('tierCardBgOpacity', 0.5)
   const menuCardSlider = opacitySlider('menuCardBgOpacity', 0.85)
+  const sidebarSlider = opacitySlider('sidebarBgOpacity', 0.6)
+  const bottomNavSlider = opacitySlider('bottomNavBgOpacity', 0.6)
   const popupSlider = opacitySlider('popupOverlayOpacity', 0.7)
   const menuLabelSlider = opacitySlider('menuCardLabelOpacity', 0.1)
 
   const glassHasChange = o.glassBgColor || (o.glassBgOpacity !== '' && o.glassBgOpacity != null)
   const tierCardHasChange = o.tierCardBgColor || (o.tierCardBgOpacity !== '' && o.tierCardBgOpacity != null)
   const menuCardHasChange = o.menuCardBgColor || (o.menuCardBgOpacity !== '' && o.menuCardBgOpacity != null)
+  const sidebarHasChange = o.sidebarBgColor || (o.sidebarBgOpacity !== '' && o.sidebarBgOpacity != null)
+  const bottomNavHasChange = o.bottomNavBgColor || (o.bottomNavBgOpacity !== '' && o.bottomNavBgOpacity != null)
   const popupHasChange = o.popupOverlayColor || (o.popupOverlayOpacity !== '' && o.popupOverlayOpacity != null)
   const menuLabelHasChange = o.menuCardLabelColor || (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
 
@@ -425,6 +431,78 @@ const ColorsTab = ({ config, updateConfig }) => {
               <div
                 className="w-10 h-10 rounded-lg border border-light-blue/30"
                 style={{ backgroundColor: toRgba(o.menuCardBgColor || o.glassBgColor || c.deepBlue || '#0a1628', 1 - menuCardSlider.sliderValue) }}
+              />
+            </div>
+          </div>
+
+          {/* サイドバー背景色 */}
+          <div className="mb-5">
+            <label className="block text-sm font-body text-light-blue mb-1">サイドバー背景色（PC版）</label>
+            <p className="text-xs text-gray-500 mb-2">PC表示時の左サイドバーの背景色。未設定なら「カード背景色」と同じ</p>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="color"
+                value={o.sidebarBgColor || o.glassBgColor || c.deepBlue || '#0a1628'}
+                onChange={(e) => updateConfig('colorOverrides.sidebarBgColor', e.target.value)}
+                className="w-12 h-10 rounded-lg border border-light-blue/30 cursor-pointer bg-transparent"
+              />
+              <span className="text-xs text-gray-400 w-16">透明度</span>
+              <input
+                type="range"
+                min="0" max="1" step="0.05"
+                value={sidebarSlider.sliderValue}
+                onChange={sidebarSlider.onChange}
+                className="flex-1"
+              />
+              <span className="text-xs text-gray-300 w-10 text-right">
+                {sidebarSlider.displayPct}%
+              </span>
+              {sidebarHasChange && (
+                <button
+                  onClick={() => { updateConfig('colorOverrides.sidebarBgColor', ''); updateConfig('colorOverrides.sidebarBgOpacity', '') }}
+                  className="px-3 py-2 text-xs text-gray-400 hover:text-tuna-red transition-all"
+                  title="リセット"
+                >クリア</button>
+              )}
+              <div
+                className="w-10 h-10 rounded-lg border border-light-blue/30"
+                style={{ backgroundColor: toRgba(o.sidebarBgColor || o.glassBgColor || c.deepBlue || '#0a1628', 1 - sidebarSlider.sliderValue) }}
+              />
+            </div>
+          </div>
+
+          {/* 下部メニュー背景色 */}
+          <div className="mb-5">
+            <label className="block text-sm font-body text-light-blue mb-1">下部メニュー背景色（スマホ版）</label>
+            <p className="text-xs text-gray-500 mb-2">スマホ表示時の画面下部メニューバーの背景色。未設定なら「カード背景色」と同じ</p>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="color"
+                value={o.bottomNavBgColor || o.glassBgColor || c.deepBlue || '#0a1628'}
+                onChange={(e) => updateConfig('colorOverrides.bottomNavBgColor', e.target.value)}
+                className="w-12 h-10 rounded-lg border border-light-blue/30 cursor-pointer bg-transparent"
+              />
+              <span className="text-xs text-gray-400 w-16">透明度</span>
+              <input
+                type="range"
+                min="0" max="1" step="0.05"
+                value={bottomNavSlider.sliderValue}
+                onChange={bottomNavSlider.onChange}
+                className="flex-1"
+              />
+              <span className="text-xs text-gray-300 w-10 text-right">
+                {bottomNavSlider.displayPct}%
+              </span>
+              {bottomNavHasChange && (
+                <button
+                  onClick={() => { updateConfig('colorOverrides.bottomNavBgColor', ''); updateConfig('colorOverrides.bottomNavBgOpacity', '') }}
+                  className="px-3 py-2 text-xs text-gray-400 hover:text-tuna-red transition-all"
+                  title="リセット"
+                >クリア</button>
+              )}
+              <div
+                className="w-10 h-10 rounded-lg border border-light-blue/30"
+                style={{ backgroundColor: toRgba(o.bottomNavBgColor || o.glassBgColor || c.deepBlue || '#0a1628', 1 - bottomNavSlider.sliderValue) }}
               />
             </div>
           </div>

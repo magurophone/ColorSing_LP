@@ -79,6 +79,32 @@ export function ConfigProvider({ config, children }) {
       }
     }
 
+    // sidebar 背景色（未設定時は glass-effect にフォールバック）
+    {
+      if (o.sidebarBgColor && /^#[0-9a-f]{6}$/i.test(o.sidebarBgColor)) {
+        const a = (o.sidebarBgOpacity !== '' && o.sidebarBgOpacity != null)
+          ? o.sidebarBgOpacity
+          : (isLight ? 0.85 : 0.6)
+        const rgba = hexToRgba(o.sidebarBgColor, a)
+        if (rgba) root.style.setProperty('--sidebar-bg', rgba)
+      } else {
+        root.style.removeProperty('--sidebar-bg')
+      }
+    }
+
+    // bottom nav 背景色（未設定時は glass-effect にフォールバック）
+    {
+      if (o.bottomNavBgColor && /^#[0-9a-f]{6}$/i.test(o.bottomNavBgColor)) {
+        const a = (o.bottomNavBgOpacity !== '' && o.bottomNavBgOpacity != null)
+          ? o.bottomNavBgOpacity
+          : (isLight ? 0.85 : 0.6)
+        const rgba = hexToRgba(o.bottomNavBgColor, a)
+        if (rgba) root.style.setProperty('--bottom-nav-bg', rgba)
+      } else {
+        root.style.removeProperty('--bottom-nav-bg')
+      }
+    }
+
     // menu card 背景色（特典内容ビュー専用、未設定時は glass-effect と同じ値を使う = フォールバック）
     {
       if (o.menuCardBgColor && /^#[0-9a-f]{6}$/i.test(o.menuCardBgColor)) {

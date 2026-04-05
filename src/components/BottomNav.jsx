@@ -7,8 +7,13 @@ const BottomNav = ({ currentView, onViewChange }) => {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 glass-effect border-t border-card-border/30 z-40"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="md:hidden fixed bottom-0 left-0 right-0 border-t border-card-border/30 z-40"
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        backgroundColor: 'var(--bottom-nav-bg, var(--override-glass-bg, rgba(10, 22, 40, 0.6)))',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)'
+      }}
     >
       <div
         className="h-16"
