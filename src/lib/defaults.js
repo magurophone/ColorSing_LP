@@ -69,6 +69,8 @@ const DEFAULT_CONFIG = {
     menuCardLabelOpacity: '',
     tierCardBgColor: '',
     tierCardBgOpacity: '',
+    menuCardBgColor: '',
+    menuCardBgOpacity: '',
   },
 
   fonts: {

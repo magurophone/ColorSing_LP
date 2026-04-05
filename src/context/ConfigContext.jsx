@@ -64,17 +64,33 @@ export function ConfigProvider({ config, children }) {
       }
     }
 
-    // menu card label background（未設定時はアクセントカラー10%）
+    // menu card label background（未設定時はカード背景色と同じ色相 = glassBgColor フォールバック）
+    // accentText（文字色）を背景に流用する設計ミスを排除
     {
       const col = (o.menuCardLabelColor && /^#[0-9a-f]{6}$/i.test(o.menuCardLabelColor))
         ? o.menuCardLabelColor
-        : (o.accentText || config.colors.amber)
+        : ((o.glassBgColor && /^#[0-9a-f]{6}$/i.test(o.glassBgColor)) ? o.glassBgColor : config.colors.deepBlue)
       const a = (o.menuCardLabelOpacity !== '' && o.menuCardLabelOpacity != null)
         ? o.menuCardLabelOpacity
         : 0.1
       const menuLabelRgba = hexToRgba(col, a)
       if (menuLabelRgba) {
         root.style.setProperty('--menu-card-label-bg', menuLabelRgba)
+      }
+    }
+
+    // menu card 背景色（特典内容ビュー専用、未設定時は glass-effect と同じ値を使う = フォールバック）
+    {
+      if (o.menuCardBgColor && /^#[0-9a-f]{6}$/i.test(o.menuCardBgColor)) {
+        const a = (o.menuCardBgOpacity !== '' && o.menuCardBgOpacity != null)
+          ? o.menuCardBgOpacity
+          : 0.85
+        const menuCardRgba = hexToRgba(o.menuCardBgColor, a)
+        if (menuCardRgba) {
+          root.style.setProperty('--menu-card-bg', menuCardRgba)
+        }
+      } else {
+        root.style.removeProperty('--menu-card-bg')
       }
     }
 

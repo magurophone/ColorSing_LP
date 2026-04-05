@@ -28,7 +28,8 @@ const MenuView = ({ benefits, onSelectBenefit }) => {
                   onSelectBenefit(benefit)
                 }
               }}
-              className={`group glass-effect rounded-2xl md:p-6 border border-card-border/30 transition-all text-center overflow-hidden flex flex-col ${
+              style={{ backgroundColor: 'var(--menu-card-bg, var(--override-glass-bg, rgba(10, 22, 40, 0.6)))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+              className={`group rounded-2xl md:p-6 border border-card-border/30 transition-all text-center overflow-hidden flex flex-col ${
                 benefit[BENEFIT_FIELDS.LABEL]
                   ? 'hover:border-card-hover md:hover:border-card-border/30 hover:scale-105 md:hover:scale-100 cursor-pointer md:cursor-default'
                   : 'hover:border-card-hover hover:scale-105 cursor-pointer'
