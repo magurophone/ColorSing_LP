@@ -199,37 +199,37 @@ const ColorsTab = ({ config, updateConfig }) => {
             label="背景メイン"
             value={c.deepBlue}
             onChange={(v) => updateConfig('colors.deepBlue', v)}
-            description="サイト背景のメイン色（ダーク時は最暗、ライト時は最明）。カード背景・ティアカード背景・ヘッダー背景グラデ両端のフォールバック元"
+            description="ページ背景の基本色。ダークテーマでは一番濃く、ライトテーマでは一番淡く表示されます"
           />
           <ColorField
             label="背景グラデーション（中間色）"
             value={c.oceanTeal}
             onChange={(v) => updateConfig('colors.oceanTeal', v)}
-            description="body背景グラデの中間色 + ヘッダー背景グラデの中央 + タイトルグラデ開始色のフォールバック"
+            description="ページ背景の真ん中に使われる色。ヘッダー背景とサイトタイトルのグラデーションにも関係します"
           />
           <ColorField
             label="UIメインカラー"
             value={c.lightBlue}
             onChange={(v) => updateConfig('colors.lightBlue', v)}
-            description="text-primary / card-border / タイトルグラデ中間色 / スクロールバー / text-glow / water-shimmer のベース色"
+            description="見出し・ボーダー・スクロールバーなど、サイト全体で最も広く使われるベースの色"
           />
           <ColorField
             label="UIアクセントカラー"
             value={c.amber}
             onChange={(v) => updateConfig('colors.amber', v)}
-            description="text-highlight / card-border-hover / footer-text / タイトルグラデ終了色のベース色。イベント日付・未終了イベント枠にもハードコード使用"
+            description="強調表示の文字・ホバー時のボーダー・フッター・イベント日付などに使われるアクセント色"
           />
           <ColorField
-            label="強調色（1位カード・エラー）"
+            label="強調色（1位カード）"
             value={c.accent}
             onChange={(v) => updateConfig('colors.accent', v)}
-            description="1位カードの border・ポイント数 + box-glow-soft の光彩色（全ポップアップ・ランキング1位に影響）"
+            description="1位ランキングカードの枠線・ポイント数 + 全ポップアップの周りの光彩"
           />
           <ColorField
             label="プレミアムカラー"
             value={c.gold}
             onChange={(v) => updateConfig('colors.gold', v)}
-            description="限定コンテンツ（アクセスキー）関連のボタン・ボーダー・モーダル枠 + メンバーシップティアカードのグラデ"
+            description="アクセスキー付き限定コンテンツのボタン・枠線 + メンバーシップ特典カードの装飾色"
           />
         </div>
       )}
@@ -239,43 +239,43 @@ const ColorsTab = ({ config, updateConfig }) => {
         <div>
           <p className="text-sm text-gray-400 mb-6">未設定の場合、ベースカラーが適用されます。</p>
 
-          {overrideField('primaryText', 'メインテキスト色',
-            '全セクション見出し（Ranking/Targets/特典内容等）、目標ラベル、Sidebar/BottomNav選択中タブ、Header更新ボタン、ローディング表示、サイト名フォールバック（グラデOFF時）。未設定 → UIメインカラー',
+          {overrideField('primaryText', 'メインテキスト色（見出し・選択中タブ）',
+            '各ページの大見出し（Ranking・Targets・特典内容 など）、ナビの選択中タブ、更新ボタン、ローディング表示の文字色',
             c.lightBlue)}
-          {overrideField('accentText', 'アクセントテキスト色（内部名: highlight）',
-            'ランキング2〜3位の数字、▸矢印（目標/イベント）、FAQ見出し・質問、MenuView全ティアラベル+カード名、PersonPopup人物名+全ティアヘッダー+Special権利、全アイコン類。最も広く使われるハイライト色。未設定 → UIアクセントカラー',
+          {overrideField('accentText', 'アクセントテキスト色（強調文字全般）',
+            'ランキング2〜3位の数字、目標やFAQの▸矢印、FAQ見出し、特典ラベル（1k/3k等）、人物名ポップアップの名前、全アイコン類 ― 最も目立つ場所に使われる強調色',
             c.amber)}
-          {overrideField('nameText', 'カード名前テキスト色',
-            '人物名カード専用（ランキングの人物名、権利者カード、枠内アイコンのユーザー名）。未設定 → ダーク時: lightBlue+白 20%ブレンド / ライト時: lightBlue+#2c1810 35%ブレンド',
+          {overrideField('nameText', '人物名テキスト色',
+            'ランキング・特典権利者・枠内アイコンに表示される各人物の名前の色',
             blendWithWhite(c.lightBlue, 0.2))}
-          {overrideField('contentText', 'コンテンツ本文テキスト色',
-            '目標内容/FAQ回答/イベント説明/MenuViewカード名+説明/PersonPopupティア+Special権利/BenefitPopup特典名+説明。未設定 → ダーク時: lightBlue+白 10%ブレンド / ライト時: lightBlue+#2c1810 25%ブレンド',
+          {overrideField('contentText', '本文テキスト色',
+            '目標の内容、FAQ回答、イベント説明、特典の名前・説明文などの本文テキストの色',
             blendWithWhite(c.lightBlue, 0.1))}
-          {overrideField('footerText', 'フッターテキスト色',
-            'フッターのメインテキスト（footerText のみ、副文・注釈は補足テキスト色）。未設定 → UIアクセントカラー',
+          {overrideField('footerText', 'フッターメインテキスト色',
+            'ページ下部フッターのメイン行の色（副文・注釈は「補足テキスト色」で調整）',
             c.amber)}
-          {overrideField('subText', '補足テキスト色',
-            'ナビ非選択/補足テキスト/×閉じるボタン/タイムスタンプ/空状態メッセージ/フッター副文・注釈。未設定 → ダーク時: #9ca3af / ライト時: #6b5a4e（暖色茶）',
+          {overrideField('subText', '補足テキスト色（脇役全般）',
+            'タイムスタンプ、×閉じるボタン、ナビの非選択タブ、空の一覧メッセージ、フッターの副文・注釈、「歌推しPt」ラベルなど',
             '#9ca3af')}
 
           <hr className="border-light-blue/20 my-6" />
           <h3 className="text-base font-body text-amber mb-4">タイトルテキスト色</h3>
 
-          {overrideField('titleColor', 'タイトルテキスト色（グラデOFF時）',
-            'Header/Sidebar のサイト名テキスト（タイトルグラデーションOFF時のみ有効）。未設定 → primaryText → UIメインカラーの順でフォールバック',
+          {overrideField('titleColor', 'タイトル単色（グラデOFF時）',
+            'サイト名（ヘッダー・サイドバー）を単色で表示するときの色。タイトルのグラデーションをOFFにしている場合のみ反映されます',
             c.lightBlue)}
 
           <div className="mb-2">
-            <p className="text-xs text-gray-500 mb-4">グラデーションON時のタイトル色（3色）。未設定の場合は背景グラデ中間色 → UIメイン → UIアクセントの順で適用されます。</p>
+            <p className="text-xs text-gray-500 mb-4">サイト名のグラデーション（3色）。タイトルグラデーションをONにしている場合に使われます。</p>
           </div>
-          {overrideField('titleGradientStart', 'タイトルグラデーション（開始色）',
-            'Header/Sidebar タイトルグラデの開始色（左側）。未設定 → oceanTeal（背景グラデ中間色）',
+          {overrideField('titleGradientStart', 'サイト名グラデ（左側）',
+            'サイト名グラデーションの左端の色',
             c.oceanTeal)}
-          {overrideField('titleGradientMid', 'タイトルグラデーション（中間色）',
-            'タイトルグラデの中間色。未設定 → UIメインカラー（lightBlue）',
+          {overrideField('titleGradientMid', 'サイト名グラデ（真ん中）',
+            'サイト名グラデーションの真ん中の色',
             c.lightBlue)}
-          {overrideField('titleGradientEnd', 'タイトルグラデーション（終了色）',
-            'タイトルグラデの終了色（右側）。未設定 → UIアクセントカラー（amber）',
+          {overrideField('titleGradientEnd', 'サイト名グラデ（右側）',
+            'サイト名グラデーションの右端の色',
             c.amber)}
         </div>
       )}
@@ -287,8 +287,8 @@ const ColorsTab = ({ config, updateConfig }) => {
 
           {/* カード背景色（色 + 透明度） */}
           <div className="mb-5">
-            <label className="block text-sm font-body text-light-blue mb-1">カード背景色（全ガラスエフェクト）</label>
-            <p className="text-xs text-gray-500 mb-2">全glass-effect要素の背景：Home全カード、MenuViewカード（メニューカード背景未設定時）、RightsView検索+人物カード、EventViewカード、全ポップアップパネル、Sidebar、BottomNav、Header更新ボタン、IconGallery各要素。未設定 → deepBlue ベース、不透明度60%（ライト時は自動85%）</p>
+            <label className="block text-sm font-body text-light-blue mb-1">カード背景色（サイト全体）</label>
+            <p className="text-xs text-gray-500 mb-2">サイト上の全てのカード・ポップアップ・ナビ・入力欄の背景色（ホームのランキング/目標/イベントカード、特典カード、人物ポップアップ、サイドバー、メニューバーなど全て）</p>
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="color"
@@ -323,8 +323,8 @@ const ColorsTab = ({ config, updateConfig }) => {
 
           {/* メニューカードラベル背景色（色 + 透明度） */}
           <div className="mb-5">
-            <label className="block text-sm font-body text-light-blue mb-1">メニューカード内側レイヤー色</label>
-            <p className="text-xs text-gray-500 mb-2">MenuViewカード内側のサブレイヤー：デスクトップは上部ラベル帯、モバイルはカード内側全面を占有。未設定 → glassBgColor ベース、不透明度10%</p>
+            <label className="block text-sm font-body text-light-blue mb-1">特典カード内側の色掛け</label>
+            <p className="text-xs text-gray-500 mb-2">特典内容ページのカード内側に重ねる色。PC版ではカード上部のラベル帯、スマホ版ではカード全面に適用されます（カード背景色の上に薄く重なります）</p>
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="color"
@@ -359,8 +359,8 @@ const ColorsTab = ({ config, updateConfig }) => {
 
           {/* ティアカード背景色（色 + 透明度） */}
           <div className="mb-5">
-            <label className="block text-sm font-body text-light-blue mb-1">特典ティアカード背景色</label>
-            <p className="text-xs text-gray-500 mb-2">PersonPopup（個人特典ポップアップ）の各ティアカード背景。未設定 → ダーク時: deepBlue@50% / ライト時: #ffffff@55%</p>
+            <label className="block text-sm font-body text-light-blue mb-1">人物ポップアップ内のティアカード背景</label>
+            <p className="text-xs text-gray-500 mb-2">人物名をタップして開くポップアップ内に並ぶ、各特典ティア（1k・3k・5k…）カードの背景色</p>
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="color"
@@ -395,8 +395,8 @@ const ColorsTab = ({ config, updateConfig }) => {
 
           {/* メニューカード背景色（色 + 透明度） */}
           <div className="mb-5">
-            <label className="block text-sm font-body text-light-blue mb-1">メニューカード背景色</label>
-            <p className="text-xs text-gray-500 mb-2">MenuView（特典内容）のカード背景専用。未設定 → カード背景色（glassBgColor）にフォールバック、不透明度85%</p>
+            <label className="block text-sm font-body text-light-blue mb-1">特典内容ページのカード背景</label>
+            <p className="text-xs text-gray-500 mb-2">特典内容ページ専用のカード背景色。ここだけ他のカードと違う色にしたい場合に使います（未設定なら「カード背景色」と同じ）</p>
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="color"
@@ -429,26 +429,26 @@ const ColorsTab = ({ config, updateConfig }) => {
             </div>
           </div>
 
-          {overrideField('backgroundMain', '背景メインカラー（override）',
-            'body背景グラデーションの両端（上下）。未設定 → deepBlue',
+          {overrideField('backgroundMain', 'ページ背景（上下）',
+            'ページ背景のグラデーションで、画面の上端と下端に使う色',
             c.deepBlue)}
-          {overrideField('backgroundMid', '背景中間グラデーション（override）',
-            'body背景グラデーションの中央。未設定 → oceanTeal',
+          {overrideField('backgroundMid', 'ページ背景（中央）',
+            'ページ背景のグラデーションで、画面中央に使う色',
             c.oceanTeal)}
-          {overrideField('cardBorder', 'カードボーダー色',
-            '全カード・入力欄・ポップアップ・Sidebar境界・BottomNav境界・Footer境界・仕切り線の外枠ボーダー。未設定 → UIメインカラー',
+          {overrideField('cardBorder', 'カード枠線色',
+            '全てのカード・入力欄・ポップアップ・サイドバー・メニューバーの枠線の色',
             c.lightBlue)}
-          {overrideField('cardBorderHover', 'カードボーダー（ホバー+一部常時）',
-            'カードホバー時のボーダー + 一部カードの常時ボーダー（HomeView目標カード / MenuViewデスクトップのラベル帯下線）。未設定 → UIアクセントカラー',
+          {overrideField('cardBorderHover', 'カード枠線（ホバー/強調用）',
+            'カードにマウスを乗せたときの枠線色。加えて目標カードの枠線と、特典内容カードのラベル帯の仕切り線にも常時使われます',
             c.amber)}
           {overrideField('rank1Card', '1位カード強調色',
-            'HomeViewの1位ランキングカードのboder色 + ポイント数テキスト色。未設定 → accent（強調色）',
+            '1位ランキングカードの枠線とポイント数の色',
             c.accent)}
 
           {/* ポップアップ暗幕（色 + 透明度） */}
           <div className="mb-5">
-            <label className="block text-sm font-body text-light-blue mb-1">ポップアップ暗幕色</label>
-            <p className="text-xs text-gray-500 mb-2">全ポップアップの背景暗幕（PersonPopup/BenefitPopup/LockedContentModal/IconGalleryモーダル）。未設定 → ダーク時: 黒@70% / ライト時: oceanTeal@55%</p>
+            <label className="block text-sm font-body text-light-blue mb-1">ポップアップの背景幕</label>
+            <p className="text-xs text-gray-500 mb-2">ポップアップを開いたとき、後ろに被せる色付きの幕。ダークテーマでは黒系、ライトテーマでは自動的に明るい色になります</p>
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="color"
@@ -485,11 +485,11 @@ const ColorsTab = ({ config, updateConfig }) => {
           <hr className="border-light-blue/20 my-6" />
           <h3 className="text-base font-body text-amber mb-2">ヘッダー背景グラデーション</h3>
           <p className="text-xs text-gray-500 mb-4">未設定の場合、ヘッダー背景はグラデーションなし（透明）。画像がある場合は画像が表示されます。</p>
-          {overrideField('headerGradientStart', 'ヘッダー背景グラデ（中央・明るい側）',
-            'ヘッダー背景グラデーションの中央（50%位置）の明るい色。未設定 → 背景なし（ヘッダー画像があれば画像）',
+          {overrideField('headerGradientStart', 'ヘッダー背景グラデ（真ん中の明るい色）',
+            'ヘッダー背景の真ん中に使う明るい色。未設定ならヘッダー背景なし（画像があれば画像のみ）',
             c.oceanTeal)}
-          {overrideField('headerGradientEnd', 'ヘッダー背景グラデ（両端・暗い側）',
-            'ヘッダー背景グラデーションの両端（上下）の暗い色。未設定 → 背景なし',
+          {overrideField('headerGradientEnd', 'ヘッダー背景グラデ（上下の暗い色）',
+            'ヘッダー背景の上端と下端に使う暗い色。未設定ならヘッダー背景なし',
             c.deepBlue)}
         </div>
       )}
