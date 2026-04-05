@@ -79,39 +79,48 @@ export function ConfigProvider({ config, children }) {
       }
     }
 
-    // sidebar 背景色（未設定時は glass-effect にフォールバック）
+    // sidebar 背景色（色 or 透明度いずれか設定されていれば適用。未設定項目は glassBgColor/deepBlue にフォールバック）
     {
-      if (o.sidebarBgColor && /^#[0-9a-f]{6}$/i.test(o.sidebarBgColor)) {
-        const a = (o.sidebarBgOpacity !== '' && o.sidebarBgOpacity != null)
-          ? o.sidebarBgOpacity
-          : (isLight ? 0.85 : 0.6)
-        const rgba = hexToRgba(o.sidebarBgColor, a)
+      const hasColor = o.sidebarBgColor && /^#[0-9a-f]{6}$/i.test(o.sidebarBgColor)
+      const hasOpacity = o.sidebarBgOpacity !== '' && o.sidebarBgOpacity != null
+      if (hasColor || hasOpacity) {
+        const col = hasColor
+          ? o.sidebarBgColor
+          : ((o.glassBgColor && /^#[0-9a-f]{6}$/i.test(o.glassBgColor)) ? o.glassBgColor : config.colors.deepBlue)
+        const a = hasOpacity ? o.sidebarBgOpacity : (isLight ? 0.85 : 0.6)
+        const rgba = hexToRgba(col, a)
         if (rgba) root.style.setProperty('--sidebar-bg', rgba)
       } else {
         root.style.removeProperty('--sidebar-bg')
       }
     }
 
-    // bottom nav 背景色（未設定時は glass-effect にフォールバック）
+    // bottom nav 背景色（同上）
     {
-      if (o.bottomNavBgColor && /^#[0-9a-f]{6}$/i.test(o.bottomNavBgColor)) {
-        const a = (o.bottomNavBgOpacity !== '' && o.bottomNavBgOpacity != null)
-          ? o.bottomNavBgOpacity
-          : (isLight ? 0.85 : 0.6)
-        const rgba = hexToRgba(o.bottomNavBgColor, a)
+      const hasColor = o.bottomNavBgColor && /^#[0-9a-f]{6}$/i.test(o.bottomNavBgColor)
+      const hasOpacity = o.bottomNavBgOpacity !== '' && o.bottomNavBgOpacity != null
+      if (hasColor || hasOpacity) {
+        const col = hasColor
+          ? o.bottomNavBgColor
+          : ((o.glassBgColor && /^#[0-9a-f]{6}$/i.test(o.glassBgColor)) ? o.glassBgColor : config.colors.deepBlue)
+        const a = hasOpacity ? o.bottomNavBgOpacity : (isLight ? 0.85 : 0.6)
+        const rgba = hexToRgba(col, a)
         if (rgba) root.style.setProperty('--bottom-nav-bg', rgba)
       } else {
         root.style.removeProperty('--bottom-nav-bg')
       }
     }
 
-    // menu card 背景色（特典内容ビュー専用、未設定時は glass-effect と同じ値を使う = フォールバック）
+    // menu card 背景色（特典内容ビュー専用、色or透明度いずれか設定で有効）
     {
-      if (o.menuCardBgColor && /^#[0-9a-f]{6}$/i.test(o.menuCardBgColor)) {
-        const a = (o.menuCardBgOpacity !== '' && o.menuCardBgOpacity != null)
-          ? o.menuCardBgOpacity
-          : 0.85
-        const menuCardRgba = hexToRgba(o.menuCardBgColor, a)
+      const hasColor = o.menuCardBgColor && /^#[0-9a-f]{6}$/i.test(o.menuCardBgColor)
+      const hasOpacity = o.menuCardBgOpacity !== '' && o.menuCardBgOpacity != null
+      if (hasColor || hasOpacity) {
+        const col = hasColor
+          ? o.menuCardBgColor
+          : ((o.glassBgColor && /^#[0-9a-f]{6}$/i.test(o.glassBgColor)) ? o.glassBgColor : config.colors.deepBlue)
+        const a = hasOpacity ? o.menuCardBgOpacity : 0.85
+        const menuCardRgba = hexToRgba(col, a)
         if (menuCardRgba) {
           root.style.setProperty('--menu-card-bg', menuCardRgba)
         }
