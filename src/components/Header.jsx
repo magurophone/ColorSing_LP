@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
 import { GRADIENT_DIR } from '../lib/constants'
@@ -173,7 +173,9 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   const isCenter = titlePos === 'center'
   const desktopSrc = convertDriveUrl(config.images.headerDesktop, 1600)
   const mobileSrc  = convertDriveUrl(config.images.headerMobile || config.images.headerDesktop, 800)
-  const hasImage = desktopSrc || mobileSrc
+  const [imgFailed, setImgFailed] = useState(false)
+  useEffect(() => { setImgFailed(false) }, [desktopSrc, mobileSrc])
+  const hasImage = (desktopSrc || mobileSrc) && !imgFailed
 
   const imgW  = config.brand.headerImageW
   const imgH  = config.brand.headerImageH
@@ -218,8 +220,8 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
     >
       {imgFit === 'contain' ? (
         <>
-          {mobileSrc  && <img className="md:hidden  w-full block" src={mobileSrc}  alt="" />}
-          {desktopSrc && <img className="hidden md:block w-full" src={desktopSrc} alt="" />}
+          {mobileSrc  && <img className="md:hidden  w-full block" src={mobileSrc}  alt="" onError={() => setImgFailed(true)} />}
+          {desktopSrc && <img className="hidden md:block w-full" src={desktopSrc} alt="" onError={() => setImgFailed(true)} />}
         </>
       ) : (
         <>

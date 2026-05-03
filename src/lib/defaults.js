@@ -85,8 +85,8 @@ const DEFAULT_CONFIG = {
   },
 
   images: {
-    headerDesktop: './customer/header.png',
-    headerMobile: './customer/header-mobile.png',
+    headerDesktop: '',
+    headerMobile: '',
     favicon: './customer/vite.svg',
   },
 

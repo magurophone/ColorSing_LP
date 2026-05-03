@@ -94,6 +94,15 @@ export function loadConfig() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
+        // 旧テンプレ・プレースホルダー画像パスを localStorage から除去
+        // (defaults を空文字に変更する前のキャッシュ。残っていると config.js の "" が上書きされ、
+        //  存在しない画像を読みに行きヘッダーが潰れるため)
+        if (parsed.images?.headerDesktop === './customer/header.png') {
+          parsed.images.headerDesktop = ''
+        }
+        if (parsed.images?.headerMobile === './customer/header-mobile.png') {
+          parsed.images.headerMobile = ''
+        }
         // benefitTiers は localStorage を正とする（管理画面での削除を永続化）
         // deepMerge は配列を丸ごと上書きするため、benefitTiers も自動的に localStorage の値が使われる
         config = deepMerge(config, parsed)
