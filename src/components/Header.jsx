@@ -180,9 +180,14 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   const imgWM = config.brand.headerImageWMobile
   const imgHM = config.brand.headerImageHMobile
   const paddingY = config.brand.titlePaddingY ?? 12
-  // 画像なし: タイトルのpadding + フォントサイズ + 上下余白で自動算出
-  const noImageDesktop = `calc(${paddingY * 2}px + 5rem + 48px)`
-  const noImageMobile  = `calc(${paddingY * 2}px + 3rem + 32px)`
+  // 画像なし: タイトルのpadding + フォントサイズ + 上下余白で自動算出（titleSize 連動）
+  const TITLE_MAX_REM_DESKTOP = { small: 1.75, medium: 3, large: 5, xlarge: 8 }
+  const TITLE_MAX_REM_MOBILE  = { small: 1.25, medium: 2, large: 3, xlarge: 4 }
+  const titleSizeKey = config.brand.titleSize || 'large'
+  const titleRemDesktop = TITLE_MAX_REM_DESKTOP[titleSizeKey] ?? 5
+  const titleRemMobile  = TITLE_MAX_REM_MOBILE[titleSizeKey]  ?? 3
+  const noImageDesktop = `calc(${paddingY * 2}px + ${titleRemDesktop}rem + 48px)`
+  const noImageMobile  = `calc(${paddingY * 2}px + ${titleRemMobile}rem + 32px)`
   const defaultHeightDesktop = hasImage ? '600px' : noImageDesktop
   const defaultHeightMobile  = hasImage ? '400px' : noImageMobile
   const heightDesktop = config.brand.headerHeight || defaultHeightDesktop
