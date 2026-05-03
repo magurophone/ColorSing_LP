@@ -29,7 +29,7 @@ const TITLE_SIZE = {
 const TitleText = ({ config, glowClass, compact = false }) => {
   const effectiveStyle = config.brand.titleStyle || 'glass'
   const dir = GRADIENT_DIR[config.brand.titleGradientDirection] || 'to right'
-  const fontSize = compact ? '1.25rem' : (TITLE_SIZE[config.brand.titleSize || 'large'])
+  const fontSize = TITLE_SIZE[config.brand.titleSize || (compact ? 'small' : 'large')]
   const glassBg = config.brand.titleGlassBg ?? 0.35
   const glassBlur = config.brand.titleGlassBlur ?? 12
   const paddingY = config.brand.titlePaddingY ?? 12
