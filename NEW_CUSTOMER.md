@@ -65,7 +65,19 @@ config.js を作成する際の注意:
 - **admin.password** にアンケートのパスワードを設定
 - **brightness** はテーマカラーに応じて `"light"` or `"dark"` を選択
 - **headerGradientStart/End** は画像未設定なら空文字にする（背景が変わってしまうため）
+- **images.headerDesktop / headerMobile** は空文字にする（後述）
 - イベント非使用なら `views` の events を `enabled: false` に
+
+⚠️ **ヘッダー画像のプレースホルダー削除（必須）**
+
+sync-all.sh はテンプレ main の `public/customer/header.png` `header-mobile.png`（magurophone のプレースホルダー画像）を新規顧客リポに配布してしまう。
+そのまま放置すると顧客サイトに magurophone の画像が表示されるため、Step 5 内で必ず削除する：
+
+```bash
+git -C /tmp/{username} rm public/customer/header.png public/customer/header-mobile.png
+```
+
+合わせて config.js の `images.headerDesktop` `images.headerMobile` を空文字 `""` にしておく。
 
 ```bash
 # /tmp にcloneしたリポのWriteツールが効かない場合は bash の cat/sed で直接書く
@@ -158,7 +170,8 @@ darkテーマの場合:
 □ GitHubリポ作成（colorsing-dashboard/{username}、Public）
 □ customers.json 追記 → push → sync-all.sh
 □ GitHub Pages 有効化（API経由）
-□ config.js 作成・push（全設定反映済み）
+□ ヘッダープレースホルダー画像 削除（public/customer/header.png, header-mobile.png）
+□ config.js 作成・push（全設定反映済み・headerDesktop/Mobile は空）
 □ デプロイ成功確認
 □ GitHub PAT 生成 → 管理画面のデプロイタブに設定 → デプロイ実行（※唯一の手動手順）
 □ サイトURL・管理画面URL・パスワードをユーザーに共有待ち
