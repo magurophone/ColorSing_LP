@@ -17,6 +17,7 @@ const DEFAULT_CONFIG = {
     titleGlow: true,
     titlePosition: 'center',
     titleSize: 'large',
+    titleOffsetY: -0.12,
     titleTextFill: 'default',
     titleGlassBg: 0.35,
     titleGlassBlur: 12,

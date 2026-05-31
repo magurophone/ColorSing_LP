@@ -30,16 +30,24 @@ const TitleText = ({ config, glowClass, compact = false }) => {
   const effectiveStyle = config.brand.titleStyle || 'glass'
   const dir = GRADIENT_DIR[config.brand.titleGradientDirection] || 'to right'
   const fontSize = TITLE_SIZE[config.brand.titleSize || (compact ? 'small' : 'large')]
+  const rawTitleOffsetY = Number(config.brand.titleOffsetY ?? -0.12)
+  const titleOffsetY = Number.isFinite(rawTitleOffsetY)
+    ? Math.max(-0.3, Math.min(0.3, rawTitleOffsetY))
+    : -0.12
   const glassBg = config.brand.titleGlassBg ?? 0.35
   const glassBlur = config.brand.titleGlassBlur ?? 12
   const paddingY = config.brand.titlePaddingY ?? 12
   const baseClass = `font-display font-black tracking-wide leading-tight drop-shadow-lg ${glowClass}`
+  const titleVisualStyle = {
+    fontSize,
+    transform: `translateY(${titleOffsetY}em)`,
+  }
 
   if (effectiveStyle === 'glass') {
     const textFill = config.brand.titleTextFill || 'default'
     const o = config.colorOverrides || {}
     const gradientStyle = `linear-gradient(${dir}, var(--color-title-gradient-start, var(--color-ocean-teal)), var(--color-title-gradient-mid, var(--color-light-blue)), var(--color-title-gradient-end, var(--color-amber)))`
-    const h1Style = { fontSize, ...(
+    const h1Style = { ...titleVisualStyle, ...(
       textFill === 'gradient'
         ? { backgroundImage: gradientStyle, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
         : textFill === 'white'
@@ -113,7 +121,7 @@ const TitleText = ({ config, glowClass, compact = false }) => {
       <h1
         className={`${baseClass} bg-clip-text text-transparent`}
         style={{
-          fontSize,
+          ...titleVisualStyle,
           backgroundImage: `linear-gradient(${dir}, var(--color-title-gradient-start, var(--color-ocean-teal)), var(--color-title-gradient-mid, var(--color-light-blue)), var(--color-title-gradient-end, var(--color-amber)))`,
         }}
       >
@@ -125,7 +133,7 @@ const TitleText = ({ config, glowClass, compact = false }) => {
   return (
     <h1
       className={baseClass}
-      style={{ fontSize, color: 'var(--color-title, var(--color-primary))' }}
+      style={{ ...titleVisualStyle, color: 'var(--color-title, var(--color-primary))' }}
     >
       {config.brand.name}
     </h1>

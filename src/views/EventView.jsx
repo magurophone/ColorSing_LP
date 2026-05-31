@@ -92,11 +92,11 @@ const PastEventCard = ({ event }) => {
         {urls.length > 0 && <ImageGallery urls={urls} title={event.title} />}
         <div className="flex-1 min-w-0">
           {event.date && (
-            <div className="text-xs md:text-sm text-gray-500 mb-1">{formatEventDate(event.date)}</div>
+            <div className="text-xs md:text-sm text-sub-text mb-1">{formatEventDate(event.date)}</div>
           )}
-          <h3 className="text-base md:text-lg font-body text-white mb-2 leading-snug">{event.title}</h3>
+          <h3 className="text-base md:text-lg font-body text-name-text mb-2 leading-snug">{event.title}</h3>
           {event.notes && (
-            <p className="text-xs md:text-sm text-gray-400 mb-2">{event.notes}</p>
+            <p className="text-xs md:text-sm text-sub-text mb-2">{event.notes}</p>
           )}
           {event.setlist && (
             <>

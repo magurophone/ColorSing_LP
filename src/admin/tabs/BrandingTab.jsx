@@ -30,6 +30,12 @@ const BrandingTab = ({ config, updateConfig }) => {
     setShowBodyPicker(false)
   }
 
+  const rawTitleOffsetY = Number(config.brand.titleOffsetY ?? -0.12)
+  const titleOffsetY = Number.isFinite(rawTitleOffsetY) ? rawTitleOffsetY : -0.12
+  const titleOffsetLabel = titleOffsetY === 0
+    ? '中央'
+    : `${titleOffsetY < 0 ? '上' : '下'}へ ${Math.abs(titleOffsetY).toFixed(2)}em`
+
   return (
     <div>
       <h2 className="text-2xl font-body text-light-blue mb-6">ブランディング</h2>
@@ -144,6 +150,20 @@ const BrandingTab = ({ config, updateConfig }) => {
             />
             <div className="flex justify-between text-xs text-gray-600 mt-0.5">
               <span>小</span><span>中</span><span>大</span><span>特大</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">
+              文字の縦位置：{titleOffsetLabel}
+            </label>
+            <input type="range" min="-0.3" max="0.3" step="0.01"
+              value={titleOffsetY}
+              onChange={(e) => updateConfig('brand.titleOffsetY', +e.target.value)}
+              className="w-full accent-amber"
+            />
+            <div className="flex justify-between text-xs text-gray-600 mt-0.5">
+              <span>上</span><span>中央</span><span>下</span>
             </div>
           </div>
 
