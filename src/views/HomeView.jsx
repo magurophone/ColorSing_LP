@@ -190,7 +190,7 @@ const HomeView = ({ ranking, goals, events }) => {
                 ended={ended}
               />
             )}
-            <div className={`p-5 md:p-8 text-center${ended ? ' opacity-40' : ''}`}>
+            <div className={`p-5 md:p-8 text-center${ended ? ' opacity-60' : ''}`}>
               {events.upcoming.date && (
                 <div className="text-amber text-sm font-body mb-2">
                   {formatEventDate(events.upcoming.date)}
