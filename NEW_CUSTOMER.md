@@ -236,7 +236,20 @@ https://colorsing-dashboard.github.io/{username}/customer/config.js
 サイトの初回公開は完了しました。
 管理画面から今後デプロイできるように、GitHubのFine-grained PATを発行してください。
 発行URL: {token_issuance_url}
+
+発行画面では次のとおり設定してください。
+- Token name: {username}
+- Expiration: 1年
+- Resource owner: colorsing-dashboard
+- Repository access: Only select repositories
+- Selected repositories: {username}
+- Repository permissions:
+  - Contents: Read and write
+  - Pages: Read and write
+- Actions / Workflowsなど、上記以外の権限は追加しない
+
 トークンはチャットへ貼らず、管理画面の「デプロイ」タブへ直接入力してください。
+入力後は「保存」→「デプロイ実行」まで行い、成功したことを教えてください。
 ```
 
 発行URL:
@@ -252,6 +265,25 @@ https://github.com/settings/personal-access-tokens/new?name={username}&descripti
 ```
 
 このURLではリポジトリ選択までは固定されない。画面上で必ず `Only select repositories` → `{username}` を選択する。
+
+### 作業完了後の必須案内ルール
+
+初回公開作業が完了したら、最終回答に必ず次を含める。
+
+1. サイトURL
+2. 管理画面URL
+3. Fine-grained PAT発行URL（可能なら顧客slug入りの事前入力URL）
+4. Resource owner: `colorsing-dashboard`
+5. Repository access: `Only select repositories` → `{username}`
+6. `Contents: Read and write`
+7. `Pages: Read and write`
+8. `Actions` / `Workflows` など追加権限は不要
+9. Expiration: 1年
+10. トークンはチャットへ貼らず、管理画面へ直接入力すること
+11. 管理画面で「保存」→「デプロイ実行」まで行うこと
+12. 運用用スプレッドシートIDなど、その時点で残っている作業
+
+この案内を送る前に「作業完了」とだけ報告して終了しない。
 
 GitHub公式手順:
 
@@ -356,7 +388,9 @@ darkテーマの場合:
 □ node --check / npm run build 成功
 □ GitHub Actions completed success
 □ 公開URL 200 / 公開configのサイト名・repo一致
-□ GitHub PAT発行をユーザーへ依頼（チャットには貼らず管理画面へ直接入力）
+□ GitHub PAT発行をユーザーへ依頼（発行URL・Resource owner・対象repo・Contents/Pages R/W・期限1年を明記）
+□ Actions / Workflowsなど余分な権限は不要と案内
+□ トークンはチャットには貼らず管理画面へ直接入力と案内
 □ GitHub PAT設定後、管理画面からデプロイ実行を本人が確認
 □ サイトURL・管理画面URL・残作業をユーザーに共有
 □ 残作業メモ（スプシID未設定、FAQ後日追記 等）
