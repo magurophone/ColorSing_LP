@@ -1,4 +1,4 @@
-import { generateConfigJS, importConfigFromText } from './configIO'
+import { generateConfigJS, importConfigFromText } from './configIO.js'
 
 async function gh(token, method, path, body) {
   const res = await fetch(`https://api.github.com${path}`, {

@@ -3,6 +3,9 @@ node_modules
 
 # Build files (keep source, ignore node_modules and temp files)
 dist
+playwright-report
+test-results
+.local
 *.log
 npm-debug.log*
 

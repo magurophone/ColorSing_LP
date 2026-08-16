@@ -1,0 +1,63 @@
+{
+  "ranking": [
+    [1, "星空リスナー", 70, "rank-a"],
+    [2, "音符ちゃん", 49, "rank-b"]
+  ],
+  "goals": [
+    ["300k", "400k"],
+    ["歌推し40人", "歌推し50人"]
+  ],
+  "benefits": [
+    ["5k", "強制リクエスト権", "強制リクエスト権", "好きな曲を1曲リクエストできます。", "TRUE"]
+  ],
+  "rights": [
+    ["星空リスナー", "2", "", "限定権利"]
+  ],
+  "specialIndex": 3,
+  "history": [
+    {
+      "month": "202608",
+      "userName": "星空リスナー",
+      "tierKey": "5k",
+      "content": "強制リクエスト1曲"
+    }
+  ],
+  "events": {
+    "upcoming": {
+      "date": "20260820",
+      "title": "1周年",
+      "setlist": "曲A\n曲B",
+      "imageUrl": "upcoming-1",
+      "notes": "配信予定",
+      "imageUrls": ["upcoming-1", "upcoming-2"]
+    },
+    "past": [
+      {
+        "date": "20260701",
+        "title": "夏イベント",
+        "setlist": "曲C",
+        "imageUrl": "past-1",
+        "notes": "完了",
+        "imageUrls": ["past-1", "past-2"]
+      },
+      {
+        "date": "20260601",
+        "title": "春イベント",
+        "setlist": "曲D",
+        "imageUrl": "",
+        "notes": "",
+        "imageUrls": []
+      }
+    ]
+  },
+  "icons": {
+    "202608": [
+      { "label": "星空リスナー", "thumbnailUrl": "thumb:icon-a", "originalUrl": "icon-a" },
+      { "label": "星空リスナー", "thumbnailUrl": "thumb:icon-b", "originalUrl": "icon-b" }
+    ],
+    "限定": [
+      { "label": "音符ちゃん", "thumbnailUrl": "thumb:icon-c", "originalUrl": "icon-c" }
+    ],
+    "_orderedKeys": ["202608", "限定"]
+  }
+}

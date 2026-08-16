@@ -517,8 +517,11 @@ https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/m
 ```
 サイトURL:   https://colorsing-dashboard.github.io/{username}/
 管理画面URL: https://colorsing-dashboard.github.io/{username}/admin.html
+新オンボーディング試験URL: https://colorsing-dashboard.github.io/{username}/onboarding.html
 残作業:      運用用スプレッドシート設定 / Fine-grained PAT設定 / 必要ならヘッダー画像設定
 ```
+
+`onboarding.html` は `setup.html` と併存する試験経路。Spreadsheet URL解析、connection validation、previewまでは新画面で確認できる。中央publish serviceは未導入なので、legacy接続設定がない顧客では公開準備がblockedになる。この場合は従来の管理画面へ戻し、完了と誤報しない。
 
 管理画面パスワードを再掲する必要がある場合は、安全な連絡手段を使う。公開Issueやコミットメッセージには書かない。
 

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { fetchSheetData, fetchIconData, fetchHistoryData, fetchEventData } from '../lib/sheets'
-import { DEMO_RANKING, DEMO_GOALS, DEMO_BENEFITS, DEMO_RIGHTS, DEMO_HISTORY, DEMO_EVENTS, DEMO_ICONS } from '../lib/demoData'
+import { createGoogleSheetsDataSource } from '../dataSources/googleSheetsDataSource'
+import { resolvePortalDataSources } from '../dataSources/registry'
+import { countSemanticDifferences } from '../lib/platformData'
 
-export function useSheetData(sheetsConfig) {
+export function usePortalData(sheetsConfig, platformConfig = {}) {
   const [ranking, setRanking] = useState([])
   const [goals, setGoals] = useState([])
   const [rights, setRights] = useState([])
@@ -20,78 +21,88 @@ export function useSheetData(sheetsConfig) {
   const loadingIconsRef = useRef(false)
   const [iconError, setIconError] = useState(null)
   const iconsLoadedRef = useRef(false)
+  const activeSourceRef = useRef('google-sheets')
+  const shadowDatabaseDataRef = useRef(null)
 
   const { spreadsheetId, rankingSheetName, benefitsSheetName, benefitsContentSheetName, historySheetName, iconSheetName, eventSheetName, ranges, refreshIntervalMs } = sheetsConfig
   // rangesオブジェクトを個別の文字列に分解して安定した依存関係にする
   const rankingRange = ranges.ranking
   const goalsRange = ranges.goals
   const benefitsRange = ranges.benefits
+  const publicApiBaseUrl = platformConfig.publicApiBaseUrl || ''
+  const tenantSlug = platformConfig.tenantSlug || ''
+  const configuredReadSource = platformConfig.readSource === 'db' ? 'db' : 'sheets'
+  const configuredShadow = platformConfig.shadowCompareEnabled === true
+  const useRuntimeConfig = platformConfig.useRuntimeConfig !== false
+
+  const applyViewModel = useCallback((data, includeIcons = false) => {
+    setRanking(data.ranking || [])
+    setGoals(data.goals || [])
+    setBenefits(data.benefits || [])
+    setRights(data.rights || [])
+    setSpecialIndex(Number.isInteger(data.specialIndex) ? data.specialIndex : 8)
+    setHistory(data.history || [])
+    setEvents(data.events ?? null)
+    if (includeIcons) {
+      setIcons(data.icons || {})
+      iconsLoadedRef.current = true
+      setIconError(null)
+    }
+  }, [])
 
   const loadData = useCallback(async () => {
-    // DEMO MODE
-    if (spreadsheetId === 'demo') {
-      setRanking(DEMO_RANKING)
-      setGoals(DEMO_GOALS)
-      setBenefits(DEMO_BENEFITS)
-      setRights(DEMO_RIGHTS)
-      setSpecialIndex(8)
-      setHistory(DEMO_HISTORY)
-      setEvents(DEMO_EVENTS)
-      setLastUpdate(new Date())
-      setLoading(false)
-      setError(null)
-      return
-    }
-
-    if (!spreadsheetId) {
-      setError('スプレッドシートIDが設定されていません。管理画面（admin.html）から設定してください。')
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
-      const [rankingData, goalsData, benefitsData, rawRightsData, historyData, eventData] = await Promise.all([
-        fetchSheetData(spreadsheetId, rankingSheetName, rankingRange),
-        fetchSheetData(spreadsheetId, rankingSheetName, goalsRange),
-        fetchSheetData(spreadsheetId, benefitsContentSheetName, benefitsRange),
-        // rights: ヘッダー行込みで全シートを取得（Special列を動的に検出するため range なし・headers=0）
-        fetchSheetData(spreadsheetId, benefitsSheetName, null, 3, { allRows: true }),
-        // history: A3:D（行上限なしのオープンレンジ）
-        historySheetName
-          ? fetchHistoryData(spreadsheetId, historySheetName, 'A3:D').catch(() => [])
-          : Promise.resolve([]),
-        // events: イベントシート（開催予定・開催済み）
-        eventSheetName
-          ? fetchEventData(spreadsheetId, eventSheetName).catch(() => null)
-          : Promise.resolve(null),
-      ])
+      const sources = await resolvePortalDataSources({
+        sheetsConfig: {
+          spreadsheetId,
+          rankingSheetName,
+          benefitsSheetName,
+          benefitsContentSheetName,
+          historySheetName,
+          iconSheetName,
+          eventSheetName,
+          ranges: { ranking: rankingRange, goals: goalsRange, benefits: benefitsRange },
+        },
+        platformConfig: {
+          publicApiBaseUrl,
+          tenantSlug,
+          readSource: configuredReadSource,
+          shadowCompareEnabled: configuredShadow,
+          useRuntimeConfig,
+        },
+      })
 
-      // "Special"列を含む行をヘッダー行として動的検出（先頭の空行・タイトル行をスキップ）
-      let detectedSpecialIndex = -1
-      let headerRowIndex = 0
-      for (let i = 0; i < rawRightsData.length; i++) {
-        const idx = rawRightsData[i].findIndex(col => String(col).toLowerCase() === 'special')
-        if (idx >= 0) {
-          detectedSpecialIndex = idx
-          headerRowIndex = i
-          break
+      if (sources.active.id === 'central') {
+        try {
+          const databaseData = await sources.active.loadPortalData()
+          applyViewModel(databaseData, true)
+          activeSourceRef.current = 'central'
+          shadowDatabaseDataRef.current = databaseData
+        } catch (databaseError) {
+          console.warn('DB read failed; continuing with the protected Sheets source.', databaseError)
+          const sheetData = await sources.fallback.loadPortalData()
+          applyViewModel(sheetData, spreadsheetId === 'demo')
+          activeSourceRef.current = 'google-sheets'
+        }
+      } else {
+        const sheetData = await sources.active.loadPortalData()
+        applyViewModel(sheetData, spreadsheetId === 'demo')
+        activeSourceRef.current = 'google-sheets'
+        if (sources.shadow) {
+          sources.shadow.loadPortalData()
+            .then(databaseData => {
+              shadowDatabaseDataRef.current = databaseData
+              const { icons: _sheetIcons, ...sheetPrimary } = sheetData
+              const { icons: _databaseIcons, ...databasePrimary } = databaseData
+              const differenceCount = countSemanticDifferences(sheetPrimary, databasePrimary)
+              if (differenceCount > 0) console.warn(`LP shadow comparison found ${differenceCount} semantic differences.`)
+            })
+            .catch(() => {})
         }
       }
-      if (detectedSpecialIndex < 0) {
-        const maxLen = Math.max(0, ...rawRightsData.map(r => r.length))
-        detectedSpecialIndex = maxLen > 0 ? maxLen - 1 : 8
-      }
-
-      setRanking(rankingData)
-      setGoals(goalsData.slice(1)) // 先頭行は列ヘッダー行（「目標1」「目標2」）のためスキップ
-      setBenefits(benefitsData)
-      setRights(rawRightsData.slice(headerRowIndex + 1)) // ヘッダー行の次から
-      setSpecialIndex(detectedSpecialIndex)
-      setHistory(historyData || [])
-      setEvents(eventData ?? null)
       setLastUpdate(new Date())
       setError(null)
     } catch (err) {
@@ -100,7 +111,7 @@ export function useSheetData(sheetsConfig) {
     } finally {
       setLoading(false)
     }
-  }, [spreadsheetId, rankingSheetName, benefitsSheetName, benefitsContentSheetName, historySheetName, eventSheetName, rankingRange, goalsRange, benefitsRange])
+  }, [applyViewModel, benefitsContentSheetName, benefitsRange, benefitsSheetName, configuredReadSource, configuredShadow, eventSheetName, goalsRange, historySheetName, iconSheetName, publicApiBaseUrl, rankingRange, rankingSheetName, spreadsheetId, tenantSlug, useRuntimeConfig])
 
   // 初回読み込み + 自動更新
   useEffect(() => {
@@ -115,26 +126,24 @@ export function useSheetData(sheetsConfig) {
     iconsLoadedRef.current = false
     setIcons({})
     setIconError(null)
-  }, [spreadsheetId, iconSheetName])
+  }, [spreadsheetId, iconSheetName, publicApiBaseUrl, tenantSlug])
 
   // アイコンデータ読み込み
   const loadIcons = useCallback(async () => {
-    if (iconsLoadedRef.current || loadingIconsRef.current || !spreadsheetId) return
-
-    // DEMO MODE
-    if (spreadsheetId === 'demo') {
-      setIcons(DEMO_ICONS)
-      iconsLoadedRef.current = true
-      return
-    }
+    if (iconsLoadedRef.current || loadingIconsRef.current || activeSourceRef.current === 'central' || !spreadsheetId) return
 
     loadingIconsRef.current = true
     setLoadingIcons(true)
     setIconError(null)
     try {
-      const iconData = await fetchIconData(spreadsheetId, iconSheetName)
+      const iconData = await createGoogleSheetsDataSource({ spreadsheetId, iconSheetName }).loadIcons()
       setIcons(iconData)
       iconsLoadedRef.current = true
+      const shadowIcons = shadowDatabaseDataRef.current?.icons
+      if (shadowIcons) {
+        const differenceCount = countSemanticDifferences(iconData, shadowIcons)
+        if (differenceCount > 0) console.warn(`LP icon shadow comparison found ${differenceCount} semantic differences.`)
+      }
     } catch (err) {
       console.error('Failed to load icon data:', err)
       setIconError('アイコンデータの読み込みに失敗しました')
@@ -162,3 +171,6 @@ export function useSheetData(sheetsConfig) {
     loadIcons,
   }
 }
+
+// Legacy import compatibility for customer repositories that still reference the old hook name.
+export const useSheetData = usePortalData

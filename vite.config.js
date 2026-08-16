@@ -22,6 +22,7 @@ export default defineConfig({
         features: resolve(__dirname, 'features.html'),
         monitor: resolve(__dirname, 'monitor.html'),
         setup: resolve(__dirname, 'setup.html'),
+        onboarding: resolve(__dirname, 'onboarding.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',

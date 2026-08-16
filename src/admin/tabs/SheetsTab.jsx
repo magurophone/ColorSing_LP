@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchSheetData } from '../../lib/sheets'
+import { extractSpreadsheetId, validateSpreadsheetConnection } from '../../lib/spreadsheetConnection'
 import Field from '../components/Field'
 
 const SheetsTab = ({ config, updateConfig }) => {
@@ -11,19 +11,12 @@ const SheetsTab = ({ config, updateConfig }) => {
     setTestResult(null)
 
     try {
-      const data = await fetchSheetData(
-        config.sheets.spreadsheetId,
-        config.sheets.rankingSheetName,
-        config.sheets.ranges.ranking
-      )
-      setTestResult({
-        success: true,
-        message: `接続成功！${data.length}行のデータを取得しました。`,
-      })
+      const result = await validateSpreadsheetConnection(config.sheets)
+      setTestResult(result)
     } catch (err) {
       setTestResult({
-        success: false,
-        message: `接続失敗: ${err.message}`,
+        status: 'error',
+        checks: [{ id: 'unexpected', label: '接続確認', status: 'error', message: `接続を確認できませんでした: ${err.message}` }],
       })
     } finally {
       setTesting(false)
@@ -36,11 +29,11 @@ const SheetsTab = ({ config, updateConfig }) => {
       <p className="text-sm text-gray-400 mb-6">データソースとなるGoogleスプレッドシートの接続設定です。</p>
 
       <Field
-        label="スプレッドシートID"
+        label="スプレッドシートURL または ID"
         value={config.sheets.spreadsheetId}
-        onChange={(v) => updateConfig('sheets.spreadsheetId', v)}
-        placeholder="スプレッドシートURLの /d/ と /edit の間のID"
-        description="GoogleスプレッドシートのURLから取得できます。https://docs.google.com/spreadsheets/d/[ここのID]/edit"
+        onChange={(v) => updateConfig('sheets.spreadsheetId', extractSpreadsheetId(v) || v)}
+        placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+        description="URL全体を貼り付けるとIDを自動で読み取ります。IDだけでも設定できます。"
       />
 
       <button
@@ -52,12 +45,18 @@ const SheetsTab = ({ config, updateConfig }) => {
       </button>
 
       {testResult && (
-        <div className={`mb-6 glass-effect px-4 py-3 rounded-lg border text-sm ${
-          testResult.success
-            ? 'border-green-500/50 text-green-400'
-            : 'border-tuna-red/50 text-tuna-red'
-        }`}>
-          {testResult.message}
+        <div className={`mb-6 glass-effect px-4 py-3 rounded-lg border text-sm ${testResult.status === 'success' ? 'border-green-500/50' : 'border-amber/50'}`}>
+          <p className={`font-bold mb-3 ${testResult.status === 'success' ? 'text-green-400' : 'text-amber'}`}>
+            {testResult.status === 'success' ? '必要なデータを確認しました' : '修正が必要な項目があります'}
+          </p>
+          <ul className="space-y-3" aria-label="接続確認結果">
+            {testResult.checks.map(item => (
+              <li key={item.id} className="text-gray-300">
+                <p><span className={item.status === 'success' ? 'text-green-400' : 'text-amber'}>{item.status === 'success' ? '✓' : '!'}</span> <span className="font-bold">{item.label}</span> — {item.message}</p>
+                {item.fix && <p className="mt-1 pl-5 text-xs text-gray-500">修正方法: {item.fix}</p>}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:contracts": "node --test tests/lp-compatibility.test.mjs tests/spreadsheet-connection.test.mjs tests/productization.test.mjs",
+    "test:e2e": "playwright test",
+    "test": "npm run test:contracts && npm run test:e2e",
+    "platform:export-source": "node scripts/export-platform-source.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -17,6 +21,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^18.3.12",

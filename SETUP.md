@@ -64,9 +64,22 @@ bash scripts/sync-all.sh
 https://colorsing-dashboard.github.io/{username}/admin.html
 ```
 
+### 5.1 新オンボーディングの試験（任意・additive）
+
+既存の `setup.html` と管理画面を残したまま、状態駆動型の案内を次のURLで試験できる。
+
+```text
+https://colorsing-dashboard.github.io/{username}/onboarding.html
+```
+
+- Spreadsheet URLの解析、必要データの接続確認、基本情報、テーマ、公開内容、preview readinessを実状態から判定する。
+- 公開サービスが未設定なら「準備待ち」となり、従来の管理画面から公開する。
+- 新画面の不具合時は案内を止めるだけで、`setup.html`、`admin.html`、公開URL、Sheets運用へ戻せる。
+- 新画面を既存顧客へ強制案内しない。
+
 ---
 
-## 顧客側の初期設定（管理画面で行う）
+## 顧客側の初期設定（legacy管理画面で行う）
 
 | 優先 | タブ | 設定内容 |
 |------|------|---------|

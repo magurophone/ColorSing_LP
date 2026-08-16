@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfig } from './context/ConfigContext'
-import { useSheetData } from './hooks/useSheetData'
+import { usePortalData } from './hooks/useSheetData'
 import Sidebar from './components/Sidebar'
 import BottomNav from './components/BottomNav'
 import Header from './components/Header'
@@ -9,6 +9,7 @@ import PersonPopup from './components/PersonPopup'
 import BenefitPopup from './components/BenefitPopup'
 import ParticleEffect from './components/ParticleEffect'
 import VIEW_REGISTRY from './views/registry'
+import { resolveTenantSlug } from './productization/tenant'
 
 function App() {
   const config = useConfig()
@@ -21,7 +22,10 @@ function App() {
     ranking, goals, rights, specialIndex, benefits, history, events, icons,
     loading, loadingIcons, iconError, error, lastUpdate,
     loadData, loadIcons,
-  } = useSheetData(config.sheets)
+  } = usePortalData(config.sheets, {
+    ...config.platform,
+    tenantSlug: resolveTenantSlug(config, window.location.pathname),
+  })
 
   // ポップアップ状態
   const [selectedPerson, setSelectedPerson] = useState(null)

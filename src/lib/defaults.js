@@ -107,6 +107,14 @@ const DEFAULT_CONFIG = {
     refreshIntervalMs: 300000,
   },
 
+  platform: {
+    tenantSlug: '',
+    publicApiBaseUrl: '',
+    readSource: 'sheets',
+    shadowCompareEnabled: false,
+    useRuntimeConfig: true,
+  },
+
   views: [
     { id: 'home', label: 'Home', icon: '🏠', enabled: true },
     { id: 'menu', label: 'Menu', icon: '🍾', enabled: true },
