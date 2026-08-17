@@ -29,7 +29,12 @@ test('onboarding completion is derived from config, validation, preview, and ver
 
   assert.equal(model.currentStep, null)
   assert.equal(model.progress, 100)
-  assert.equal(model.steps.find(step => step.id === 'account_created').status, 'optional')
+  // 顧客がやることの無い説明ステップは出さない。
+  assert.equal(model.steps.some(step => step.id === 'account_created'), false)
+  // 既定の配色のままは「決めた」ではないので、必須にせず任意にする。
+  const theme = model.steps.find(step => step.id === 'theme_complete')
+  assert.equal(theme.required, false)
+  assert.equal(theme.status, 'optional')
   assert.equal(model.steps.find(step => step.id === 'published').status, 'complete')
 })
 

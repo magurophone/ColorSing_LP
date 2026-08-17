@@ -1,3 +1,4 @@
+import DEFAULT_CONFIG from '../lib/defaults.js'
 import { createTenantSnapshot } from '../productization/tenant.js'
 import { deriveAcquisitionState, describeFanPageStep } from '../productization/acquisition.js'
 import { TENANT_KIND, describeSupportersStep, resolveTenantKind } from '../productization/tenantKind.js'
@@ -17,10 +18,12 @@ function result(status, canComplete, validation = null) {
   return { status, canComplete, validation }
 }
 
-function hasTheme(config) {
+// 既定色のままは「決めた」ではない。触っていないものを完了にしない。
+function themeChosen(config) {
   const colors = config.colors || {}
-  return ['deepBlue', 'oceanTeal', 'lightBlue', 'amber', 'accent']
-    .every(key => /^#[0-9a-f]{6}$/i.test(String(colors[key] || '')))
+  const base = DEFAULT_CONFIG.colors || {}
+  // 未設定は既定のままという意味。指定があって既定と違うときだけ「決めた」。
+  return Object.keys(base).some(key => colors[key] !== undefined && String(colors[key]) !== String(base[key]))
 }
 
 // BLOCKEDは「エラー」ではなく「今は進めない」を表す。利用者が操作できる状態、
@@ -66,24 +69,23 @@ export function deriveOnboardingSteps({
   meta = {},
   acquisition = null,
   supporters = null,
+  hasFanPageRecord = false,
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
-  const tenantKind = resolveTenantKind(config)
+  const tenantKind = resolveTenantKind(config, { hasFanPageRecord })
   const profileComplete = Boolean(tenant.displayName && config.brand?.pageTitle)
   const dataSourceSelected = config.platform?.readSource === 'db'
     ? Boolean(config.platform?.publicApiBaseUrl)
     : Boolean(config.sheets)
   const connectionComplete = connection?.status === 'success'
   const benefitsRequired = (config.views || []).some(view => ['menu', 'rights'].includes(view.id) && view.enabled)
-  const benefitsComplete = Array.isArray(config.benefitTiers) && config.benefitTiers.length > 0
+  // 既定の特典は別の配信者のもの。そのままを「設定済み」にすると、他人の
+  // 特典内容で公開してしまう。自分で決めたときだけ完了とする。
+  const benefitsComplete = Array.isArray(config.benefitTiers)
+    && config.benefitTiers.length > 0
+    && JSON.stringify(config.benefitTiers) !== JSON.stringify(DEFAULT_CONFIG.benefitTiers)
 
   const raw = [
-    {
-      id: 'account_created',
-      title: '利用者確認',
-      required: false,
-      ...result(S.OPTIONAL, false, { message: 'SaaS認証方式は未決定です。既存の管理画面保護を継続します。' }),
-    },
     {
       id: 'fanpage_created',
       title: '歌推しページの準備',
@@ -101,11 +103,12 @@ export function deriveOnboardingSteps({
       }),
     },
     {
+      // 既定の配色のままでも公開できる。やらなくてよいことを必須にしない。
       id: 'theme_complete',
-      title: 'テーマ',
-      required: true,
-      ...result(hasTheme(config) ? S.COMPLETE : S.IN_PROGRESS, hasTheme(config), {
-        message: hasTheme(config) ? '公開可能な配色を確認しました。' : '配色設定を確認してください。',
+      title: '色を変える',
+      required: false,
+      ...result(themeChosen(config) ? S.COMPLETE : S.OPTIONAL, themeChosen(config), {
+        message: themeChosen(config) ? '色を変更しました。' : '既定の色のまま公開できます。',
       }),
     },
     // 新規顧客の正規データソースはCentral DBで固定する。内部実装である

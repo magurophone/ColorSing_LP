@@ -221,6 +221,7 @@ function OnboardingApp() {
     publishing,
     meta,
     acquisition,
+    hasFanPageRecord: Boolean(acquisition.portal),
   })
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
   // 状態ごとの案内があるステップは、静的な文言より優先する。
@@ -380,35 +381,26 @@ function OnboardingApp() {
             </div>
             <h2 id="active-step-title" className="mt-4 text-2xl font-bold text-light-blue">{activeStep.title}</h2>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-light-blue/15 bg-black/15 p-4 sm:col-span-2">
-                <p className="text-xs font-bold text-amber">今やること</p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-200">{guide.now}</p>
-              </div>
-              <div className="rounded-xl border border-light-blue/15 bg-black/10 p-4">
-                <p className="text-xs font-bold text-light-blue">なぜ必要か</p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-400">{guide.why}</p>
-              </div>
-              <div className="rounded-xl border border-light-blue/15 bg-black/10 p-4">
-                <p className="text-xs font-bold text-light-blue">完了条件</p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-400">{guide.completion}</p>
-              </div>
-            </div>
+            {/* やることを一つだけ大きく出す。理由や条件は見出しごと常設しない。 */}
+            <p className="mt-4 text-base leading-relaxed text-gray-100">{guide.now}</p>
 
-            <div className="mt-4 rounded-xl border border-light-blue/15 bg-light-blue/5 p-4">
-              <p className="text-xs font-bold text-light-blue">自動判定結果</p>
-              <p className="mt-2 text-sm text-gray-300">{activeStep.validation?.message || 'このステップの状態を確認しています。'}</p>
-              <p className="mt-2 text-xs text-gray-500">後で変更: {guide.later}</p>
-              {guide.action && (
-                <a
-                  href={STATIC_PAGES[guide.action.route] || guide.action.route}
-                  data-testid="step-action"
-                  className="mt-4 inline-block rounded-xl border border-light-blue/50 bg-light-blue/20 px-5 py-3 text-sm font-bold text-light-blue"
-                >
-                  {guide.action.label}
-                </a>
-              )}
-            </div>
+            {guide.action && (
+              <a
+                href={STATIC_PAGES[guide.action.route] || guide.action.route}
+                data-testid="step-action"
+                className="mt-5 inline-block rounded-xl border border-light-blue/50 bg-light-blue/20 px-5 py-3 text-sm font-bold text-light-blue"
+              >
+                {guide.action.label}
+              </a>
+            )}
+
+            {/* 理由・完了条件・後で変更は、知りたい人だけが開く。 */}
+            <details className="mt-5 text-sm text-gray-400">
+              <summary className="cursor-pointer text-xs text-gray-500">くわしく</summary>
+              <p className="mt-3 leading-relaxed">{guide.why}</p>
+              <p className="mt-2 leading-relaxed">完了の条件: {guide.completion}</p>
+              <p className="mt-2 leading-relaxed">あとから変更: {guide.later}</p>
+            </details>
 
             {activeStep.id === 'basic_profile_complete' && (
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -477,8 +469,8 @@ function OnboardingApp() {
               </div>
             )}
 
-            <div className="mt-8 flex items-center justify-between border-t border-light-blue/15 pt-5">
-              <p className="text-xs text-gray-500">次へ進む条件: {activeStep.canComplete ? 'このステップは完了可能です。' : guide.completion}</p>
+            {/* 完了条件は「くわしく」に一度だけ書く。同じ文をここへ再掲しない。 */}
+            <div className="mt-8 flex items-center justify-end border-t border-light-blue/15 pt-5">
               {model.currentStep && model.currentStep.id !== activeStep.id && (
                 <button type="button" onClick={() => selectStep(model.currentStep.id)} className="text-sm font-bold text-light-blue">今やることへ →</button>
               )}

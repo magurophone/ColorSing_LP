@@ -80,3 +80,31 @@ test('新規顧客向けの文言に内部実装の語を出さない', () => {
     assert.equal(text.includes(word), false, `${word} が残っている`)
   }
 })
+
+test('既定の特典のままを「設定済み」にしない', async () => {
+  const { default: DEFAULT_CONFIG } = await import('../src/lib/defaults.js')
+  const withDefaults = {
+    ...newConfig,
+    views: [{ id: 'menu', enabled: true }],
+    benefitTiers: DEFAULT_CONFIG.benefitTiers,
+  }
+  const step = deriveOnboardingSteps({ config: withDefaults })
+    .steps.find(item => item.id === 'benefit_structure_complete')
+  // 他人の特典内容のまま公開してしまわないよう、未完了として扱う。
+  assert.notEqual(step.status, 'complete')
+
+  const withOwn = { ...withDefaults, benefitTiers: [{ key: '3k', label: '自分で決めた特典' }] }
+  const chosen = deriveOnboardingSteps({ config: withOwn })
+    .steps.find(item => item.id === 'benefit_structure_complete')
+  assert.equal(chosen.status, 'complete')
+})
+
+test('歌推しページを作った人は、設定に古いシートIDが残っていても新規顧客のまま', () => {
+  const staleConfig = { sheets: { spreadsheetId: 'demo' } }
+  const asLegacy = deriveOnboardingSteps({ config: staleConfig }).steps.map(step => step.id)
+  assert.equal(asLegacy.includes('data_source_connected'), true)
+
+  const asNew = deriveOnboardingSteps({ config: staleConfig, hasFanPageRecord: true }).steps.map(step => step.id)
+  assert.equal(asNew.includes('data_source_connected'), false)
+  assert.equal(asNew.includes('supporters_ready'), true)
+})

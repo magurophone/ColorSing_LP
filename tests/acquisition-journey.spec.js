@@ -45,7 +45,7 @@ test('歌推しページ未作成のDAPは、行き止まりではなく作成�
 
   const detail = page.getByTestId('step-action')
   await expect(page.getByRole('heading', { name: '歌推しページの準備' }).first()).toBeVisible()
-  await expect(page.getByText('まだ歌推しページを作っていません')).toBeVisible()
+  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toBeVisible()
   await expect(detail).toBeVisible()
   await expect(detail).toHaveText('歌推しページを作成する')
   // 以前の「歌推しページが作成されていること。」は出さない。
@@ -73,7 +73,7 @@ test('作成の導線から歌推しページを作り、DAPへ戻ると準備�
   // 作成完了の導線からDAPへ戻る。
   await page.getByTestId('fanpage-next').click()
   await expect(page.getByRole('heading', { name: '歌推しページの準備' }).first()).toBeVisible()
-  await expect(page.getByText('まだ歌推しページを作っていません')).toHaveCount(0)
+  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toHaveCount(0)
   await expect(page.getByTestId('step-action')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-4-dap-ready-${testInfo.project.name}.png`, fullPage: true })
 })
@@ -99,12 +99,12 @@ test('歌推しページ作成後は基本情報から公開準備まで順に�
 
   // 代わりに、利用者の作業であるリスナー情報を出す。
   await page.getByRole('button', { name: /リスナー情報/ }).first().click()
-  await expect(page.getByText('リスナー情報の管理画面を準備しています')).toBeVisible()
+  await expect(page.getByText('準備ができると、この画面からリスナーを追加・編集できます。')).toBeVisible()
 
   await page.screenshot({ path: `${OUT}/journey-5-dap-progress-${testInfo.project.name}.png`, fullPage: true })
   // 歌推しページの準備が完了として残り続けることが、この通しで守りたい状態。
   await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
-  await expect(page.getByText('まだ歌推しページを作っていません')).toHaveCount(0)
+  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toHaveCount(0)
 })
 
 test('準備中の歌推しページはDAPでも待ちとして示し、エラーにしない', async ({ page }, testInfo) => {
@@ -128,7 +128,7 @@ test('準備中の歌推しページはDAPでも待ちとして示し、エラ�
     }))
   })
   await page.goto('/onboarding.html')
-  await expect(page.getByText('歌推しページを準備しています')).toBeVisible()
+  await expect(page.getByText('歌推しページの準備がまだ完了していません', { exact: false })).toBeVisible()
   await expect(page.getByTestId('step-action')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-6-dap-preparing-${testInfo.project.name}.png`, fullPage: true })
 })

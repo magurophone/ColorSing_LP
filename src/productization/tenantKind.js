@@ -16,9 +16,12 @@ export const DATA_SOURCE = Object.freeze({
   SHEETS: 'sheets',
 })
 
-export function resolveTenantKind(config = {}) {
+export function resolveTenantKind(config = {}, { hasFanPageRecord = false } = {}) {
   const declared = config.platform?.tenantKind
   if (declared === TENANT_KIND.NEW || declared === TENANT_KIND.LEGACY) return declared
+  // この画面から歌推しページを作った人は新規顧客。あとから設定値が変わっても
+  // legacyへ落ちないよう、作成の事実を優先する。
+  if (hasFanPageRecord) return TENANT_KIND.NEW
   // 既存顧客はスプレッドシートIDを持っている。新規顧客には作らせない。
   if (String(config.sheets?.spreadsheetId ?? '').trim()) return TENANT_KIND.LEGACY
   return TENANT_KIND.NEW
