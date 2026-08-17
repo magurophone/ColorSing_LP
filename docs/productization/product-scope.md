@@ -31,6 +31,31 @@
 | 作成画面 | `src/fanpage/FanPageCreateApp.jsx` / `fanpage-create.html` |
 | 利用者向けの表示 | 「歌推しページを作成する」「歌推しページを準備しています」「歌推しページの作成が完了しました」 |
 
+## 新規顧客と既存顧客のデータ経路
+
+```text
+既存顧客
+Google Sheets → 互換維持・安全な移行 → Central DB / 管理画面
+
+新規顧客
+管理画面 → Central DB → 歌推しページ
+```
+
+Google Sheetsは**既存顧客を壊さず移行するためのlegacy data source**であり、新規顧客の標準運用ではない。新規顧客へテンプレートSheetのコピーやURL登録を求めない。上位指示書は、Spreadsheet ID・「リンクを知っている全員」・Drive画像公開設定を、消すべき顧客の認知負荷として名指ししている。新しい商品で旧運用を再生産しない。
+
+| | 新規顧客 | 既存顧客 |
+| --- | --- | --- |
+| `resolveTenantKind` | `new` | `legacy` |
+| 正規データソース | Central DB | Google Sheets |
+| DAPの手順 | 支援者情報 | データ管理方法・データ接続 |
+| Sheets→DB移行 | 対象外 | 対象 |
+
+判定は `src/productization/tenantKind.js`。スプレッドシートIDを持つ設定だけをlegacyとするため、既存顧客の手順と表示は変わらない。
+
+`DataSource` は内部実装の概念なので利用者へ選ばせない。DAPには「データ管理方法を選択してください」ではなく「支援者情報を設定しましょう」のように、利用者が実際にやりたい作業を出す。Portalを顧客向けに出していたのと同じ誤りを繰り返さない。
+
+Sheetsが残るのは、既存顧客のdry-run・mirror・semantic diff・shadow read・切替という移行経路と、将来のインポート／エクスポートである。これらは移行・互換の機能であって、新規オンボーディングの必須工程ではない。Sheets→DBのmigration DAPは既存顧客専用として別に扱う。
+
 ## 共通基盤へ寄せている理由
 
 将来、上位の総合管理ツールから歌推しページを作成・管理できるようにするため、Provisioning と DataSource の境界を共通基盤へ寄せている。歌推しページ側の実装がその境界を直接持たないのは、上位層が同じ境界を使えるようにするためである。

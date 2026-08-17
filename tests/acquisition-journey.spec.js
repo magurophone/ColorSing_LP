@@ -93,13 +93,13 @@ test('歌推しページ作成後は基本情報から公開準備まで順に�
   await page.getByRole('textbox', { name: '表示名' }).fill('通しテスト')
   await page.getByRole('textbox', { name: 'ページ名' }).fill('通しテスト 歌推しページ')
 
-  // データ接続。demoを使って接続確認まで通す。
-  await page.getByRole('button', { name: /データ接続|データ管理方法/ }).first().click()
-  const sheetInput = page.getByRole('textbox', { name: /スプレッドシート/ })
-  if (await sheetInput.count()) {
-    await sheetInput.fill('demo')
-    await page.getByRole('button', { name: /接続を確認|確認/ }).first().click()
-  }
+  // 新規顧客にスプレッドシートの用意を求めない。手順そのものを出さない。
+  await expect(page.getByRole('button', { name: /データ管理方法/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /データ接続/ })).toHaveCount(0)
+
+  // 代わりに、利用者の作業である支援者情報を出す。
+  await page.getByRole('button', { name: /支援者情報/ }).first().click()
+  await expect(page.getByText('支援者情報の管理画面を準備しています')).toBeVisible()
 
   await page.screenshot({ path: `${OUT}/journey-5-dap-progress-${testInfo.project.name}.png`, fullPage: true })
   // 歌推しページの準備が完了として残り続けることが、この通しで守りたい状態。

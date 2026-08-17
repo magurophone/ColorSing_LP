@@ -1,5 +1,6 @@
 import { createTenantSnapshot } from '../productization/tenant.js'
 import { deriveAcquisitionState, describeFanPageStep } from '../productization/acquisition.js'
+import { TENANT_KIND, describeSupportersStep, resolveTenantKind } from '../productization/tenantKind.js'
 
 export const ONBOARDING_STATUS = Object.freeze({
   PENDING: 'pending',
@@ -48,6 +49,13 @@ function fanPageStep(tenant, acquisition) {
   }
 }
 
+function supportersStep(supporters) {
+  const guidance = describeSupportersStep(supporters)
+  const ready = supporters?.status === 'ready'
+  const status = ready ? S.COMPLETE : BLOCKING_STATUS[guidance.blocking] ?? S.IN_PROGRESS
+  return { ...result(status, ready, { message: guidance.headline }), guidance }
+}
+
 export function deriveOnboardingSteps({
   config = {},
   pathname = '',
@@ -57,8 +65,10 @@ export function deriveOnboardingSteps({
   publishing = false,
   meta = {},
   acquisition = null,
+  supporters = null,
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
+  const tenantKind = resolveTenantKind(config)
   const profileComplete = Boolean(tenant.displayName && config.brand?.pageTitle)
   const dataSourceSelected = config.platform?.readSource === 'db'
     ? Boolean(config.platform?.publicApiBaseUrl)
@@ -98,24 +108,36 @@ export function deriveOnboardingSteps({
         message: hasTheme(config) ? '公開可能な配色を確認しました。' : '配色設定を確認してください。',
       }),
     },
-    {
-      id: 'data_source_selected',
-      title: 'データ管理方法',
-      required: true,
-      ...result(dataSourceSelected ? S.COMPLETE : S.BLOCKED, dataSourceSelected, {
-        message: dataSourceSelected ? '現在利用するデータ管理方法を確認しました。' : '利用するデータ管理方法が未設定です。',
-      }),
-    },
-    {
-      id: 'data_source_connected',
-      title: 'データ接続',
-      required: true,
-      ...result(
-        connectionComplete ? S.COMPLETE : (connection?.status === 'error' ? S.WARNING : S.IN_PROGRESS),
-        connectionComplete,
-        connection,
-      ),
-    },
+    // 新規顧客の正規データソースはCentral DBで固定する。内部実装である
+    // DataSourceを選ばせず、支援者情報という利用者の作業を出す。
+    // 既存顧客はSheetsのままなので、従来の2手順を変えない。
+    ...(tenantKind === TENANT_KIND.NEW ? [
+      {
+        id: 'supporters_ready',
+        title: '支援者情報',
+        required: true,
+        ...supportersStep(supporters),
+      },
+    ] : [
+      {
+        id: 'data_source_selected',
+        title: 'データ管理方法',
+        required: true,
+        ...result(dataSourceSelected ? S.COMPLETE : S.BLOCKED, dataSourceSelected, {
+          message: dataSourceSelected ? '現在利用するデータ管理方法を確認しました。' : '利用するデータ管理方法が未設定です。',
+        }),
+      },
+      {
+        id: 'data_source_connected',
+        title: 'データ接続',
+        required: true,
+        ...result(
+          connectionComplete ? S.COMPLETE : (connection?.status === 'error' ? S.WARNING : S.IN_PROGRESS),
+          connectionComplete,
+          connection,
+        ),
+      },
+    ]),
     {
       id: 'benefit_structure_complete',
       title: '公開内容',
