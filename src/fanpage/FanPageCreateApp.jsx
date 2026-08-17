@@ -135,7 +135,9 @@ export default function FanPageCreateApp() {
 
   const view = describeFanPageCreation(record)
   const canCreate = availability.canCreate && Boolean(pageName.trim()) && !running
-  const preview = publicAddressPreview(previewBase(), availability.address || 'あなたのページ')
+  // 未入力のときは日本語の見本を出さない。ここに日本語は使えないと
+  // すぐ上で説明しているのに、見本がそれを破ることになる。
+  const preview = availability.address ? publicAddressPreview(previewBase(), availability.address) : ''
 
   if (record) {
     return (
@@ -248,8 +250,19 @@ export default function FanPageCreateApp() {
             </button>
           )}
 
-          <p className="mt-3 text-xs text-gray-400">このアドレスで公開されます</p>
-          <p className="mt-1 break-all text-sm text-gray-100" data-testid="address-preview">{preview}</p>
+          {/* 日本語のページ名からは候補を作れない。手が止まらないよう例を出す。 */}
+          {!addressInput.trim() && !showSuggestion && (
+            <p className="mt-3 text-xs text-gray-400" data-testid="address-hint">
+              例: uta-page、mika-music、maguro2 のように、好きな英字を入れてください。配信名のローマ字表記でも構いません。
+            </p>
+          )}
+
+          {preview && (
+            <>
+              <p className="mt-3 text-xs text-gray-400">このアドレスで公開されます</p>
+              <p className="mt-1 break-all text-sm text-gray-100" data-testid="address-preview">{preview}</p>
+            </>
+          )}
 
           <p
             className={`mt-4 text-sm ${AVAILABILITY_TONE[availability.status] ?? 'text-gray-400'}`}

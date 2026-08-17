@@ -65,16 +65,17 @@ const GUIDANCE = {
     later: '接続先は公開後も変更できます。',
   },
   benefit_structure_complete: {
-    now: '特典の内容を決めましょう。1k / 5k / 10kなど、歌推しの段階ごとに表示する内容を設定します。',
+    now: '特典の内容を決めましょう。歌推しの段階ごとに、受け取れるものを設定します。段階は自由に決められます。',
     why: '最初は見本の内容が入っています。そのままだと他の配信者の特典が表示されます。',
     completion: '自分の特典を保存すること。',
     later: '公開後も追加・変更できます。',
   },
   preview_verified: {
-    now: 'PCとスマートフォンの表示をプレビューしてください。',
-    why: 'デザインと文章の最終判断は自動化できないため、目視確認が必要です。',
-    completion: '表示名、色、公開内容、操作を確認し、確認ボタンを押すこと。',
-    later: '設定を変更すると、もう一度プレビュー確認してください。',
+    now: 'できあがりを見てみましょう。PCとスマートフォンの両方で確認してから次へ進みます。',
+    // 見た目の良し悪しだけは機械が判定できない。ここだけ本人の確認に頼る理由。
+    why: '文字が読めるか、内容が意図どおりかは、実際に見ないと分かりません。ここだけはご自身の確認が必要です。',
+    completion: '表示を見て、確認ボタンを押すこと。',
+    later: '設定を変えたら、もう一度見てください。',
   },
   publish_ready: {
     now: '公開前の最終確認です。残っている項目があれば先に済ませてください。',
@@ -465,7 +466,9 @@ function OnboardingApp() {
                 {/* 押せないボタンを理由なしで置かない。 */}
                 {(!publishAvailable || !activeStep.canComplete) && (
                   <p className="mt-3 text-xs text-gray-500" data-testid="publish-blocked-reason">
-                    {publishAvailable ? '残っている項目を終えると公開できます。' : '公開の準備ができると押せるようになります。'}
+                    {publishAvailable
+                      ? '残っている項目を終えると公開できます。'
+                      : '公開の受付をこちらで準備しています。準備ができると、ここから公開できます。'}
                   </p>
                 )}
                 {publishResult && <p role="status" className={`mt-4 rounded-xl border p-4 text-sm ${publishResult.status === 'verified' || publishResult.status === 'published' ? 'border-green-500/35 text-green-400' : 'border-amber/35 text-amber'}`}>{publishResult.message}</p>}
