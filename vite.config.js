@@ -27,6 +27,7 @@ export default defineConfig({
         products: resolve(__dirname, 'products.html'),
         start: resolve(__dirname, 'start.html'),
         signup: resolve(__dirname, 'signup.html'),
+        devReset: resolve(__dirname, 'dev-reset.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
