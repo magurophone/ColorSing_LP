@@ -25,7 +25,11 @@ async function installEntry(page, { withProviders = true } = {}) {
       provisioningAdapter: { executeStep: async stepId => ({ resource: stepId }) },
     }
   })
-  if (!withProviders) return
+  if (!withProviders) {
+    // 事業者未接続の本番を再現する。空を注入することで仮処理も使わせない。
+    await page.addInitScript(() => { window.__entryAdapters = {} })
+    return
+  }
   await page.addInitScript(() => {
     window.__entryAdapters = {
       payment: { requestEntitlement: async () => ({ status: 'granted' }) },

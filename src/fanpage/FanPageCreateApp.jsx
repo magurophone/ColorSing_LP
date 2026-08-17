@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AVAILABILITY, createAddressAvailability } from '../productization/addressAvailability'
 import { publicAddressPreview, suggestPublicAddress } from '../productization/publicAddress'
+import { isLocalPreview } from '../productization/localPreview'
 import {
   beginFanPageCreation,
   clearFanPageCreation,
@@ -21,6 +22,8 @@ function previewBase() {
 function resolveAdapters() {
   const injected = typeof window !== 'undefined' ? window.__fanPageCreateAdapters : null
   if (injected) return { ...injected, demo: false }
+  // 仮実装は開発機のブラウザだけ。本番で偽の重複確認や作成を動かさない。
+  if (!isLocalPreview()) return { demo: false, checkAvailability: null, provisioningAdapter: null }
   // 未接続時の仮実装。画面の状態を確認できるようにするためのもの。
   const taken = new Set(['magurophone', 'colorsing', 'test'])
   return {

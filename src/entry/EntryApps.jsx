@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { loadConfig } from '../lib/configIO'
+import { PLACEHOLDER_NOTICE, isLocalPreview } from '../productization/localPreview'
 import { FAN_PAGE_PLAN_ID, describePrice, findPlan } from '../productization/plans'
 import {
   loadAcquisitionSession,
@@ -10,11 +11,19 @@ import {
 
 // 決済と認証の事業者は未確定。注入されていなければ受付を開かず、準備中として
 // 正直に示す。押せない操作を置かない。
+// 開発機のブラウザだけは、通しで確認できるよう仮処理を使う。仮であることは
+// 画面へ明示し、本番では決して開かない。
 function resolveEntryAdapters() {
   const injected = typeof window !== 'undefined' ? window.__entryAdapters : null
+  // 注入されている場合は、中身が空でもそれを正とする。未接続の本番を再現できる。
+  if (injected) {
+    return { payment: injected.payment ?? null, identity: injected.identity ?? null, placeholder: false }
+  }
+  if (!isLocalPreview()) return { payment: null, identity: null, placeholder: false }
   return {
-    payment: injected?.payment ?? null,
-    identity: injected?.identity ?? null,
+    placeholder: true,
+    payment: { async requestEntitlement() { return { status: 'granted' } } },
+    identity: { async createAccount() { return { status: 'ready' } } },
   }
 }
 
@@ -149,6 +158,7 @@ export function StartApp() {
         >
           お申し込みに進む
         </button>
+        {adapters.placeholder && <p className="mt-5 text-xs text-gray-500" data-testid="placeholder-notice">{PLACEHOLDER_NOTICE}</p>}
       </section>
     </Shell>
   )
@@ -207,6 +217,7 @@ export function SignupApp() {
         >
           登録して次へ
         </button>
+        {adapters.placeholder && <p className="mt-5 text-xs text-gray-500" data-testid="placeholder-notice">{PLACEHOLDER_NOTICE}</p>}
       </form>
     </Shell>
   )

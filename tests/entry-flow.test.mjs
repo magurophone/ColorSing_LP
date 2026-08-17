@@ -89,3 +89,23 @@ test('入口の各段階が、そのまま獲得導線の状態になる', () =>
   const withFanPage = toAcquisitionInput(loadAcquisitionSession(storage), { status: 'ready' })
   assert.equal(deriveAcquisitionState(withFanPage), A.FANPAGE_READY)
 })
+
+test('仮処理を許す場所を開発機のブラウザだけに限る', async () => {
+  const { isLocalPreview } = await import('../src/productization/localPreview.js')
+  const original = globalThis.window
+  try {
+    for (const [hostname, expected] of [
+      ['localhost', true],
+      ['127.0.0.1', true],
+      ['[::1]', true],
+      ['colorsing-dashboard.github.io', false],
+      ['service.example.com', false],
+    ]) {
+      globalThis.window = { location: { hostname } }
+      assert.equal(isLocalPreview(), expected, hostname)
+    }
+  } finally {
+    if (original === undefined) delete globalThis.window
+    else globalThis.window = original
+  }
+})
