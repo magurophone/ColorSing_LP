@@ -81,22 +81,18 @@ test('新規顧客向けの文言に内部実装の語を出さない', () => {
   }
 })
 
-test('既定の特典のままを「設定済み」にしない', async () => {
-  const { default: DEFAULT_CONFIG } = await import('../src/lib/defaults.js')
-  const withDefaults = {
-    ...newConfig,
-    views: [{ id: 'menu', enabled: true }],
-    benefitTiers: DEFAULT_CONFIG.benefitTiers,
-  }
-  const step = deriveOnboardingSteps({ config: withDefaults })
-    .steps.find(item => item.id === 'benefit_structure_complete')
-  // 他人の特典内容のまま公開してしまわないよう、未完了として扱う。
-  assert.notEqual(step.status, 'complete')
+test('config.jsが積んでいる特典を「設定済み」にしない', () => {
+  const withViews = { ...newConfig, views: [{ id: 'menu', enabled: true }], benefitTiers: [{ key: '1k' }] }
 
-  const withOwn = { ...withDefaults, benefitTiers: [{ key: '3k', label: '自分で決めた特典' }] }
-  const chosen = deriveOnboardingSteps({ config: withOwn })
+  // config.js 由来の特典しか無い状態。顧客はまだ何も決めていない。
+  const untouched = deriveOnboardingSteps({ config: withViews })
     .steps.find(item => item.id === 'benefit_structure_complete')
-  assert.equal(chosen.status, 'complete')
+  assert.notEqual(untouched.status, 'complete')
+
+  // この端末で保存したときだけ完了とする。
+  const saved = deriveOnboardingSteps({ config: withViews, storedConfig: { benefitTiers: [{ key: '3k' }] } })
+    .steps.find(item => item.id === 'benefit_structure_complete')
+  assert.equal(saved.status, 'complete')
 })
 
 test('歌推しページを作った人は、設定に古いシートIDが残っていても新規顧客のまま', () => {

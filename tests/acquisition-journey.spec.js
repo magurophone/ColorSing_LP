@@ -72,8 +72,8 @@ test('作成の導線から歌推しページを作り、DAPへ戻ると準備�
 
   // 作成完了の導線からDAPへ戻る。
   await page.getByTestId('fanpage-next').click()
-  await expect(page.getByRole('heading', { name: '歌推しページの準備' }).first()).toBeVisible()
-  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toHaveCount(0)
+  // 作成が済んだら、完了と書いてあるだけの項目を手順へ残さない。
+  await expect(page.getByRole('heading', { name: '歌推しページの準備' })).toHaveCount(0)
   await expect(page.getByTestId('step-action')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-4-dap-ready-${testInfo.project.name}.png`, fullPage: true })
 })
@@ -102,9 +102,8 @@ test('歌推しページ作成後は基本情報から公開準備まで順に�
   await expect(page.getByText('準備ができると、この画面からリスナーを追加・編集できます。')).toBeVisible()
 
   await page.screenshot({ path: `${OUT}/journey-5-dap-progress-${testInfo.project.name}.png`, fullPage: true })
-  // 歌推しページの準備が完了として残り続けることが、この通しで守りたい状態。
-  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
-  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toHaveCount(0)
+  // 作成済みなので、作成を促す項目は手順から消えている。
+  await expect(page.getByRole('button', { name: /歌推しページの準備/ })).toHaveCount(0)
 })
 
 test('準備中の歌推しページはDAPでも待ちとして示し、エラーにしない', async ({ page }, testInfo) => {

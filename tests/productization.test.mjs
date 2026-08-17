@@ -25,6 +25,8 @@ test('onboarding completion is derived from config, validation, preview, and ver
     previewConfirmed: true,
     publishAvailable: true,
     meta: { lastModified: 100, lastPublishedVerified: 101 },
+    // 特典は顧客がこの端末で保存したものとして扱う。色は既定のまま。
+    storedConfig: { benefitTiers: [{ key: '5k' }] },
   })
 
   assert.equal(model.currentStep, null)

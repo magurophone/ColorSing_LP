@@ -48,7 +48,7 @@ test('state-driven onboarding reaches preview and blocks publish without exposin
   await page.getByRole('button', { name: 'プレビューを確認しました' }).click()
 
   await page.getByRole('button').filter({ hasText: '公開準備' }).click()
-  await expect(page.getByText('公開サービスの準備待ちです。入力した設定はこの端末に保存されています。')).toBeVisible()
+  await expect(page.getByText('公開の準備をしています。ここまでに入力した内容は保存されているので、そのままお待ちください。')).toBeVisible()
   await expect(page.locator('body')).not.toContainText(/GitHub|Personal Access Token|repository|branch|commit|push|workflow|config\.js|customers\.json/i)
   await expectNoHorizontalOverflow(page)
 })

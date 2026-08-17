@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { loadConfig, loadConfigMeta, saveConfig, saveConfigMeta } from '../lib/configIO'
+import { loadConfig, loadConfigMeta, loadStoredConfig, saveConfig, saveConfigMeta } from '../lib/configIO'
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
 import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
 import { deriveOnboardingSteps } from './state'
@@ -34,12 +34,6 @@ const STATUS_STYLES = {
 }
 
 const GUIDANCE = {
-  account_created: {
-    now: '現在の管理画面の利用方法をそのまま使えます。',
-    why: '将来のSaaSアカウント方式は未確定のため、この画面では新しい登録を要求しません。',
-    completion: '認証方式が決まるまでは任意項目です。',
-    later: '認証導入後も既存顧客を自動移行しません。',
-  },
   fanpage_created: {
     now: 'あなたの歌推しページが作成済みか確認します。',
     why: '設定と公開先を安全に同じ利用者へ結び付けるためです。',
@@ -53,10 +47,10 @@ const GUIDANCE = {
     later: '公開後も変更できます。',
   },
   theme_complete: {
-    now: '現在の配色を確認し、必要なら管理画面で調整してください。',
-    why: '文字が読める安全な初期テーマで公開するためです。',
-    completion: '必要な基本色が有効なカラーコードで設定済み。',
-    later: '公開後もプレビューしてから変更できます。',
+    now: 'ページの色を決めましょう。プリセットから近い雰囲気を選ぶのが早いです。',
+    why: '既定の色のままでも公開できます。変えたいときだけで大丈夫です。',
+    completion: '色を選んで保存すること。',
+    later: '公開後もいつでも変えられます。',
   },
   data_source_selected: {
     now: '現在利用できるGoogle Sheets方式を使用します。',
@@ -71,9 +65,9 @@ const GUIDANCE = {
     later: '接続先は公開後も変更できます。',
   },
   benefit_structure_complete: {
-    now: '公開する画面と特典内容が意図どおりか確認してください。',
-    why: '獲得条件と表示内容の食い違いを防ぐためです。',
-    completion: '特典画面を使う場合は、少なくとも1つの特典設定があること。',
+    now: '特典の内容を決めましょう。1k / 5k / 10kなど、歌推しの段階ごとに表示する内容を設定します。',
+    why: '最初は見本の内容が入っています。そのままだと他の配信者の特典が表示されます。',
+    completion: '自分の特典を保存すること。',
     later: '公開後も追加・変更できます。',
   },
   preview_verified: {
@@ -83,16 +77,16 @@ const GUIDANCE = {
     later: '設定を変更すると、もう一度プレビュー確認してください。',
   },
   publish_ready: {
-    now: '必須項目と公開サービスの準備状態を確認します。',
-    why: '不完全なページを誤って公開しないためです。',
-    completion: '前の必須項目が完了し、公開サービスが利用可能。',
-    later: '公開サービスの接続は運営側で変更できます。',
+    now: '公開前の最終確認です。残っている項目があれば先に済ませてください。',
+    why: '中途半端な状態で公開してしまわないためです。',
+    completion: '必要な項目がすべて終わっていること。',
+    later: 'いつでも公開し直せます。',
   },
   published: {
-    now: '設定を公開し、公開ページへ反映されたことを確認します。',
-    why: '公開操作の受付だけでなく、実際の反映まで確認するためです。',
-    completion: '公開先の設定内容が現在の設定と一致すること。',
-    later: '変更後はいつでも再公開できます。',
+    now: '公開しましょう。公開すると、あなたの歌推しページが誰でも見られるようになります。',
+    why: '公開したあと、実際にページへ反映されたかまで確認します。',
+    completion: '公開ページに今の設定が出ていること。',
+    later: '内容を変えたら、また公開し直せます。',
   },
 }
 
@@ -190,7 +184,7 @@ function OnboardingApp() {
   const [validating, setValidating] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [publishResult, setPublishResult] = useState(null)
-  const [activeId, setActiveId] = useState('fanpage_created')
+  const [activeId, setActiveId] = useState(null)
   const [sheetInput, setSheetInput] = useState(() => config.sheets?.spreadsheetId || '')
   const [authenticated, setAuthenticated] = useState(
     () => !config.admin?.password || sessionStorage.getItem('onboarding_auth') === 'true' || sessionStorage.getItem('admin_auth') === 'true',
@@ -222,6 +216,7 @@ function OnboardingApp() {
     meta,
     acquisition,
     hasFanPageRecord: Boolean(acquisition.portal),
+    storedConfig: loadStoredConfig(),
   })
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
   // 状態ごとの案内があるステップは、静的な文言より優先する。
@@ -452,7 +447,7 @@ function OnboardingApp() {
 
             {activeStep.id === 'publish_ready' && !publishAvailable && (
               <div className="mt-6 rounded-xl border border-amber/35 bg-amber/5 p-4 text-sm text-gray-300">
-                公開サービスの準備待ちです。入力した設定はこの端末に保存されています。既存顧客は従来の管理画面から公開できます。
+                公開の準備をしています。ここまでに入力した内容は保存されているので、そのままお待ちください。
               </div>
             )}
 
@@ -465,6 +460,12 @@ function OnboardingApp() {
                   )}
                   {model.tenant.publishedUrl && <a href={model.tenant.publishedUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-light-blue/30 px-5 py-3 text-sm text-light-blue">公開ページを開く</a>}
                 </div>
+                {/* 押せないボタンを理由なしで置かない。 */}
+                {(!publishAvailable || !activeStep.canComplete) && (
+                  <p className="mt-3 text-xs text-gray-500" data-testid="publish-blocked-reason">
+                    {publishAvailable ? '残っている項目を終えると公開できます。' : '公開の準備ができると押せるようになります。'}
+                  </p>
+                )}
                 {publishResult && <p role="status" className={`mt-4 rounded-xl border p-4 text-sm ${publishResult.status === 'verified' || publishResult.status === 'published' ? 'border-green-500/35 text-green-400' : 'border-amber/35 text-amber'}`}>{publishResult.message}</p>}
               </div>
             )}

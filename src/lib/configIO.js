@@ -84,6 +84,17 @@ export function loadBaseConfig() {
   return merged
 }
 
+// この端末で顧客が実際に保存した値だけを返す。config.js が最初から積んでいる
+// 値と、顧客が自分で決めた値を区別するために使う。
+export function loadStoredConfig() {
+  if (typeof window === 'undefined') return null
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
 // 設定を読み込む（config.js + デフォルト → localStorage で上書き）
 export function loadConfig() {
   const baseConfig = loadBaseConfig()

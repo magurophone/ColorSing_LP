@@ -19,11 +19,10 @@ function result(status, canComplete, validation = null) {
 }
 
 // 既定色のままは「決めた」ではない。触っていないものを完了にしない。
-function themeChosen(config) {
-  const colors = config.colors || {}
-  const base = DEFAULT_CONFIG.colors || {}
-  // 未設定は既定のままという意味。指定があって既定と違うときだけ「決めた」。
-  return Object.keys(base).some(key => colors[key] !== undefined && String(colors[key]) !== String(base[key]))
+// 顧客が自分で保存したときだけ「決めた」とする。config.jsが最初から積んで
+// いる値を、本人の選択と取り違えない。
+function themeChosen(stored) {
+  return Boolean(stored?.colors && Object.keys(stored.colors).length > 0)
 }
 
 // BLOCKEDは「エラー」ではなく「今は進めない」を表す。利用者が操作できる状態、
@@ -70,6 +69,7 @@ export function deriveOnboardingSteps({
   acquisition = null,
   supporters = null,
   hasFanPageRecord = false,
+  storedConfig = null,
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
   const tenantKind = resolveTenantKind(config, { hasFanPageRecord })
@@ -79,21 +79,16 @@ export function deriveOnboardingSteps({
     : Boolean(config.sheets)
   const connectionComplete = connection?.status === 'success'
   const benefitsRequired = (config.views || []).some(view => ['menu', 'rights'].includes(view.id) && view.enabled)
-  // 既定の特典は別の配信者のもの。そのままを「設定済み」にすると、他人の
-  // 特典内容で公開してしまう。自分で決めたときだけ完了とする。
-  const benefitsComplete = Array.isArray(config.benefitTiers)
-    && config.benefitTiers.length > 0
-    && JSON.stringify(config.benefitTiers) !== JSON.stringify(DEFAULT_CONFIG.benefitTiers)
+  // config.js は最初から特典を積んでいる。その中身は別の配信者のものなので、
+  // 顧客がこの端末で保存したときだけ完了とする。
+  const benefitsComplete = Array.isArray(storedConfig?.benefitTiers) && storedConfig.benefitTiers.length > 0
+
+  // 歌推しページの作成は手順ではなく前提。まだ無いときだけ、進むための項目
+  // として出す。出来ていれば「完了」と書かれただけの項目を並べない。
+  const fanPage = { id: 'fanpage_created', title: '歌推しページの準備', required: true, ...fanPageStep(tenant, acquisition) }
 
   const raw = [
-    {
-      id: 'fanpage_created',
-      title: '歌推しページの準備',
-      required: true,
-      // 獲得導線の状態が渡された場合だけ、状態ごとの利用者向け案内を出す。
-      // 未着手・処理待ち・失敗を同じBLOCKEDへ丸めない。
-      ...fanPageStep(tenant, acquisition),
-    },
+    ...(fanPage.status === S.COMPLETE ? [] : [fanPage]),
     {
       id: 'basic_profile_complete',
       title: '基本情報',
@@ -107,8 +102,8 @@ export function deriveOnboardingSteps({
       id: 'theme_complete',
       title: '色を変える',
       required: false,
-      ...result(themeChosen(config) ? S.COMPLETE : S.OPTIONAL, themeChosen(config), {
-        message: themeChosen(config) ? '色を変更しました。' : '既定の色のまま公開できます。',
+      ...result(themeChosen(storedConfig) ? S.COMPLETE : S.OPTIONAL, themeChosen(storedConfig), {
+        message: themeChosen(storedConfig) ? '色を変更しました。' : '既定の色のまま公開できます。',
       }),
     },
     // 新規顧客の正規データソースはCentral DBで固定する。内部実装である
