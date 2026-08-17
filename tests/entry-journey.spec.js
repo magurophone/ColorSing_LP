@@ -1,0 +1,97 @@
+import { expect, test } from '@playwright/test'
+
+const OUT = 'C:/Users/iimy/AppData/Local/Temp/claude/C--Users-iimy-desktop-SLT/9b16243b-f739-42c8-a0a8-d22f6748fa2b/scratchpad'
+
+const CONFIG = {
+  brand: { name: '', pageTitle: '' },
+  sheets: { spreadsheetId: '' },
+  admin: { password: '' },
+  plans: [{ id: 'fanpage', monthlyAmount: 600 }],
+}
+
+// 決済と認証は事業者未確定。注入したときだけ受付が開く。
+async function installEntry(page, { withProviders = true } = {}) {
+  await page.route('**/customer/config.js', route => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: `window.DASHBOARD_CONFIG = ${JSON.stringify(CONFIG)}`,
+  }))
+  await page.addInitScript(`
+    window.__fanPagePreviewBase = 'https://service.example.com';
+  `)
+  await page.addInitScript(() => {
+    window.__fanPageCreateAdapters = {
+      checkAvailability: async () => true,
+      provisioningAdapter: { executeStep: async stepId => ({ resource: stepId }) },
+    }
+  })
+  if (!withProviders) return
+  await page.addInitScript(() => {
+    window.__entryAdapters = {
+      payment: { requestEntitlement: async () => ({ status: 'granted' }) },
+      identity: { createAccount: async () => ({ status: 'ready' }) },
+    }
+  })
+}
+
+test('商品ページは歌推しページだけを売り、上位ツールやSLTを混ぜない', async ({ page }, testInfo) => {
+  await installEntry(page)
+  await page.goto('/products.html')
+  await expect(page.getByTestId('products')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '歌推しページ' })).toBeVisible()
+  await expect(page.getByTestId('plan-price')).toHaveText('月額 600円')
+  await expect(page.getByTestId('existing-login')).toBeVisible()
+
+  const text = await page.locator('body').innerText()
+  for (const word of ['Portal', 'SLT', '総合管理', 'OBS', 'スプレッドシート']) {
+    expect(text, word).not.toContain(word)
+  }
+  await page.screenshot({ path: `${OUT}/entry-1-products-${testInfo.project.name}.png`, fullPage: true })
+})
+
+test('料金が未設定なら金額を作らず、準備中と示す', async ({ page }) => {
+  await page.route('**/customer/config.js', route => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: 'window.DASHBOARD_CONFIG = {"brand":{},"sheets":{"spreadsheetId":""},"admin":{"password":""}}',
+  }))
+  await page.goto('/products.html')
+  await expect(page.getByTestId('plan-price')).toHaveText('料金は準備中です')
+})
+
+test('事業者が未接続なら受付を開かず、押せない操作を置かない', async ({ page }, testInfo) => {
+  await installEntry(page, { withProviders: false })
+  await page.goto('/start.html')
+  await expect(page.getByTestId('entry-waiting')).toBeVisible()
+  await expect(page.getByText('お申し込みの受付を準備しています')).toBeVisible()
+  await expect(page.getByTestId('purchase-button')).toHaveCount(0)
+  await page.screenshot({ path: `${OUT}/entry-2-start-waiting-${testInfo.project.name}.png`, fullPage: true })
+
+  await page.goto('/signup.html')
+  await expect(page.getByText('登録の受付を準備しています')).toBeVisible()
+  await expect(page.getByTestId('signup-submit')).toHaveCount(0)
+})
+
+test('商品ページから歌推しページ作成まで一本で進める', async ({ page }, testInfo) => {
+  await installEntry(page)
+
+  await page.goto('/products.html')
+  await page.getByTestId('start-button').click()
+
+  await expect(page.getByTestId('start')).toBeVisible()
+  await page.getByTestId('purchase-button').click()
+
+  await expect(page.getByTestId('signup')).toBeVisible()
+  await page.getByTestId('signup-email').fill('listener@example.invalid')
+  await page.screenshot({ path: `${OUT}/entry-3-signup-${testInfo.project.name}.png`, fullPage: true })
+  await page.getByTestId('signup-submit').click()
+
+  // 登録が済むと歌推しページ作成へ着く。
+  await expect(page.getByTestId('fanpage-create')).toBeVisible()
+  await page.getByTestId('page-name-input').fill('入口テスト 歌推しページ')
+  await page.getByTestId('address-input').fill('entry-journey')
+  await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
+  await page.getByTestId('fanpage-create-submit').click()
+  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
+  await page.screenshot({ path: `${OUT}/entry-4-created-${testInfo.project.name}.png`, fullPage: true })
+})

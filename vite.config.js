@@ -24,6 +24,9 @@ export default defineConfig({
         setup: resolve(__dirname, 'setup.html'),
         onboarding: resolve(__dirname, 'onboarding.html'),
         fanPageCreate: resolve(__dirname, 'fanpage-create.html'),
+        products: resolve(__dirname, 'products.html'),
+        start: resolve(__dirname, 'start.html'),
+        signup: resolve(__dirname, 'signup.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
