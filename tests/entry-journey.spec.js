@@ -54,7 +54,9 @@ test('商品ページは歌推しページだけを売り、上位ツールやSL
   await page.screenshot({ path: `${OUT}/entry-1-products-${testInfo.project.name}.png`, fullPage: true })
 })
 
-test('料金が未設定なら金額を作らず、準備中と示す', async ({ page }) => {
+test('本番では、料金が未設定なら申し込みへ進ませない', async ({ page }) => {
+  // 開発機の仮処理を外し、公開環境と同じ条件にする。
+  await page.addInitScript(() => { window.__localPreview = false })
   await page.route('**/customer/config.js', route => route.fulfill({
     status: 200,
     contentType: 'application/javascript',

@@ -8,6 +8,8 @@ const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
 
 export function isLocalPreview() {
   if (typeof window === 'undefined') return false
+  // 本番の挙動を検査できるようにする明示の上書き。テストだけが使う。
+  if (typeof window.__localPreview === 'boolean') return window.__localPreview
   return LOCAL_HOSTS.has(window.location.hostname)
 }
 

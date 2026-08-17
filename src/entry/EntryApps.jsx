@@ -65,6 +65,8 @@ export function ProductsApp() {
   const config = useMemo(() => loadConfig(), [])
   const plan = useMemo(() => findPlan(config, FAN_PAGE_PLAN_ID), [config])
   const price = describePrice(plan)
+  // 本番では料金が決まるまで進ませない。開発機だけは通しで確認できるようにする。
+  const canStart = price.available || isLocalPreview()
 
   const start = useCallback(() => {
     selectPlan(FAN_PAGE_PLAN_ID)
@@ -89,11 +91,13 @@ export function ProductsApp() {
       <section className="mt-8 rounded-2xl border border-card-border/30 bg-black/20 p-6">
         <p className="text-lg font-bold text-highlight" data-testid="plan-price">{price.label}</p>
         <p className="mt-1 text-xs text-gray-400">{price.note}</p>
-        {/* 値段が分からないうちに申し込みへ進ませない。 */}
+        {/* 値段が分からないうちに申し込みへ進ませない。
+            ただし開発機では、通しで確認できるよう進めるようにする。
+            金額そのものは作らない。 */}
         <button
           type="button"
           onClick={start}
-          disabled={!price.available}
+          disabled={!canStart}
           data-testid="start-button"
           className="mt-5 w-full rounded-lg bg-light-blue px-5 py-3 text-sm font-bold text-deep-blue disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
         >
@@ -101,7 +105,9 @@ export function ProductsApp() {
         </button>
         {!price.available && (
           <p className="mt-3 text-xs text-gray-500" data-testid="start-blocked-reason">
-            料金が決まってからお申し込みいただけます。
+            {canStart
+              ? '料金は未設定です。動作確認のため、このまま進めます。'
+              : '料金が決まってからお申し込みいただけます。'}
           </p>
         )}
         {plan.sampleUrl && (
