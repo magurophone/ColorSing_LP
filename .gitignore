@@ -21,3 +21,10 @@ Thumbs.db
 
 # Backup files
 *.bak
+
+# Customer onboarding working notes.
+# This template repository is public. Questionnaire answers hold a
+# customer's display name, benefit contents and delivery arrangements,
+# so keep them on the operator machine and out of every commit.
+*_questions.txt
+*_questionnaire_summary.txt
