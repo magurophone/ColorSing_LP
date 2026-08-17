@@ -157,3 +157,46 @@ test('顧客向け画面に内部工程名を出さない', async ({ page }) => 
     expect(text.toLowerCase(), word).not.toContain(word.toLowerCase())
   }
 })
+
+test('ページ名から公開URLを勝手に決めず、候補として提示する', async ({ page }) => {
+  await openCreate(page)
+  await page.getByTestId('page-name-input').fill('Maguro Phone')
+
+  // 入力しただけでは公開URLを埋めない。
+  await expect(page.getByTestId('address-input')).toHaveValue('')
+  await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'unchecked')
+
+  // 候補は提示し、押したときだけ反映する。
+  const suggestion = page.getByTestId('address-suggestion')
+  await expect(suggestion).toHaveText('ページ名から「maguro-phone」を使う')
+  await suggestion.click()
+  await expect(page.getByTestId('address-input')).toHaveValue('maguro-phone')
+  await expect(suggestion).toHaveCount(0)
+})
+
+test('日本語のページ名では候補を出さず、URLは空のままにする', async ({ page }) => {
+  await openCreate(page)
+  await page.getByTestId('page-name-input').fill('まぐろふぉん 歌推しページ')
+  await expect(page.getByTestId('address-input')).toHaveValue('')
+  await expect(page.getByTestId('address-suggestion')).toHaveCount(0)
+  await expect(page.getByTestId('fanpage-create-submit')).toBeDisabled()
+})
+
+test('作成済みの記録が残っていても、名前とURLを決め直せる', async ({ page }) => {
+  await openCreate(page)
+  await page.getByTestId('page-name-input').fill('最初の名前')
+  await page.getByTestId('address-input').fill('first-name')
+  await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
+  await page.getByTestId('fanpage-create-submit').click()
+  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
+
+  // 記録が残ったまま開き直しても、決定済みの結果だけで終わらせない。
+  await page.reload()
+  await expect(page.getByTestId('fanpage-progress')).toBeVisible()
+  await expect(page.getByTestId('fanpage-restart')).toBeVisible()
+
+  await page.getByTestId('fanpage-restart').click()
+  await expect(page.getByTestId('page-name-input')).toBeVisible()
+  await expect(page.getByTestId('page-name-input')).toHaveValue('')
+  await expect(page.getByTestId('address-input')).toHaveValue('')
+})

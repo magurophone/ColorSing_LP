@@ -95,11 +95,19 @@ export default function FanPageCreateApp() {
     }
   }, [adapters])
 
+  // 公開URLは後から変えると閲覧者のリンクが切れる。ページ名から黙って
+  // 決めてしまわず、候補を見せて本人に選ばせる。
   const onPageNameChange = useCallback((value) => {
     setPageName(value)
-    // 利用者がURLを触るまでは、ページ名から候補を作って手間を減らす。
-    if (!addressTouchedRef.current) setAddressInput(suggestPublicAddress(value))
   }, [])
+
+  const suggestion = suggestPublicAddress(pageName)
+  const showSuggestion = Boolean(suggestion) && suggestion.length >= 3 && !addressInput.trim()
+
+  const applySuggestion = useCallback(() => {
+    addressTouchedRef.current = true
+    setAddressInput(suggestion)
+  }, [suggestion])
 
   const start = useCallback(async () => {
     setRunning(true)
@@ -172,13 +180,19 @@ export default function FanPageCreateApp() {
               </div>
             )}
             {view.tone === 'ready' && (
-              <a
-                href="/onboarding.html"
-                data-testid="fanpage-next"
-                className="mt-6 inline-block rounded-lg bg-light-blue px-5 py-2 text-sm font-bold text-deep-blue"
-              >
-                公開する内容を設定する
-              </a>
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <a
+                  href="/onboarding.html"
+                  data-testid="fanpage-next"
+                  className="inline-block rounded-lg bg-light-blue px-5 py-2 text-sm font-bold text-deep-blue"
+                >
+                  公開する内容を設定する
+                </a>
+                {/* 決まった結果だけを見せて終わりにしない。名前とURLを決め直す道を残す。 */}
+                <button type="button" onClick={startOver} data-testid="fanpage-restart" className="text-sm text-gray-400 underline">
+                  名前とURLを入力し直す
+                </button>
+              </div>
             )}
           </section>
         </div>
@@ -222,6 +236,17 @@ export default function FanPageCreateApp() {
               className="mt-2 w-full rounded-lg border border-card-border/40 bg-black/20 px-3 py-2 text-gray-100"
             />
           </label>
+
+          {showSuggestion && (
+            <button
+              type="button"
+              onClick={applySuggestion}
+              data-testid="address-suggestion"
+              className="mt-3 rounded-lg border border-light-blue/40 bg-light-blue/10 px-3 py-2 text-xs text-light-blue"
+            >
+              ページ名から「{suggestion}」を使う
+            </button>
+          )}
 
           <p className="mt-3 text-xs text-gray-400">このアドレスで公開されます</p>
           <p className="mt-1 break-all text-sm text-gray-100" data-testid="address-preview">{preview}</p>
