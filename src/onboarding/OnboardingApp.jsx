@@ -201,7 +201,8 @@ function OnboardingApp() {
     meta,
   })
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
-  const guide = GUIDANCE[activeStep.id]
+  // 状態ごとの案内があるステップは、静的な文言より優先する。
+  const guide = activeStep.guidance ?? GUIDANCE[activeStep.id]
 
   const updateConfig = (path, value, { resetPreview = true } = {}) => {
     setConfig(previous => {

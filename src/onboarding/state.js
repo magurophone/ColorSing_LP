@@ -1,4 +1,5 @@
 import { createTenantSnapshot } from '../productization/tenant.js'
+import { deriveAcquisitionState, describePortalStep } from '../productization/acquisition.js'
 
 export const ONBOARDING_STATUS = Object.freeze({
   PENDING: 'pending',
@@ -21,6 +22,32 @@ function hasTheme(config) {
     .every(key => /^#[0-9a-f]{6}$/i.test(String(colors[key] || '')))
 }
 
+// BLOCKEDは「エラー」ではなく「今は進めない」を表す。利用者が操作できる状態、
+// 待つだけの状態、実際に失敗した状態を分けて返す。
+const BLOCKING_STATUS = {
+  action_required: S.IN_PROGRESS,
+  waiting: S.PENDING,
+  failed: S.BLOCKED,
+}
+
+function portalStep(tenant, acquisition) {
+  if (!acquisition) {
+    // 従来の呼び出し。運営が設定済みかどうかだけで判定する。
+    return result(tenant.slug ? S.COMPLETE : S.BLOCKED, Boolean(tenant.slug), {
+      message: tenant.slug ? 'Portalの識別情報を確認しました。' : 'Portalの準備情報がまだありません。',
+    })
+  }
+  const state = deriveAcquisitionState(acquisition)
+  const guidance = describePortalStep(state, acquisition.portal ?? null)
+  const ready = acquisition.portal?.status === 'ready' || Boolean(tenant.slug)
+  const status = ready ? S.COMPLETE : BLOCKING_STATUS[guidance.blocking] ?? S.IN_PROGRESS
+  return {
+    ...result(status, ready, { message: guidance.headline }),
+    acquisitionState: state,
+    guidance,
+  }
+}
+
 export function deriveOnboardingSteps({
   config = {},
   pathname = '',
@@ -29,6 +56,7 @@ export function deriveOnboardingSteps({
   publishAvailable = false,
   publishing = false,
   meta = {},
+  acquisition = null,
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
   const profileComplete = Boolean(tenant.displayName && config.brand?.pageTitle)
@@ -50,9 +78,9 @@ export function deriveOnboardingSteps({
       id: 'portal_created',
       title: 'Portalの準備',
       required: true,
-      ...result(tenant.slug ? S.COMPLETE : S.BLOCKED, Boolean(tenant.slug), {
-        message: tenant.slug ? 'Portalの識別情報を確認しました。' : 'Portalの準備情報がまだありません。',
-      }),
+      // 獲得導線の状態が渡された場合だけ、状態ごとの利用者向け案内を出す。
+      // 未着手・処理待ち・失敗を同じBLOCKEDへ丸めない。
+      ...portalStep(tenant, acquisition),
     },
     {
       id: 'basic_profile_complete',
