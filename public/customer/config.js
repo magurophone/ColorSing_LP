@@ -89,63 +89,41 @@ window.DASHBOARD_CONFIG = {
   "benefitTiers": [
     {
       "key": "1k",
-      "icon": "🖼️",
-      "columnIndex": 0,
-      "displayTemplate": "特典: {value}",
-      "isMembership": false
+      "icon": "ph:star",
+      "columnIndex": 1,
+      "displayTemplate": "{value}",
+      "showUsers": true,
+      "showHistory": false,
+      "lockedContent": {
+        "text": "",
+        "imageUrl": ""
+      }
+    },
+    {
+      "key": "3k",
+      "icon": "ph:seal-check",
+      "columnIndex": 2,
+      "displayTemplate": "{value}",
+      "showUsers": true,
+      "showHistory": false,
+      "lockedContent": {
+        "text": "",
+        "imageUrl": ""
+      }
     },
     {
       "key": "5k",
-      "icon": "🎵",
-      "columnIndex": 1,
-      "displayTemplate": "強制リクエスト: {value}曲"
-    },
-    {
-      "key": "10k",
-      "icon": "🎮",
-      "columnIndex": 2,
-      "displayTemplate": "権利: {value}時間分"
-    },
-    {
-      "key": "20k",
-      "icon": "💬",
+      "icon": "ph:diamond",
       "columnIndex": 3,
-      "displayTemplate": "オープンチャット招待済",
-      "isBoolean": true
-    },
-    {
-      "key": "30k",
-      "icon": "🎤",
-      "columnIndex": 4,
-      "displayTemplate": "アカペラ音源獲得: {value}曲"
-    },
-    {
-      "key": "40k",
-      "icon": "⚡",
-      "columnIndex": 5,
-      "displayTemplate": "強制リクエスト: {value}曲"
-    },
-    {
-      "key": "50k",
-      "icon": "🏆",
-      "columnIndex": 6,
-      "displayTemplate": "ミックス音源獲得: {value}曲"
-    },
-    {
-      "key": "メンバーシップA",
-      "icon": "👑",
-      "columnIndex": 7,
-      "displayTemplate": "月内リクエスト対応中",
-      "isMembership": true
-    },
-    {
-      "key": "メンバーシップB",
-      "icon": "🌟",
-      "columnIndex": 0,
-      "displayTemplate": "特典: {value}",
-      "isMembership": true
+      "displayTemplate": "{value}",
+      "showUsers": true,
+      "showHistory": false,
+      "lockedContent": {
+        "text": "",
+        "imageUrl": ""
+      }
     }
-  ],
+    ],
   "home": {
     "rankingTitle": "Ranking",
     "pointsLabel": "歌推しPt",

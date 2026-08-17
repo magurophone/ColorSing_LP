@@ -18,11 +18,10 @@ function result(status, canComplete, validation = null) {
   return { status, canComplete, validation }
 }
 
-// 既定色のままは「決めた」ではない。触っていないものを完了にしない。
-// 顧客が自分で保存したときだけ「決めた」とする。config.jsが最初から積んで
-// いる値を、本人の選択と取り違えない。
-function themeChosen(stored) {
-  return Boolean(stored?.colors && Object.keys(stored.colors).length > 0)
+// localStorageは設定を丸ごと保存するため「保存済み＝本人が決めた」にならない。
+// 顧客が触る前の状態（config.js＋既定）と比べて、変わっているかで判定する。
+function differsFromBase(current, base) {
+  return JSON.stringify(current ?? null) !== JSON.stringify(base ?? null)
 }
 
 // BLOCKEDは「エラー」ではなく「今は進めない」を表す。利用者が操作できる状態、
@@ -69,7 +68,7 @@ export function deriveOnboardingSteps({
   acquisition = null,
   supporters = null,
   hasFanPageRecord = false,
-  storedConfig = null,
+  baseConfig = null,
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
   const tenantKind = resolveTenantKind(config, { hasFanPageRecord })
@@ -80,8 +79,10 @@ export function deriveOnboardingSteps({
   const connectionComplete = connection?.status === 'success'
   const benefitsRequired = (config.views || []).some(view => ['menu', 'rights'].includes(view.id) && view.enabled)
   // config.js は最初から特典を積んでいる。その中身は別の配信者のものなので、
-  // 顧客がこの端末で保存したときだけ完了とする。
-  const benefitsComplete = Array.isArray(storedConfig?.benefitTiers) && storedConfig.benefitTiers.length > 0
+  // 顧客が変えたときだけ完了とする。
+  const benefitsComplete = Array.isArray(config.benefitTiers)
+    && config.benefitTiers.length > 0
+    && differsFromBase(config.benefitTiers, baseConfig?.benefitTiers)
 
   // 歌推しページの作成は手順ではなく前提。まだ無いときだけ、進むための項目
   // として出す。出来ていれば「完了」と書かれただけの項目を並べない。
@@ -102,18 +103,20 @@ export function deriveOnboardingSteps({
       id: 'theme_complete',
       title: '色を変える',
       required: false,
-      ...result(themeChosen(storedConfig) ? S.COMPLETE : S.OPTIONAL, themeChosen(storedConfig), {
-        message: themeChosen(storedConfig) ? '色を変更しました。' : '既定の色のまま公開できます。',
+      ...result(differsFromBase(config.colors, baseConfig?.colors) ? S.COMPLETE : S.OPTIONAL, differsFromBase(config.colors, baseConfig?.colors), {
+        message: differsFromBase(config.colors, baseConfig?.colors) ? '色を変更しました。' : '既定の色のまま公開できます。',
       }),
     },
     // 新規顧客の正規データソースはCentral DBで固定する。内部実装である
     // DataSourceを選ばせず、リスナー情報という利用者の作業を出す。
     // 既存顧客はSheetsのままなので、従来の2手順を変えない。
     ...(tenantKind === TENANT_KIND.NEW ? [
+      // リスナーが0人でも公開はできる。登録の画面が未接続の間まで必須にすると、
+      // 公開へ永久に到達できなくなる。
       {
         id: 'supporters_ready',
         title: 'リスナー情報',
-        required: true,
+        required: supporters?.status === 'empty' || supporters?.status === 'ready',
         ...supportersStep(supporters),
       },
     ] : [

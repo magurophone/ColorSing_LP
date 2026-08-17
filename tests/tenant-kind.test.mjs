@@ -82,17 +82,20 @@ test('新規顧客向けの文言に内部実装の語を出さない', () => {
 })
 
 test('config.jsが積んでいる特典を「設定済み」にしない', () => {
-  const withViews = { ...newConfig, views: [{ id: 'menu', enabled: true }], benefitTiers: [{ key: '1k' }] }
+  const shipped = [{ key: '1k' }]
+  const withViews = { ...newConfig, views: [{ id: 'menu', enabled: true }], benefitTiers: shipped }
 
-  // config.js 由来の特典しか無い状態。顧客はまだ何も決めていない。
-  const untouched = deriveOnboardingSteps({ config: withViews })
+  // config.js 由来のまま。顧客はまだ何も決めていない。
+  const untouched = deriveOnboardingSteps({ config: withViews, baseConfig: { benefitTiers: shipped } })
     .steps.find(item => item.id === 'benefit_structure_complete')
   assert.notEqual(untouched.status, 'complete')
 
-  // この端末で保存したときだけ完了とする。
-  const saved = deriveOnboardingSteps({ config: withViews, storedConfig: { benefitTiers: [{ key: '3k' }] } })
-    .steps.find(item => item.id === 'benefit_structure_complete')
-  assert.equal(saved.status, 'complete')
+  // 顧客が変えたときだけ完了とする。
+  const changed = deriveOnboardingSteps({
+    config: { ...withViews, benefitTiers: [{ key: '3k' }] },
+    baseConfig: { benefitTiers: shipped },
+  }).steps.find(item => item.id === 'benefit_structure_complete')
+  assert.equal(changed.status, 'complete')
 })
 
 test('歌推しページを作った人は、設定に古いシートIDが残っていても新規顧客のまま', () => {

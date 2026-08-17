@@ -44,7 +44,8 @@ test('商品ページは歌推しページだけを売り、上位ツールやSL
   await expect(page.getByTestId('products')).toBeVisible()
   await expect(page.getByRole('heading', { name: '歌推しページ' })).toBeVisible()
   await expect(page.getByTestId('plan-price')).toHaveText('月額 600円')
-  await expect(page.getByTestId('existing-login')).toBeVisible()
+  // 行き先が無いリンクは置かない。
+  await expect(page.getByTestId('existing-login')).toHaveCount(0)
 
   const text = await page.locator('body').innerText()
   for (const word of ['Portal', 'SLT', '総合管理', 'OBS', 'スプレッドシート']) {
@@ -61,6 +62,8 @@ test('料金が未設定なら金額を作らず、準備中と示す', async ({
   }))
   await page.goto('/products.html')
   await expect(page.getByTestId('plan-price')).toHaveText('料金は準備中です')
+  await expect(page.getByTestId('start-button')).toBeDisabled()
+  await expect(page.getByTestId('start-blocked-reason')).toBeVisible()
 })
 
 test('事業者が未接続なら受付を開かず、押せない操作を置かない', async ({ page }, testInfo) => {

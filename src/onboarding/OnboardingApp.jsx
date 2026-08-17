@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { loadConfig, loadConfigMeta, loadStoredConfig, saveConfig, saveConfigMeta } from '../lib/configIO'
+import { loadBaseConfig, loadConfig, loadConfigMeta, saveConfig, saveConfigMeta } from '../lib/configIO'
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
 import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
 import { deriveOnboardingSteps } from './state'
@@ -178,6 +178,8 @@ function ValidationList({ connection }) {
 
 function OnboardingApp() {
   const [config, setConfig] = useState(() => loadConfig())
+  // 顧客が触る前の状態。完了判定の基準にする。
+  const baseConfig = useMemo(() => loadBaseConfig(), [])
   const [meta, setMeta] = useState(() => loadConfigMeta())
   const [localState, setLocalState] = useState(() => loadLocalState())
   const [connection, setConnection] = useState(null)
@@ -216,7 +218,7 @@ function OnboardingApp() {
     meta,
     acquisition,
     hasFanPageRecord: Boolean(acquisition.portal),
-    storedConfig: loadStoredConfig(),
+    baseConfig,
   })
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
   // 状態ごとの案内があるステップは、静的な文言より優先する。

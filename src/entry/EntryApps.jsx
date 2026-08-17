@@ -35,13 +35,18 @@ const PAGES = {
   admin: './admin.html',
 }
 
-function Shell({ title, lead, children, testId }) {
+function Shell({ title, lead, children, testId, back }) {
   return (
     <main className="min-h-screen bg-deep-blue px-4 py-10 text-gray-100" data-testid={testId}>
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="text-2xl md:text-3xl font-bold text-highlight">{title}</h1>
         {lead && <p className="mt-3 text-sm leading-relaxed text-gray-300">{lead}</p>}
         {children}
+        {back && (
+          <p className="mt-8 text-sm">
+            <a href={back.href} className="text-light-blue underline" data-testid="entry-back">{back.label}</a>
+          </p>
+        )}
       </div>
     </main>
   )
@@ -70,7 +75,7 @@ export function ProductsApp() {
     <Shell
       testId="products"
       title="歌推しページ"
-      lead={plan.summary}
+      lead={`歌配信をしている方へ。${plan.summary}`}
     >
       <section className="mt-8 grid gap-4 sm:grid-cols-2">
         {plan.features.map(feature => (
@@ -84,24 +89,27 @@ export function ProductsApp() {
       <section className="mt-8 rounded-2xl border border-card-border/30 bg-black/20 p-6">
         <p className="text-lg font-bold text-highlight" data-testid="plan-price">{price.label}</p>
         <p className="mt-1 text-xs text-gray-400">{price.note}</p>
+        {/* 値段が分からないうちに申し込みへ進ませない。 */}
         <button
           type="button"
           onClick={start}
+          disabled={!price.available}
           data-testid="start-button"
-          className="mt-5 w-full rounded-lg bg-light-blue px-5 py-3 text-sm font-bold text-deep-blue sm:w-auto"
+          className="mt-5 w-full rounded-lg bg-light-blue px-5 py-3 text-sm font-bold text-deep-blue disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
         >
           歌推しページを作る
         </button>
+        {!price.available && (
+          <p className="mt-3 text-xs text-gray-500" data-testid="start-blocked-reason">
+            料金が決まってからお申し込みいただけます。
+          </p>
+        )}
         {plan.sampleUrl && (
           <a href={plan.sampleUrl} target="_blank" rel="noreferrer" data-testid="sample-link" className="mt-4 block text-sm text-light-blue underline">
             サンプルのページを見る
           </a>
         )}
       </section>
-
-      <p className="mt-8 text-sm text-gray-400">
-        すでにご利用中の方は <a href={PAGES.admin} className="text-light-blue underline" data-testid="existing-login">管理画面へ</a>
-      </p>
     </Shell>
   )
 }
@@ -124,7 +132,7 @@ export function StartApp() {
 
   if (!adapters.payment) {
     return (
-      <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`}>
+      <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`} back={{ href: PAGES.products, label: "← 内容をもう一度見る" }}>
         <Waiting
           message="お申し込みの受付を準備しています"
           detail="準備ができ次第、この画面からお申し込みいただけます。今しばらくお待ちください。"
@@ -135,7 +143,7 @@ export function StartApp() {
 
   if (session.entitlement?.status === 'pending') {
     return (
-      <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`}>
+      <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`} back={{ href: PAGES.products, label: "← 内容をもう一度見る" }}>
         <Waiting
           message="お申し込みを確認しています"
           detail="確認が終わると、次の手続きへ進めます。この画面を閉じても手続きは続きます。"
@@ -145,10 +153,11 @@ export function StartApp() {
   }
 
   return (
-    <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`}>
+    <Shell testId="start" title="利用を開始する" lead={`${plan.name}のお申し込み手続きです。`} back={{ href: PAGES.products, label: "← 内容をもう一度見る" }}>
       <section className="mt-6 rounded-2xl border border-card-border/30 bg-black/20 p-6">
         <p className="text-sm text-gray-300">{plan.name}</p>
         <p className="mt-1 text-lg font-bold text-highlight">{price.label}</p>
+        <p className="mt-1 text-xs text-gray-400">{price.note}</p>
         <button
           type="button"
           onClick={purchase}
@@ -186,7 +195,7 @@ export function SignupApp() {
 
   if (!adapters.identity) {
     return (
-      <Shell testId="signup" title="ログイン情報を登録する" lead="設定した内容をあなたのものとして保存するために登録します。">
+      <Shell testId="signup" title="連絡先を登録する" lead="設定した内容をあなたのものとして保存し、大切なお知らせをお送りするために使います。">
         <Waiting
           message="登録の受付を準備しています"
           detail="準備ができ次第、この画面から登録いただけます。今しばらくお待ちください。"
@@ -196,7 +205,7 @@ export function SignupApp() {
   }
 
   return (
-    <Shell testId="signup" title="ログイン情報を登録する" lead="設定した内容をあなたのものとして保存するために登録します。">
+    <Shell testId="signup" title="連絡先を登録する" lead="設定した内容をあなたのものとして保存し、大切なお知らせをお送りするために使います。">
       <form onSubmit={register} className="mt-6 rounded-2xl border border-card-border/30 bg-black/20 p-6">
         <label className="block">
           <span className="text-sm font-bold text-light-blue">メールアドレス</span>
