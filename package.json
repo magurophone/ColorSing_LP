@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:contracts": "node --test tests/lp-compatibility.test.mjs tests/spreadsheet-connection.test.mjs tests/productization.test.mjs",
+    "test:contracts": "node --test tests/lp-compatibility.test.mjs tests/spreadsheet-connection.test.mjs tests/productization.test.mjs tests/rights-columns.test.mjs tests/questionnaire.test.mjs",
     "test:e2e": "playwright test",
     "test": "npm run test:contracts && npm run test:e2e",
     "platform:export-source": "node scripts/export-platform-source.mjs"

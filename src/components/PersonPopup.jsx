@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useConfig } from '../context/ConfigContext'
-import { BENEFIT_FIELDS, RIGHTS_NAME_INDEX, hasRight, isTrackHistory } from '../lib/rights'
+import { BENEFIT_FIELDS, RIGHTS_NAME_INDEX, hasRight, isRightsColumn, isTrackHistory } from '../lib/rights'
 import IconRenderer from './IconRenderer'
 
 const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onSelectBenefit }) => {
@@ -70,7 +70,7 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
 
         <div className="space-y-6 overflow-y-auto pr-2 flex-1">
           {config.benefitTiers.map((tier) => {
-            if (!tier.columnIndex || tier.columnIndex < 1) return null
+            if (!isRightsColumn(tier.columnIndex)) return null
             const value = person[tier.columnIndex]
 
             const benefit = getBenefitByTitle(tier.key)

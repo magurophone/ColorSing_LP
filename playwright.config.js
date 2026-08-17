@@ -10,8 +10,11 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: 'line',
+  // SLT側のPlaywrightも同じ開発機で 127.0.0.1:4174 を使い、両方 reuseExistingServer
+  // が有効になっている。同じポートのままだと、片方のE2Eがもう片方のサーバーへ
+  // 接続して双方の結果を壊すため、こちらは4175を使う。
   use: {
-    baseURL: 'http://127.0.0.1:4174',
+    baseURL: 'http://127.0.0.1:4175',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     reducedMotion: 'reduce',
@@ -27,8 +30,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 4174',
-    url: 'http://127.0.0.1:4174/index.html',
+    command: 'npm run dev -- --host 127.0.0.1 --port 4175',
+    url: 'http://127.0.0.1:4175/index.html',
     reuseExistingServer: true,
     timeout: 120_000,
   },

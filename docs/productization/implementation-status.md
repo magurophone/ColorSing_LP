@@ -17,6 +17,8 @@
 - `onboarding.html` の状態駆動DAP。`setup.html` は未変更のまま併存。
 - publish受付後に公開configとの一致を確認する明示的な公開確認操作。
 - desktop/mobile Playwright regression。
+- アンケート回答を外部反映する前の整合性ゲート。`NEW_CUSTOMER.md` のStep 0を機械化し、機械的に判定できる補正と、意味の判断が要る「要確認」を分ける。要確認が1件でもある間は正規化仕様を出さない。
+- 権利者一覧の列ガード。獲得者を表示しないティアの `columnIndex` が表示名の列を読まないようにする。
 
 ## 変更していない保護領域
 
@@ -54,6 +56,14 @@ Playwright projects:
 
 - desktop: Chromium 1440×1000
 - mobile: Chromium 390×844 / mobile context
+
+E2Eは `127.0.0.1:4175` を使う。SLT側のPlaywrightが4174を使い、双方 `reuseExistingServer` が有効なため、同じポートのままだと一方のE2Eがもう一方のサーバーへ接続して両方の結果を壊す。
+
+## 既知の不具合と対応
+
+`showUsers` と `showHistory` は `NEW_CUSTOMER.md` が設定を指示し顧客configにも入っているが、Public Portalのコードは読んでいない。獲得者を表示しないティアは「特典管理」に列を作らないため、`columnIndex` は権利者一覧が参照しない値である必要がある。ところが `columnIndex: 0` は表示名の列と同じで、`hasRight()` は数字だけの文字列を権利ありと判定するため、表示名が数字だけの支援者に誤ってアイコンが付き、権利がなくても一覧へ出た。`RightsView` にはガードがなく、`PersonPopup` にだけ同等の判定があり、同じconfigに対して2画面の挙動が食い違っていた。
+
+判定を `isRightsColumn()` へ一本化し、両画面から参照するようにした。既存顧客のティアはすべて `columnIndex >= 1` のため表示は変わらない。`showUsers` を実装で解釈するかどうかは、顧客の管理単位が確定してから判断する。
 
 ## 関連文書
 
