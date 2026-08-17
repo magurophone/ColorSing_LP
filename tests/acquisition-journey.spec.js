@@ -97,9 +97,9 @@ test('歌推しページ作成後は基本情報から公開準備まで順に�
   await expect(page.getByRole('button', { name: /データ管理方法/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /データ接続/ })).toHaveCount(0)
 
-  // 代わりに、利用者の作業である支援者情報を出す。
-  await page.getByRole('button', { name: /支援者情報/ }).first().click()
-  await expect(page.getByText('支援者情報の管理画面を準備しています')).toBeVisible()
+  // 代わりに、利用者の作業であるリスナー情報を出す。
+  await page.getByRole('button', { name: /リスナー情報/ }).first().click()
+  await expect(page.getByText('リスナー情報の管理画面を準備しています')).toBeVisible()
 
   await page.screenshot({ path: `${OUT}/journey-5-dap-progress-${testInfo.project.name}.png`, fullPage: true })
   // 歌推しページの準備が完了として残り続けることが、この通しで守りたい状態。

@@ -109,12 +109,12 @@ export function deriveOnboardingSteps({
       }),
     },
     // 新規顧客の正規データソースはCentral DBで固定する。内部実装である
-    // DataSourceを選ばせず、支援者情報という利用者の作業を出す。
+    // DataSourceを選ばせず、リスナー情報という利用者の作業を出す。
     // 既存顧客はSheetsのままなので、従来の2手順を変えない。
     ...(tenantKind === TENANT_KIND.NEW ? [
       {
         id: 'supporters_ready',
-        title: '支援者情報',
+        title: 'リスナー情報',
         required: true,
         ...supportersStep(supporters),
       },

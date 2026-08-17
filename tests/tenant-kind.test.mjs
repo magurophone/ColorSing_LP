@@ -61,7 +61,7 @@ test('未登録なら登録への導線を出し、登録済みなら完了に�
   const empty = deriveOnboardingSteps({ config: newConfig, supporters: { status: 'empty' } })
     .steps.find(item => item.id === 'supporters_ready')
   assert.equal(empty.status, S.IN_PROGRESS)
-  assert.equal(empty.guidance.action.label, '支援者を登録する')
+  assert.equal(empty.guidance.action.label, 'リスナーを登録する')
 
   const ready = deriveOnboardingSteps({ config: newConfig, supporters: { status: 'ready' } })
     .steps.find(item => item.id === 'supporters_ready')

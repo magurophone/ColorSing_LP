@@ -33,16 +33,16 @@ export function isSheetsMigrationAvailable(config = {}) {
   return resolveTenantKind(config) === TENANT_KIND.LEGACY
 }
 
-// 新規顧客の支援者情報は管理画面で扱う。管理画面が未接続のときは、
+// 新規顧客のリスナー情報は管理画面で扱う。管理画面が未接続のときは、
 // 空を「完了」と誤判定せず、準備中として扱う。
 export function describeSupportersStep(supporters = null) {
   if (!supporters || supporters.status === 'not_configured') {
     return {
-      headline: '支援者情報の管理画面を準備しています',
+      headline: 'リスナー情報の管理画面を準備しています',
       statusLabel: '準備中',
-      now: '準備ができると、この画面から支援者を追加・編集できます。',
-      why: '登録した支援者が、歌推しページのランキングや特典の表示になります。',
-      completion: '支援者を登録できること。',
+      now: '準備ができると、この画面からリスナーを追加・編集できます。',
+      why: '登録したリスナーが、歌推しページのランキングや特典の表示になります。',
+      completion: 'リスナーを登録できること。',
       later: '登録した内容は公開後もいつでも変更できます。',
       action: null,
       blocking: 'waiting',
@@ -50,22 +50,22 @@ export function describeSupportersStep(supporters = null) {
   }
   if (supporters.status === 'ready') {
     return {
-      headline: '支援者情報を登録しました',
+      headline: 'リスナー情報を登録しました',
       now: '続けて公開する内容を確認してください。',
-      why: '登録した支援者が、歌推しページのランキングや特典の表示になります。',
-      completion: '支援者を登録できること。',
+      why: '登録したリスナーが、歌推しページのランキングや特典の表示になります。',
+      completion: 'リスナーを登録できること。',
       later: '登録した内容は公開後もいつでも変更できます。',
       action: null,
       blocking: 'action_required',
     }
   }
   return {
-    headline: 'まだ支援者を登録していません',
-    now: '支援者情報を設定しましょう。「支援者を登録する」から追加できます。',
-    why: '登録した支援者が、歌推しページのランキングや特典の表示になります。',
-    completion: '支援者を登録できること。',
+    headline: 'まだリスナーを登録していません',
+    now: 'リスナー情報を設定しましょう。「リスナーを登録する」から追加できます。',
+    why: '登録したリスナーが、歌推しページのランキングや特典の表示になります。',
+    completion: 'リスナーを登録できること。',
     later: '登録した内容は公開後もいつでも変更できます。',
-    action: { label: '支援者を登録する', route: '/supporters' },
+    action: { label: 'リスナーを登録する', route: '/supporters' },
     blocking: 'action_required',
   }
 }
