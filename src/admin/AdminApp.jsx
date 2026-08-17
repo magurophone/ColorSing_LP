@@ -26,7 +26,12 @@ const TABS = [
 
 function AdminApp() {
   const [config, setConfig] = useState(() => loadConfig())
-  const [activeTab, setActiveTab] = useState('branding')
+  // セットアップ案内から、作業する場所へ直接来られるようにする。
+  // 「色を変える」と言われた人が、どこを開けばよいか探さずに済む。
+  const [activeTab, setActiveTab] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab')
+    return TABS.some(tab => tab.id === requested) ? requested : 'branding'
+  })
   const [authenticated, setAuthenticated] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [saveMessage, setSaveMessage] = useState(null)
