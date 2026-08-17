@@ -3,6 +3,17 @@ import { loadConfig, loadConfigMeta, saveConfig, saveConfigMeta } from '../lib/c
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
 import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
 import { deriveOnboardingSteps } from './state'
+import { loadPortalCreation, toPortalStatus } from '../productization/portalCreation'
+
+// 論理ルートと、現在の静的構成での実ファイルの対応。最終的なhostingが決まる
+// までの差を、ここだけで吸収する。
+const STATIC_PAGES = {
+  '/portal/create': './portal-create.html',
+  '/onboarding': './onboarding.html',
+  '/products': './products.html',
+  '/start': './start.html',
+  '/signup': './signup.html',
+}
 
 const STATUS_LABELS = {
   pending: '未着手',
@@ -191,6 +202,16 @@ function OnboardingApp() {
     [],
   )
   const publishAvailable = publishService.canPublish(config)
+  // Portal作成の進行状況を獲得導線の状態へ変換して渡す。これによりPortal未作成や
+  // 準備中が、進めない理由として正しく案内される。
+  // 利用権とアカウントは /products と /signup を作るまでの暫定値で、
+  // この画面へ到達した時点で保有しているものとして扱う。
+  const acquisition = useMemo(() => ({
+    entitlement: { status: 'granted' },
+    account: { status: 'ready' },
+    portal: toPortalStatus(loadPortalCreation()),
+    published: meta.lastPublishVerified === true,
+  }), [meta.lastPublishVerified, publishing])
   const model = deriveOnboardingSteps({
     config,
     pathname: window.location.pathname,
@@ -199,6 +220,7 @@ function OnboardingApp() {
     publishAvailable,
     publishing,
     meta,
+    acquisition,
   })
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
   // 状態ごとの案内があるステップは、静的な文言より優先する。
@@ -343,7 +365,7 @@ function OnboardingApp() {
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold text-gray-200">{step.title}</span>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] ${STATUS_STYLES[step.status]}`}>{STATUS_LABELS[step.status]}</span>
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] ${STATUS_STYLES[step.status]}`}>{step.guidance?.statusLabel ?? STATUS_LABELS[step.status]}</span>
                   </span>
                   <span className="mt-1 block text-xs text-gray-500">{step.required ? '必須' : '任意'}</span>
                 </span>
@@ -353,7 +375,7 @@ function OnboardingApp() {
 
           <section ref={detailRef} className="min-w-0 scroll-mt-4 rounded-2xl border border-light-blue/25 bg-black/15 p-5 md:p-7" aria-labelledby="active-step-title">
             <div className="flex flex-wrap items-center gap-3">
-              <span className={`rounded-full border px-3 py-1 text-xs ${STATUS_STYLES[activeStep.status]}`}>{STATUS_LABELS[activeStep.status]}</span>
+              <span className={`rounded-full border px-3 py-1 text-xs ${STATUS_STYLES[activeStep.status]}`}>{guide.statusLabel ?? STATUS_LABELS[activeStep.status]}</span>
               <span className="text-xs text-gray-500">{activeStep.required ? '必須ステップ' : '任意ステップ'}</span>
             </div>
             <h2 id="active-step-title" className="mt-4 text-2xl font-bold text-light-blue">{activeStep.title}</h2>
@@ -377,6 +399,15 @@ function OnboardingApp() {
               <p className="text-xs font-bold text-light-blue">自動判定結果</p>
               <p className="mt-2 text-sm text-gray-300">{activeStep.validation?.message || 'このステップの状態を確認しています。'}</p>
               <p className="mt-2 text-xs text-gray-500">後で変更: {guide.later}</p>
+              {guide.action && (
+                <a
+                  href={STATIC_PAGES[guide.action.route] || guide.action.route}
+                  data-testid="step-action"
+                  className="mt-4 inline-block rounded-xl border border-light-blue/50 bg-light-blue/20 px-5 py-3 text-sm font-bold text-light-blue"
+                >
+                  {guide.action.label}
+                </a>
+              )}
             </div>
 
             {activeStep.id === 'basic_profile_complete' && (

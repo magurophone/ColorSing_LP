@@ -6,6 +6,7 @@ const OUT = 'C:/Users/iimy/AppData/Local/Temp/claude/C--Users-iimy-desktop-SLT/9
 async function installAdapters(page, { checkDelay = 50 } = {}) {
   await page.addInitScript(`
     window.__checkDelay = ${checkDelay};
+    window.__portalPreviewBase = 'https://service.example.com';
   `)
   await page.addInitScript(() => {
     window.__portalCreateAdapters = {

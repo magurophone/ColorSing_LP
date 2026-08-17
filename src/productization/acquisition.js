@@ -147,6 +147,8 @@ export function describePortalStep(state, portal = null) {
     case A.PORTAL_PROVISIONING:
       return {
         headline: '公開ページを準備しています',
+        // 進行中を「未着手」と表示すると、止まっているように見えてしまう。
+        statusLabel: '準備中',
         now: 'ページの準備がまだ完了していません。完了すると次の設定へ進めます。',
         why: '公開ページの用意には少し時間がかかります。',
         completion: 'ページの準備が完了すること。',

@@ -9,8 +9,13 @@ import {
   runPortalCreation,
 } from '../productization/portalCreation'
 
-// 実サービスのURLは未確定なので、表示用の見本として扱う。
-const PREVIEW_BASE = 'https://service.example.com'
+// 公開サービスのURLは未確定。設定が無ければ今開いているoriginをそのまま使い、
+// 開発中の画面であることが見た目で分かるようにする。仮のドメインを商品仕様と
+// 誤認させない。
+function previewBase() {
+  if (typeof window === 'undefined') return ''
+  return window.__portalPreviewBase || window.location.origin
+}
 
 // 確認処理と作成処理の注入点。E2Eと将来の実サービスはここへ差し込む。
 function resolveAdapters() {
@@ -119,7 +124,7 @@ export default function PortalCreateApp() {
 
   const view = describePortalCreation(record)
   const canCreate = availability.canCreate && Boolean(pageName.trim()) && !running
-  const preview = publicAddressPreview(PREVIEW_BASE, availability.address || 'あなたのページ')
+  const preview = publicAddressPreview(previewBase(), availability.address || 'あなたのページ')
 
   if (record) {
     return (
@@ -140,7 +145,7 @@ export default function PortalCreateApp() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <dt className="text-gray-500">公開URL</dt>
-                <dd className="break-all text-gray-200">{publicAddressPreview(PREVIEW_BASE, record.publicAddress)}</dd>
+                <dd className="break-all text-gray-200">{publicAddressPreview(previewBase(), record.publicAddress)}</dd>
               </div>
             </dl>
 
