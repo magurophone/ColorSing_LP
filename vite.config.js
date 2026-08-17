@@ -23,7 +23,7 @@ export default defineConfig({
         monitor: resolve(__dirname, 'monitor.html'),
         setup: resolve(__dirname, 'setup.html'),
         onboarding: resolve(__dirname, 'onboarding.html'),
-        portalCreate: resolve(__dirname, 'portal-create.html'),
+        fanPageCreate: resolve(__dirname, 'fanpage-create.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',

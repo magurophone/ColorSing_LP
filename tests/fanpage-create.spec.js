@@ -6,10 +6,10 @@ const OUT = 'C:/Users/iimy/AppData/Local/Temp/claude/C--Users-iimy-desktop-SLT/9
 async function installAdapters(page, { checkDelay = 50 } = {}) {
   await page.addInitScript(`
     window.__checkDelay = ${checkDelay};
-    window.__portalPreviewBase = 'https://service.example.com';
+    window.__fanPagePreviewBase = 'https://service.example.com';
   `)
   await page.addInitScript(() => {
-    window.__portalCreateAdapters = {
+    window.__fanPageCreateAdapters = {
       checkAvailability: async (address) => {
         await new Promise(resolve => setTimeout(resolve, window.__checkDelay))
         if (address.includes('error')) throw new Error('check failed')
@@ -32,12 +32,12 @@ async function installAdapters(page, { checkDelay = 50 } = {}) {
 
 async function openCreate(page, options) {
   await installAdapters(page, options)
-  await page.goto('/portal-create.html')
-  await expect(page.getByTestId('portal-create')).toBeVisible()
+  await page.goto('/fanpage-create.html')
+  await expect(page.getByTestId('fanpage-create')).toBeVisible()
 }
 
 const message = (page) => page.getByTestId('availability-message')
-const submit = (page) => page.getByTestId('portal-create-submit')
+const submit = (page) => page.getByTestId('fanpage-create-submit')
 
 test('ページ名と公開URLを分けて入力し、確定前に実際のURLを見せる', async ({ page }) => {
   await openCreate(page)
@@ -107,11 +107,11 @@ test('作成すると準備中を見せ、完了したら次へ進める', async
   await expect(message(page)).toHaveAttribute('data-status', 'available')
   await submit(page).click()
 
-  const progress = page.getByTestId('portal-progress')
+  const progress = page.getByTestId('fanpage-progress')
   await expect(progress).toBeVisible()
   await expect(progress).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
-  await expect(page.getByRole('heading', { name: '公開ページの準備ができました' })).toBeVisible()
-  await expect(page.getByTestId('portal-next')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '歌推しページの作成が完了しました' })).toBeVisible()
+  await expect(page.getByTestId('fanpage-next')).toBeVisible()
   await page.screenshot({ path: `${OUT}/portal-ready-${testInfo.project.name}.png`, fullPage: true })
 })
 
@@ -122,10 +122,10 @@ test('失敗したときだけ、やり直しを示す', async ({ page }, testIn
   await expect(message(page)).toHaveAttribute('data-status', 'available')
   await submit(page).click()
 
-  const progress = page.getByTestId('portal-progress')
+  const progress = page.getByTestId('fanpage-progress')
   await expect(progress).toHaveAttribute('data-tone', 'failed', { timeout: 15_000 })
-  await expect(page.getByRole('heading', { name: '公開ページの準備に失敗しました' })).toBeVisible()
-  await expect(page.getByTestId('portal-retry')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '歌推しページの作成に失敗しました' })).toBeVisible()
+  await expect(page.getByTestId('fanpage-retry')).toBeVisible()
   await page.screenshot({ path: `${OUT}/portal-failed-${testInfo.project.name}.png`, fullPage: true })
 })
 
@@ -135,12 +135,12 @@ test('準備の途中で再読み込みしても状態が消えない', async ({
   await page.getByTestId('address-input').fill('fail-name')
   await expect(message(page)).toHaveAttribute('data-status', 'available')
   await submit(page).click()
-  await expect(page.getByTestId('portal-progress')).toHaveAttribute('data-tone', 'failed', { timeout: 15_000 })
+  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'failed', { timeout: 15_000 })
 
   // フルリロード。入力画面へ戻らず、作成の状態が残っていること。
   await page.reload()
-  await expect(page.getByTestId('portal-progress')).toBeVisible()
-  await expect(page.getByRole('heading', { name: '公開ページの準備に失敗しました' })).toBeVisible()
+  await expect(page.getByTestId('fanpage-progress')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '歌推しページの作成に失敗しました' })).toBeVisible()
   await expect(page.getByText('https://service.example.com/fail-name')).toBeVisible()
 })
 
@@ -150,7 +150,7 @@ test('顧客向け画面に内部工程名を出さない', async ({ page }) => 
   await page.getByTestId('address-input').fill('fail-name')
   await expect(message(page)).toHaveAttribute('data-status', 'available')
   await submit(page).click()
-  await expect(page.getByTestId('portal-progress')).toHaveAttribute('data-tone', 'failed', { timeout: 15_000 })
+  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'failed', { timeout: 15_000 })
 
   const text = await page.locator('body').innerText()
   for (const word of ['slug', 'repository', 'tenant', 'hosting', 'verification', 'provisioning', 'commit']) {

@@ -3,12 +3,12 @@ import { loadConfig, loadConfigMeta, saveConfig, saveConfigMeta } from '../lib/c
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
 import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
 import { deriveOnboardingSteps } from './state'
-import { loadPortalCreation, toPortalStatus } from '../productization/portalCreation'
+import { loadFanPageCreation, toFanPageStatus } from '../productization/fanPageCreation'
 
 // 論理ルートと、現在の静的構成での実ファイルの対応。最終的なhostingが決まる
 // までの差を、ここだけで吸収する。
 const STATIC_PAGES = {
-  '/portal/create': './portal-create.html',
+  '/fanpage/create': './fanpage-create.html',
   '/onboarding': './onboarding.html',
   '/products': './products.html',
   '/start': './start.html',
@@ -40,10 +40,10 @@ const GUIDANCE = {
     completion: '認証方式が決まるまでは任意項目です。',
     later: '認証導入後も既存顧客を自動移行しません。',
   },
-  portal_created: {
-    now: 'あなたのPortalが準備済みか確認します。',
+  fanpage_created: {
+    now: 'あなたの歌推しページが作成済みか確認します。',
     why: '設定と公開先を安全に同じ利用者へ結び付けるためです。',
-    completion: 'Portalの識別情報が現在の設定から確認できること。',
+    completion: '歌推しページが作成されていること。',
     later: 'URL変更は影響が大きいため、運営への確認が必要です。',
   },
   basic_profile_complete: {
@@ -145,7 +145,7 @@ function AuthGate({ password, onAuthenticated }) {
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={submit} className="glass-effect w-full max-w-md rounded-2xl border border-light-blue/30 p-7">
-        <p className="text-xs text-amber mb-2">Portal setup</p>
+        <p className="text-xs text-amber mb-2">FAN PAGE SETUP</p>
         <h1 className="text-2xl font-bold text-light-blue mb-3">初期設定を続ける</h1>
         <p className="text-sm text-gray-400 mb-6">管理画面と同じパスワードを入力してください。</p>
         <label className="block text-sm text-gray-300 mb-2" htmlFor="onboarding-password">パスワード</label>
@@ -190,7 +190,7 @@ function OnboardingApp() {
   const [validating, setValidating] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [publishResult, setPublishResult] = useState(null)
-  const [activeId, setActiveId] = useState('portal_created')
+  const [activeId, setActiveId] = useState('fanpage_created')
   const [sheetInput, setSheetInput] = useState(() => config.sheets?.spreadsheetId || '')
   const [authenticated, setAuthenticated] = useState(
     () => !config.admin?.password || sessionStorage.getItem('onboarding_auth') === 'true' || sessionStorage.getItem('admin_auth') === 'true',
@@ -202,14 +202,14 @@ function OnboardingApp() {
     [],
   )
   const publishAvailable = publishService.canPublish(config)
-  // Portal作成の進行状況を獲得導線の状態へ変換して渡す。これによりPortal未作成や
+  // 歌推しページ作成の進行状況を獲得導線の状態へ変換して渡す。これにより未作成や
   // 準備中が、進めない理由として正しく案内される。
   // 利用権とアカウントは /products と /signup を作るまでの暫定値で、
   // この画面へ到達した時点で保有しているものとして扱う。
   const acquisition = useMemo(() => ({
     entitlement: { status: 'granted' },
     account: { status: 'ready' },
-    portal: toPortalStatus(loadPortalCreation()),
+    portal: toFanPageStatus(loadFanPageCreation()),
     published: meta.lastPublishVerified === true,
   }), [meta.lastPublishVerified, publishing])
   const model = deriveOnboardingSteps({
@@ -336,7 +336,7 @@ function OnboardingApp() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-7 md:flex md:items-end md:justify-between md:gap-8">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-amber">Portal setup</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-amber">FAN PAGE SETUP</p>
             <h1 className="mt-2 text-3xl md:text-4xl font-bold text-light-blue">公開までのセットアップ</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400">今の状態を自動確認し、次に必要な操作だけを案内します。既存の初期設定ガイドと管理画面はそのまま利用できます。</p>
           </div>
@@ -449,7 +449,7 @@ function OnboardingApp() {
             {activeStep.id === 'preview_verified' && (
               <div className="mt-6">
                 <div className="overflow-hidden rounded-xl border border-light-blue/25 bg-deep-blue">
-                  <iframe title="Portalプレビュー" src="./index.html" className="h-[525px] w-[125%] origin-top-left scale-[0.8] bg-deep-blue md:h-[420px] md:w-full md:scale-100" />
+                  <iframe title="歌推しページプレビュー" src="./index.html" className="h-[525px] w-[125%] origin-top-left scale-[0.8] bg-deep-blue md:h-[420px] md:w-full md:scale-100" />
                 </div>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a href="./index.html" target="_blank" rel="noreferrer" className="rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-2.5 text-sm font-bold text-light-blue">別画面でプレビュー</a>

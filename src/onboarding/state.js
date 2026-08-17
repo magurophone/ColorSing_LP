@@ -1,5 +1,5 @@
 import { createTenantSnapshot } from '../productization/tenant.js'
-import { deriveAcquisitionState, describePortalStep } from '../productization/acquisition.js'
+import { deriveAcquisitionState, describeFanPageStep } from '../productization/acquisition.js'
 
 export const ONBOARDING_STATUS = Object.freeze({
   PENDING: 'pending',
@@ -30,15 +30,15 @@ const BLOCKING_STATUS = {
   failed: S.BLOCKED,
 }
 
-function portalStep(tenant, acquisition) {
+function fanPageStep(tenant, acquisition) {
   if (!acquisition) {
     // 従来の呼び出し。運営が設定済みかどうかだけで判定する。
     return result(tenant.slug ? S.COMPLETE : S.BLOCKED, Boolean(tenant.slug), {
-      message: tenant.slug ? 'Portalの識別情報を確認しました。' : 'Portalの準備情報がまだありません。',
+      message: tenant.slug ? '歌推しページの作成を確認しました。' : '歌推しページがまだ作成されていません。',
     })
   }
   const state = deriveAcquisitionState(acquisition)
-  const guidance = describePortalStep(state, acquisition.portal ?? null)
+  const guidance = describeFanPageStep(state, acquisition.portal ?? null)
   const ready = acquisition.portal?.status === 'ready' || Boolean(tenant.slug)
   const status = ready ? S.COMPLETE : BLOCKING_STATUS[guidance.blocking] ?? S.IN_PROGRESS
   return {
@@ -75,12 +75,12 @@ export function deriveOnboardingSteps({
       ...result(S.OPTIONAL, false, { message: 'SaaS認証方式は未決定です。既存の管理画面保護を継続します。' }),
     },
     {
-      id: 'portal_created',
-      title: 'Portalの準備',
+      id: 'fanpage_created',
+      title: '歌推しページの準備',
       required: true,
       // 獲得導線の状態が渡された場合だけ、状態ごとの利用者向け案内を出す。
       // 未着手・処理待ち・失敗を同じBLOCKEDへ丸めない。
-      ...portalStep(tenant, acquisition),
+      ...fanPageStep(tenant, acquisition),
     },
     {
       id: 'basic_profile_complete',

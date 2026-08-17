@@ -13,9 +13,9 @@ export const ACQUISITION_STATE = Object.freeze({
   PURCHASE_PENDING: 'purchase_pending',
   ENTITLEMENT_GRANTED: 'entitlement_granted',
   ACCOUNT_READY: 'account_ready',
-  PORTAL_NOT_CREATED: 'portal_not_created',
-  PORTAL_PROVISIONING: 'portal_provisioning',
-  PORTAL_READY: 'portal_ready',
+  FANPAGE_NOT_CREATED: 'fanpage_not_created',
+  FANPAGE_PROVISIONING: 'fanpage_provisioning',
+  FANPAGE_READY: 'fanpage_ready',
   ONBOARDING: 'onboarding',
   PUBLISHED: 'published',
 })
@@ -28,10 +28,10 @@ export const ACQUISITION_ROUTES = Object.freeze({
   [A.PLAN_SELECTED]: '/start',
   [A.PURCHASE_PENDING]: '/start',
   [A.ENTITLEMENT_GRANTED]: '/signup',
-  [A.ACCOUNT_READY]: '/portal/create',
-  [A.PORTAL_NOT_CREATED]: '/portal/create',
-  [A.PORTAL_PROVISIONING]: '/portal/create',
-  [A.PORTAL_READY]: '/onboarding',
+  [A.ACCOUNT_READY]: '/fanpage/create',
+  [A.FANPAGE_NOT_CREATED]: '/fanpage/create',
+  [A.FANPAGE_PROVISIONING]: '/fanpage/create',
+  [A.FANPAGE_READY]: '/onboarding',
   [A.ONBOARDING]: '/onboarding',
   [A.PUBLISHED]: '/onboarding',
 })
@@ -42,9 +42,9 @@ export const ACQUISITION_ORDER = Object.freeze([
   A.PURCHASE_PENDING,
   A.ENTITLEMENT_GRANTED,
   A.ACCOUNT_READY,
-  A.PORTAL_NOT_CREATED,
-  A.PORTAL_PROVISIONING,
-  A.PORTAL_READY,
+  A.FANPAGE_NOT_CREATED,
+  A.FANPAGE_PROVISIONING,
+  A.FANPAGE_READY,
   A.ONBOARDING,
   A.PUBLISHED,
 ])
@@ -66,8 +66,8 @@ export function createIdentityProvider(adapter = null) {
 }
 
 export function createProvisioningProvider(adapter = null) {
-  if (!adapter) return { ...unconfigured('provisioning'), async readPortal() { return null } }
-  return { kind: 'provisioning', configured: true, readPortal: (...args) => adapter.readPortal(...args) }
+  if (!adapter) return { ...unconfigured('provisioning'), async readFanPage() { return null } }
+  return { kind: 'provisioning', configured: true, readFanPage: (...args) => adapter.readFanPage(...args) }
 }
 
 export function deriveAcquisitionState({
@@ -78,9 +78,9 @@ export function deriveAcquisitionState({
   published = false,
 } = {}) {
   if (published) return A.PUBLISHED
-  if (portal?.status === 'ready') return portal.onboardingStarted ? A.ONBOARDING : A.PORTAL_READY
-  if (portal?.status === 'provisioning') return A.PORTAL_PROVISIONING
-  if (account?.status === 'ready') return A.PORTAL_NOT_CREATED
+  if (portal?.status === 'ready') return portal.onboardingStarted ? A.ONBOARDING : A.FANPAGE_READY
+  if (portal?.status === 'provisioning') return A.FANPAGE_PROVISIONING
+  if (account?.status === 'ready') return A.FANPAGE_NOT_CREATED
   if (entitlement?.status === 'granted') return A.ENTITLEMENT_GRANTED
   if (entitlement?.status === 'pending') return A.PURCHASE_PENDING
   if (planSelected) return A.PLAN_SELECTED
@@ -90,23 +90,23 @@ export function deriveAcquisitionState({
 // 進めない理由の種類。エラーとして見せてよいのは failed だけ。
 export function classifyBlocking(state, portal = null) {
   if (portal?.status === 'failed') return 'failed'
-  if (state === A.PORTAL_PROVISIONING) return 'waiting'
+  if (state === A.FANPAGE_PROVISIONING) return 'waiting'
   if (state === A.PURCHASE_PENDING) return 'waiting'
   return 'action_required'
 }
 
 // 利用者向けの文言。システム側の語彙を出さず、必ず次の操作か待ちの理由を返す。
-export function describePortalStep(state, portal = null) {
+export function describeFanPageStep(state, portal = null) {
   const blocking = classifyBlocking(state, portal)
   // 失敗はどの状態から来ても失敗として扱う。状態別の案内より優先する。
   if (blocking === 'failed') {
     return {
-      headline: '公開ページを準備できませんでした',
+      headline: '歌推しページの作成に失敗しました',
       now: 'もう一度お試しください。繰り返し失敗する場合は運営へご連絡ください。',
       why: '準備の途中で問題が起きたため、次の設定へ進めません。',
-      completion: 'ページの準備が完了すること。',
+      completion: '歌推しページの準備が完了すること。',
       later: '入力済みの設定は失われません。',
-      action: { label: 'もう一度試す', route: ACQUISITION_ROUTES[A.PORTAL_NOT_CREATED] },
+      action: { label: 'もう一度試す', route: ACQUISITION_ROUTES[A.FANPAGE_NOT_CREATED] },
       blocking,
     }
   }
@@ -116,8 +116,8 @@ export function describePortalStep(state, portal = null) {
     case A.PURCHASE_PENDING:
       return {
         headline: 'お申し込みの確認を待っています',
-        now: 'お申し込みが完了すると、公開ページの作成へ進めます。',
-        why: '公開ページはお申し込みごとに用意します。',
+        now: 'お申し込みが完了すると、歌推しページの作成へ進めます。',
+        why: '歌推しページはお申し込みごとに用意します。',
         completion: 'お申し込みが確認できること。',
         later: 'プランは後から変更できます。',
         action: blocking === 'waiting' ? null : { label: 'プランを見る', route: ACQUISITION_ROUTES[A.VISITOR] },
@@ -134,34 +134,34 @@ export function describePortalStep(state, portal = null) {
         blocking,
       }
     case A.ACCOUNT_READY:
-    case A.PORTAL_NOT_CREATED:
+    case A.FANPAGE_NOT_CREATED:
       return {
-        headline: 'まだPortalを作っていません',
-        now: '最初にあなたの公開ページを作成します。「Portalを作成する」からページ名と公開URLを設定してください。',
-        why: '公開ページの住所を決めてから、中身の設定へ進みます。',
-        completion: '公開ページが作成されていること。',
+        headline: 'まだ歌推しページを作っていません',
+        now: '最初にあなたの歌推しページを作成します。「歌推しページを作成する」からページ名と公開URLを設定してください。',
+        why: '歌推しページの住所を決めてから、中身の設定へ進みます。',
+        completion: '歌推しページが作成されていること。',
         later: '公開URLは後から変えると閲覧者のリンクが切れるため、運営への確認が必要です。',
-        action: { label: 'Portalを作成する', route: ACQUISITION_ROUTES[A.PORTAL_NOT_CREATED] },
+        action: { label: '歌推しページを作成する', route: ACQUISITION_ROUTES[A.FANPAGE_NOT_CREATED] },
         blocking,
       }
-    case A.PORTAL_PROVISIONING:
+    case A.FANPAGE_PROVISIONING:
       return {
-        headline: '公開ページを準備しています',
+        headline: '歌推しページを準備しています',
         // 進行中を「未着手」と表示すると、止まっているように見えてしまう。
         statusLabel: '準備中',
-        now: 'ページの準備がまだ完了していません。完了すると次の設定へ進めます。',
-        why: '公開ページの用意には少し時間がかかります。',
-        completion: 'ページの準備が完了すること。',
+        now: '歌推しページの準備がまだ完了していません。完了すると次の設定へ進めます。',
+        why: '歌推しページの用意には少し時間がかかります。',
+        completion: '歌推しページの準備が完了すること。',
         later: 'この画面を閉じても準備は続きます。',
         action: null,
         blocking,
       }
     default:
       return {
-        headline: '公開ページの準備ができています',
+        headline: '歌推しページの作成が完了しました',
         now: '続けて公開する内容を設定してください。',
         why: '設定した内容がそのまま公開ページへ反映されます。',
-        completion: '公開ページが利用できること。',
+        completion: '歌推しページが利用できること。',
         later: '設定は公開後もいつでも変更できます。',
         action: null,
         blocking: 'action_required',

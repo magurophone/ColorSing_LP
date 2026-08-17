@@ -2,24 +2,24 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AVAILABILITY, createAddressAvailability } from '../productization/addressAvailability'
 import { publicAddressPreview, suggestPublicAddress } from '../productization/publicAddress'
 import {
-  beginPortalCreation,
-  clearPortalCreation,
-  describePortalCreation,
-  loadPortalCreation,
-  runPortalCreation,
-} from '../productization/portalCreation'
+  beginFanPageCreation,
+  clearFanPageCreation,
+  describeFanPageCreation,
+  loadFanPageCreation,
+  runFanPageCreation,
+} from '../productization/fanPageCreation'
 
 // 公開サービスのURLは未確定。設定が無ければ今開いているoriginをそのまま使い、
 // 開発中の画面であることが見た目で分かるようにする。仮のドメインを商品仕様と
 // 誤認させない。
 function previewBase() {
   if (typeof window === 'undefined') return ''
-  return window.__portalPreviewBase || window.location.origin
+  return window.__fanPagePreviewBase || window.location.origin
 }
 
 // 確認処理と作成処理の注入点。E2Eと将来の実サービスはここへ差し込む。
 function resolveAdapters() {
-  const injected = typeof window !== 'undefined' ? window.__portalCreateAdapters : null
+  const injected = typeof window !== 'undefined' ? window.__fanPageCreateAdapters : null
   if (injected) return { ...injected, demo: false }
   // 未接続時の仮実装。画面の状態を確認できるようにするためのもの。
   const taken = new Set(['magurophone', 'colorsing', 'test'])
@@ -52,7 +52,7 @@ const AVAILABILITY_TONE = {
   [AVAILABILITY.CHECK_FAILED]: 'text-amber',
 }
 
-export default function PortalCreateApp() {
+export default function FanPageCreateApp() {
   const adapters = useMemo(resolveAdapters, [])
   const availabilityRef = useRef(null)
   if (!availabilityRef.current) {
@@ -62,7 +62,7 @@ export default function PortalCreateApp() {
   const [pageName, setPageName] = useState('')
   const [addressInput, setAddressInput] = useState('')
   const [availability, setAvailability] = useState(() => availabilityRef.current.state)
-  const [record, setRecord] = useState(() => loadPortalCreation())
+  const [record, setRecord] = useState(() => loadFanPageCreation())
   const [running, setRunning] = useState(false)
   const addressTouchedRef = useRef(false)
 
@@ -82,11 +82,11 @@ export default function PortalCreateApp() {
 
   // 進行中の作成があれば、開き直しても続きから見せる。
   useEffect(() => {
-    const stored = loadPortalCreation()
+    const stored = loadFanPageCreation()
     if (stored && stored.provisioning?.status !== 'complete' && stored.provisioning?.status !== 'failed') {
       setRecord(stored)
       setRunning(true)
-      runPortalCreation({ record: stored, adapter: adapters.provisioningAdapter })
+      runFanPageCreation({ record: stored, adapter: adapters.provisioningAdapter })
         .then(setRecord)
         .finally(() => setRunning(false))
     }
@@ -100,39 +100,39 @@ export default function PortalCreateApp() {
 
   const start = useCallback(async () => {
     setRunning(true)
-    const started = beginPortalCreation({ pageName, publicAddress: availability.address })
+    const started = beginFanPageCreation({ pageName, publicAddress: availability.address })
     setRecord(started)
-    const finished = await runPortalCreation({ record: started, adapter: adapters.provisioningAdapter })
+    const finished = await runFanPageCreation({ record: started, adapter: adapters.provisioningAdapter })
     setRecord(finished)
     setRunning(false)
   }, [adapters, availability.address, pageName])
 
   const retry = useCallback(async () => {
-    const stored = loadPortalCreation()
+    const stored = loadFanPageCreation()
     if (!stored) return
     setRunning(true)
-    const finished = await runPortalCreation({ record: stored, adapter: adapters.provisioningAdapter })
+    const finished = await runFanPageCreation({ record: stored, adapter: adapters.provisioningAdapter })
     setRecord(finished)
     setRunning(false)
   }, [adapters])
 
   const startOver = useCallback(() => {
-    clearPortalCreation()
+    clearFanPageCreation()
     setRecord(null)
     setRunning(false)
   }, [])
 
-  const view = describePortalCreation(record)
+  const view = describeFanPageCreation(record)
   const canCreate = availability.canCreate && Boolean(pageName.trim()) && !running
   const preview = publicAddressPreview(previewBase(), availability.address || 'あなたのページ')
 
   if (record) {
     return (
-      <main className="min-h-screen bg-deep-blue px-4 py-10 text-gray-100" data-testid="portal-create">
+      <main className="min-h-screen bg-deep-blue px-4 py-10 text-gray-100" data-testid="fanpage-create">
         <div className="mx-auto w-full max-w-xl">
           <section
             className="glass-effect rounded-2xl border border-card-border/30 p-6 md:p-8"
-            data-testid="portal-progress"
+            data-testid="fanpage-progress"
             data-tone={view.tone}
           >
             <h1 className="text-xl md:text-2xl font-bold text-highlight">{view.headline}</h1>
@@ -158,7 +158,7 @@ export default function PortalCreateApp() {
                   type="button"
                   onClick={retry}
                   disabled={running}
-                  data-testid="portal-retry"
+                  data-testid="fanpage-retry"
                   className="rounded-lg bg-amber px-5 py-2 text-sm font-bold text-deep-blue disabled:opacity-50"
                 >
                   もう一度試す
@@ -171,7 +171,7 @@ export default function PortalCreateApp() {
             {view.tone === 'ready' && (
               <a
                 href="/onboarding.html"
-                data-testid="portal-next"
+                data-testid="fanpage-next"
                 className="mt-6 inline-block rounded-lg bg-light-blue px-5 py-2 text-sm font-bold text-deep-blue"
               >
                 公開する内容を設定する
@@ -184,9 +184,9 @@ export default function PortalCreateApp() {
   }
 
   return (
-    <main className="min-h-screen bg-deep-blue px-4 py-10 text-gray-100" data-testid="portal-create">
+    <main className="min-h-screen bg-deep-blue px-4 py-10 text-gray-100" data-testid="fanpage-create">
       <div className="mx-auto w-full max-w-xl">
-        <h1 className="text-xl md:text-2xl font-bold text-highlight">公開ページを作る</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-highlight">歌推しページを作る</h1>
         <p className="mt-3 text-sm leading-relaxed text-gray-300">
           あなたの歌推しページを作ります。表示する名前と、ページのアドレスを決めてください。
         </p>
@@ -236,10 +236,10 @@ export default function PortalCreateApp() {
             type="button"
             onClick={start}
             disabled={!canCreate}
-            data-testid="portal-create-submit"
+            data-testid="fanpage-create-submit"
             className="mt-8 w-full rounded-lg bg-light-blue px-5 py-3 text-sm font-bold text-deep-blue disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Portalを作成する
+            歌推しページを作成する
           </button>
           {!canCreate && (
             <p className="mt-3 text-xs text-gray-500" data-testid="submit-hint">

@@ -43,8 +43,8 @@ test('state-driven onboarding reaches preview and blocks publish without exposin
   await expect(page.getByText('Special列を確認しました。')).toBeVisible()
 
   await page.getByRole('button').filter({ hasText: 'プレビュー確認' }).click()
-  await expect(page.locator('iframe[title="Portalプレビュー"]')).toBeVisible()
-  await expect(page.frameLocator('iframe[title="Portalプレビュー"]').getByRole('heading', { name: 'Ranking' })).toBeVisible()
+  await expect(page.locator('iframe[title="歌推しページプレビュー"]')).toBeVisible()
+  await expect(page.frameLocator('iframe[title="歌推しページプレビュー"]').getByRole('heading', { name: 'Ranking' })).toBeVisible()
   await page.getByRole('button', { name: 'プレビューを確認しました' }).click()
 
   await page.getByRole('button').filter({ hasText: '公開準備' }).click()
