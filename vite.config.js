@@ -1,7 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { existsSync } from 'fs'
 import { resolve } from 'path'
+
+// 顧客リポジトリへは公開LPの共通資産だけを配る。中央サービス専用の画面
+// （products / start / signup / fanpage-create / onboarding）と開発用の
+// dev-reset は配布しないため、顧客リポジトリにはそのHTMLが存在しない。
+// 固定で列挙すると build が「entry が無い」で落ちるので、在るものだけ入力にする。
+// テンプレート側には全て揃っているので、こちらの build 結果は変わらない。
+const entries = (names) => Object.fromEntries(
+  Object.entries(names)
+    .map(([name, file]) => [name, resolve(__dirname, file)])
+    .filter(([, full]) => existsSync(full)),
+)
 
 export default defineConfig({
   define: {
@@ -14,21 +26,21 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
-        manual: resolve(__dirname, 'manual.html'),
-        promotion: resolve(__dirname, 'promotion.html'),
-        features: resolve(__dirname, 'features.html'),
-        monitor: resolve(__dirname, 'monitor.html'),
-        setup: resolve(__dirname, 'setup.html'),
-        onboarding: resolve(__dirname, 'onboarding.html'),
-        fanPageCreate: resolve(__dirname, 'fanpage-create.html'),
-        products: resolve(__dirname, 'products.html'),
-        start: resolve(__dirname, 'start.html'),
-        signup: resolve(__dirname, 'signup.html'),
-        devReset: resolve(__dirname, 'dev-reset.html'),
-      },
+      input: entries({
+        main: 'index.html',
+        admin: 'admin.html',
+        manual: 'manual.html',
+        promotion: 'promotion.html',
+        features: 'features.html',
+        monitor: 'monitor.html',
+        setup: 'setup.html',
+        onboarding: 'onboarding.html',
+        fanPageCreate: 'fanpage-create.html',
+        products: 'products.html',
+        start: 'start.html',
+        signup: 'signup.html',
+        devReset: 'dev-reset.html',
+      }),
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

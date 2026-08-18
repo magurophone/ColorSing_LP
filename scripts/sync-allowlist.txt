@@ -1,0 +1,75 @@
+# 顧客リポジトリへ配布してよいファイル/ディレクトリ（allowlist）
+#
+# ここに書いたものだけが顧客リポジトリへ入る。書いていないものは配布されない。
+# 「全部配って一部を除外する」形にはしない。内部ファイルを1つ増やしただけで
+# 全顧客のPUBLIC repoへ漏れる構造にしないためである。
+#
+# 末尾が / のものはディレクトリ全体。それ以外はファイル1つ。
+# 空行と # 始まりは無視する。
+#
+# 分類の根拠は docs/productization/distribution-boundary.md。
+# 中央サービス専用（products / start / signup / fanpage-create / onboarding）と
+# 開発運用専用（tests / docs / HANDOVER.md 等）はここに載せない。
+
+# --- 公開URL契約で維持する entry point ---
+# docs/productization/compatibility-contract.md の保護URL
+index.html
+admin.html
+manual.html
+setup.html
+promotion.html
+features.html
+monitor.html
+
+# --- build に必要な設定 ---
+# 顧客リポは GitHub Actions で npm ci && npm run build を実行する
+package.json
+package-lock.json
+vite.config.js
+tailwind.config.js
+postcss.config.js
+.gitignore
+LICENSE
+
+# --- src 直下（legacy entry と共有分のみ）---
+# src/ 全体は配らない。onboarding.jsx / products.jsx / start.jsx /
+# signup.jsx / fanPageCreate.jsx / devReset.jsx は中央サービス専用。
+src/App.jsx
+src/index.css
+src/main.jsx
+src/admin.jsx
+src/manual.jsx
+src/setup.jsx
+
+# --- legacy entry から到達する src（ディレクトリ全体が legacy）---
+src/admin/
+src/assets/
+src/components/
+src/context/
+src/dataSources/
+src/hooks/
+src/lib/
+src/manual/
+src/setup/
+src/views/
+
+# --- src/productization（legacy が実際に import するものだけ）---
+# acquisition / acquisitionSession / addressAvailability / localPreview /
+# plans / publish / setupReset / questionnaire / adapters は legacy から
+# 到達しないため配らない。
+src/productization/benefitGridApi.js
+src/productization/fanPageCreation.js
+src/productization/provisioning.js
+src/productization/publicAddress.js
+src/productization/supportersApi.js
+src/productization/tenant.js
+src/productization/tenantKind.js
+
+# --- 静的資産 ---
+# public/customer/ は顧客所有。allowlistに載せない（同期で触らない）。
+public/manual/
+public/ss_admin.png
+public/ss_benefits.png
+public/ss_events.png
+public/ss_icons.png
+public/ss_ranking.png
