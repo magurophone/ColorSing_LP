@@ -4,7 +4,7 @@
 window.DASHBOARD_CONFIG = {
   "brand": {
     "name": "",
-    "sidebarTitle": "　color sing",
+    "sidebarTitle": "",
     "footerText": "",
     "footerSubText": "",
     "footerNote": "",

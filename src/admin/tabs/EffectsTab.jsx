@@ -36,7 +36,7 @@ const EffectsTab = ({ config, updateConfig }) => {
             onChange={(e) => updateConfig('effects.iconFloat', e.target.checked)}
             className="accent-amber"
           />
-          Menu・ボトルキープのアイコンを揺らす
+          Menu・特典一覧のアイコンを揺らす
         </label>
         <p className="text-xs text-gray-500 mt-1">OFFにするとアイコンが静止状態になります</p>
       </div>

@@ -77,7 +77,7 @@ const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 
   return (
     <section>
       <h2 className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-center text-glow-soft text-primary">
-        {viewConfig.title || '🍾 ボトルキープ一覧'}
+        {viewConfig.title || '特典一覧'}
       </h2>
 
       <div className="mb-6 max-w-2xl mx-auto">

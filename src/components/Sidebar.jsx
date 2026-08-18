@@ -13,6 +13,8 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
       className="hidden md:fixed md:flex md:flex-col md:left-0 md:top-0 md:bottom-0 md:w-64 border-r border-card-border/30 z-40 p-6"
     >
       <div className="mb-8">
+        {/* サイドバー名を別に決めていない人には、基本情報の表示名をそのまま出す。
+            決めていないだけでテンプレートの名前が顧客のページに残っていた。 */}
         {config.brand.titleGradient !== false ? (
           <h1
             className={`text-2xl font-display font-black text-transparent bg-clip-text ${glowClass}`}
@@ -20,14 +22,14 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
               backgroundImage: `linear-gradient(${GRADIENT_DIR[config.brand.titleGradientDirection] || 'to right'}, var(--color-title-gradient-start, var(--color-ocean-teal)), var(--color-title-gradient-mid, var(--color-light-blue)), var(--color-title-gradient-end, var(--color-amber)))`,
             }}
           >
-            {config.brand.sidebarTitle}
+            {config.brand.sidebarTitle?.trim() || config.brand.name}
           </h1>
         ) : (
           <h1
             className={`text-2xl font-display font-black text-primary ${glowClass}`}
             style={{ color: 'var(--color-title, var(--color-primary))' }}
           >
-            {config.brand.sidebarTitle}
+            {config.brand.sidebarTitle?.trim() || config.brand.name}
           </h1>
         )}
       </div>

@@ -2,7 +2,7 @@
 const DEFAULT_CONFIG = {
   brand: {
     name: '',
-    sidebarTitle: 'color singer LP',
+    sidebarTitle: '',
     footerText: '',
     footerSubText: '',
     footerNote: '',
@@ -136,11 +136,8 @@ const DEFAULT_CONFIG = {
       enabled: true,
       accordion: true,
       title: '📝 FAQ・注意事項',
-      items: [
-        { question: '特典の使用方法は？', answer: '枠内でリクエストするか、XのDMでお知らせください。' },
-        { question: '10k以上の特典について', answer: '永続権利です。月が替わっても消えることがありません。' },
-        { question: 'メンバーシップ特典について', answer: 'メンバーシップ特典で得られた10ｋ及び20ｋ特典は、それぞれの箇所に合算して記載しています。' },
-      ],
+      // 他の配信者のルールを、新しい顧客のページに最初から載せない。
+      items: [],
     },
   },
 
