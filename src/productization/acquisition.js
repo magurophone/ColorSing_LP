@@ -137,11 +137,13 @@ export function describeFanPageStep(state, portal = null) {
     case A.FANPAGE_NOT_CREATED:
       return {
         headline: 'まだ歌推しページを作っていません',
-        now: '最初にあなたの歌推しページを作成します。「歌推しページを作成する」からページ名と公開URLを設定してください。',
-        why: '歌推しページの住所を決めてから、中身の設定へ進みます。',
+        // 作成はこの手順の中でできる。別の画面の名前を出して探させない。
+        now: '公開URLを決めて、歌推しページを作ります。',
+        why: 'このアドレスがリスナーの見に来る場所になります。',
         completion: '歌推しページが作成されていること。',
-        later: '公開URLは後から変えると閲覧者のリンクが切れるため、運営への確認が必要です。',
-        action: { label: '歌推しページを作成する', route: ACQUISITION_ROUTES[A.FANPAGE_NOT_CREATED] },
+        later: 'URLを後から変えると、配ったリンクが切れます。変更は運営への確認が必要です。',
+        // 作成はこの手順の中でできる。別画面へ送る導線を持たない。
+        action: null,
         blocking,
       }
     case A.FANPAGE_PROVISIONING:

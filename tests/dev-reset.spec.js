@@ -52,9 +52,10 @@ test('リセット後は、歌推しページ作成が入力からやり直し�
   await page.getByTestId('dev-reset-run').click()
   await expect(page.getByTestId('dev-reset-result')).toBeVisible()
 
-  await page.goto('/fanpage-create.html')
-  await expect(page.getByTestId('page-name-input')).toBeVisible()
-  await expect(page.getByTestId('page-name-input')).toHaveValue('')
+  await page.goto('/onboarding.html')
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
+  await expect(page.getByTestId('address-input')).toBeVisible()
+  await expect(page.getByTestId('address-input')).toHaveValue('')
   await expect(page.getByTestId('fanpage-progress')).toHaveCount(0)
 })
 

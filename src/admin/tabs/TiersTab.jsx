@@ -56,8 +56,8 @@ const TiersTab = ({ config, updateConfig, isLegacyTenant = false }) => {
         <div className="glass-effect rounded-xl p-6 border border-light-blue/20 mb-6" data-testid="tiers-empty">
           <p className="text-sm text-gray-300">まだ段階がありません。</p>
           <p className="mt-2 text-sm text-gray-400">
-            下のボタンで追加してください。名前は「5K」「10K」のように応援の金額で付けると分かりやすく、
-            リスナーにも伝わります。好きな名前にもできます。
+            下のボタンで追加してください。名前は「5K」「10K」のように、貯まった歌推しPtの区切りで
+            付けるのが一般的です。好きな名前にもできます。
           </p>
         </div>
       )}
@@ -105,7 +105,7 @@ const TiersTab = ({ config, updateConfig, isLegacyTenant = false }) => {
                   className="w-full px-3 py-1.5 glass-effect border border-light-blue/30 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-amber"
                 />
                 {!isLegacyTenant && (
-                  <p className="mt-1 text-xs text-gray-500">「5K」「10K」のように金額で付けるのが一般的です。好きな名前にもできます。</p>
+                  <p className="mt-1 text-xs text-gray-500">「5K」「10K」のように、貯まった歌推しPtの区切りで付けるのが一般的です。好きな名前にもできます。</p>
                 )}
               </div>
               <div>

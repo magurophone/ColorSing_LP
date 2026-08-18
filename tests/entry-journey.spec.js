@@ -95,12 +95,15 @@ test('商品ページから歌推しページ作成まで一本で進める', as
   await page.screenshot({ path: `${OUT}/entry-3-signup-${testInfo.project.name}.png`, fullPage: true })
   await page.getByTestId('signup-submit').click()
 
-  // 登録が済むと歌推しページ作成へ着く。
-  await expect(page.getByTestId('fanpage-create')).toBeVisible()
-  await page.getByTestId('page-name-input').fill('入口テスト 歌推しページ')
+  // 登録が済むと設定へ着く。作成は設定の最初の手順。
+  await expect(page.getByRole('heading', { name: '公開までのセットアップ' })).toBeVisible()
+  await page.getByRole('button', { name: /基本情報/ }).first().click()
+  await page.getByRole('textbox', { name: '表示名' }).fill('入口テスト')
+  await page.getByRole('textbox', { name: 'ページ名' }).fill('入口テスト 歌推しページ')
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
   await page.getByTestId('address-input').fill('entry-journey')
   await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
   await page.getByTestId('fanpage-create-submit').click()
-  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
+  await expect(page.getByRole('button', { name: /歌推しページの準備/ })).toHaveCount(0, { timeout: 15_000 })
   await page.screenshot({ path: `${OUT}/entry-4-created-${testInfo.project.name}.png`, fullPage: true })
 })

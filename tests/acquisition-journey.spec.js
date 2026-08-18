@@ -43,12 +43,14 @@ test('歌推しページ未作成のDAPは、行き止まりではなく作成�
   await installJourney(page)
   await page.goto('/onboarding.html')
 
-  const detail = page.getByTestId('step-action')
+  // 未作成でも行き止まりにしない。作成はこの手順の中でできる。
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
   await expect(page.getByRole('heading', { name: '歌推しページの準備' }).first()).toBeVisible()
-  await expect(page.getByText('最初にあなたの歌推しページを作成します', { exact: false })).toBeVisible()
-  await expect(detail).toBeVisible()
-  await expect(detail).toHaveText('歌推しページを作成する')
-  // 以前の「歌推しページが作成されていること。」は出さない。
+  await expect(page.getByText('公開URLを決めて、歌推しページを作ります', { exact: false })).toBeVisible()
+  await expect(page.getByTestId('address-input')).toBeVisible()
+  await expect(page.getByTestId('fanpage-create-submit')).toBeVisible()
+  // 別画面へ送る導線は持たない。
+  await expect(page.getByTestId('step-action')).toHaveCount(0)
   await expect(page.getByText('Portalの識別情報')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-1-dap-not-created-${testInfo.project.name}.png`, fullPage: true })
 })
@@ -57,49 +59,49 @@ test('作成の導線から歌推しページを作り、DAPへ戻ると準備�
   await installJourney(page)
   await page.goto('/onboarding.html')
 
-  // DAPの案内から作成画面へ移動する。
-  await page.getByTestId('step-action').click()
+  // 作成はこの手順の中でできる。別画面へ移動させない。
+  await page.getByRole('button', { name: /基本情報/ }).first().click()
+  await page.getByRole('textbox', { name: '表示名' }).fill('通しテスト')
+  await page.getByRole('textbox', { name: 'ページ名' }).fill('通しテスト 歌推しページ')
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
   await expect(page.getByTestId('fanpage-create')).toBeVisible()
 
-  await page.getByTestId('page-name-input').fill('通しテスト 歌推しページ')
   await page.getByTestId('address-input').fill('journey-portal')
   await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
   await page.screenshot({ path: `${OUT}/journey-2-create-${testInfo.project.name}.png`, fullPage: true })
 
   await page.getByTestId('fanpage-create-submit').click()
-  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
   await page.screenshot({ path: `${OUT}/journey-3-ready-${testInfo.project.name}.png`, fullPage: true })
 
-  // 作成完了の導線からDAPへ戻る。
-  await page.getByTestId('fanpage-next').click()
   // 作成が済んだら、完了と書いてあるだけの項目を手順へ残さない。
-  await expect(page.getByRole('heading', { name: '歌推しページの準備' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /歌推しページの準備/ })).toHaveCount(0, { timeout: 15_000 })
   await expect(page.getByTestId('step-action')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-4-dap-ready-${testInfo.project.name}.png`, fullPage: true })
 })
 
 test('歌推しページ作成後は基本情報から公開準備まで順に進める', async ({ page }, testInfo) => {
   await installJourney(page)
-  await page.goto('/fanpage-create.html')
-  await page.getByTestId('page-name-input').fill('通しテスト 歌推しページ')
-  await page.getByTestId('address-input').fill('journey-portal')
-  await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
-  await page.getByTestId('fanpage-create-submit').click()
-  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 15_000 })
-  await page.getByTestId('fanpage-next').click()
+  await page.goto('/onboarding.html')
 
-  // 基本情報。
+  // 基本情報。名前はここで一度だけ決める。
   await page.getByRole('button', { name: /基本情報/ }).first().click()
   await page.getByRole('textbox', { name: '表示名' }).fill('通しテスト')
   await page.getByRole('textbox', { name: 'ページ名' }).fill('通しテスト 歌推しページ')
+
+  // 作成。
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
+  await page.getByTestId('address-input').fill('journey-portal')
+  await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available')
+  await page.getByTestId('fanpage-create-submit').click()
+  await expect(page.getByRole('button', { name: /歌推しページの準備/ })).toHaveCount(0, { timeout: 15_000 })
 
   // 新規顧客にスプレッドシートの用意を求めない。手順そのものを出さない。
   await expect(page.getByRole('button', { name: /データ管理方法/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /データ接続/ })).toHaveCount(0)
 
   // 代わりに、利用者の作業であるリスナー情報を出す。
-  await page.getByRole('button', { name: /リスナー情報/ }).first().click()
-  await expect(page.getByText('準備ができると、この画面からリスナーを追加・編集できます。')).toBeVisible()
+  // リスナー情報の保存先が未接続のうちは、手順そのものを出さない。
+  await expect(page.getByRole('button', { name: /リスナー情報/ })).toHaveCount(0)
 
   await page.screenshot({ path: `${OUT}/journey-5-dap-progress-${testInfo.project.name}.png`, fullPage: true })
   // 作成済みなので、作成を促す項目は手順から消えている。
@@ -108,6 +110,13 @@ test('歌推しページ作成後は基本情報から公開準備まで順に�
 
 test('準備中の歌推しページはDAPでも待ちとして示し、エラーにしない', async ({ page }, testInfo) => {
   await installJourney(page)
+  // 手順を開くと中断していた作成を再開する。終わらないアダプタに差し替えて、
+  // 準備中の見え方そのものを確かめる。
+  await page.addInitScript(() => {
+    window.__fanPageCreateAdapters.provisioningAdapter = {
+      executeStep: () => new Promise(() => {}),
+    }
+  })
   // 作成途中の記録だけを置いた状態でDAPを開く。
   await page.addInitScript(() => {
     localStorage.setItem('fanpage_creation_state_v1', JSON.stringify({
@@ -127,7 +136,9 @@ test('準備中の歌推しページはDAPでも待ちとして示し、エラ�
     }))
   })
   await page.goto('/onboarding.html')
-  await expect(page.getByText('歌推しページの準備がまだ完了していません', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
+  await expect(page.locator('section[aria-labelledby="active-step-title"]'))
+    .toContainText('歌推しページの準備がまだ完了していません')
   await expect(page.getByTestId('step-action')).toHaveCount(0)
   await page.screenshot({ path: `${OUT}/journey-6-dap-preparing-${testInfo.project.name}.png`, fullPage: true })
 })

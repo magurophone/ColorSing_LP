@@ -32,6 +32,7 @@ const PAGES = {
   start: './start.html',
   signup: './signup.html',
   fanpageCreate: './fanpage-create.html',
+  onboarding: './onboarding.html',
   admin: './admin.html',
 }
 
@@ -193,7 +194,8 @@ export function SignupApp() {
     setBusy(false)
     if (result?.status === 'ready') {
       recordAccount(result)
-      window.location.href = PAGES.fanpageCreate
+      // 作成は設定の最初の手順。別画面へ寄り道させない。
+      window.location.href = PAGES.onboarding
       return
     }
     setError('登録できませんでした。もう一度お試しください。')

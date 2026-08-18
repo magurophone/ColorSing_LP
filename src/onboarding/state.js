@@ -94,8 +94,9 @@ export function deriveOnboardingSteps({
   // として出す。出来ていれば「完了」と書かれただけの項目を並べない。
   const fanPage = { id: 'fanpage_created', title: '歌推しページの準備', required: true, ...fanPageStep(tenant, acquisition) }
 
+  // 名前を決めてから作る。作成には表示名が要るので、基本情報を先に置く。
+  // 作成だけ別画面にしていたときは、そこで名前を聞き、ここでもう一度聞いていた。
   const raw = [
-    ...(fanPage.status === S.COMPLETE ? [] : [fanPage]),
     {
       id: 'basic_profile_complete',
       title: '基本情報',
@@ -104,6 +105,7 @@ export function deriveOnboardingSteps({
         message: profileComplete ? '表示名とページ名を確認しました。' : '表示名とページ名を入力してください。',
       }),
     },
+    ...(fanPage.status === S.COMPLETE ? [] : [fanPage]),
     {
       // 既定の配色のままでも公開できる。やらなくてよいことを必須にしない。
       id: 'theme_complete',
@@ -116,16 +118,19 @@ export function deriveOnboardingSteps({
     // 新規顧客の正規データソースはCentral DBで固定する。内部実装である
     // DataSourceを選ばせず、リスナー情報という利用者の作業を出す。
     // 既存顧客はSheetsのままなので、従来の2手順を変えない。
-    ...(tenantKind === TENANT_KIND.NEW ? [
-      // リスナーが0人でも公開はできる。登録の画面が未接続の間まで必須にすると、
-      // 公開へ永久に到達できなくなる。
-      {
-        id: 'supporters_ready',
-        title: 'リスナー情報',
-        required: supporters?.status === 'empty' || supporters?.status === 'ready',
-        ...supportersStep(supporters),
-      },
-    ] : [
+    // リスナー登録の画面が未接続のうちは、この手順を出さない。
+    // 何をすればよいか分からない項目を、番号付きで手順に並べない。接続されて
+    // 初めて出す。リスナーが0人でも公開はできるので、そのときも必須にしない。
+    ...(tenantKind === TENANT_KIND.NEW ? (
+      supporters && supporters.status !== 'not_configured' ? [
+        {
+          id: 'supporters_ready',
+          title: 'リスナー情報',
+          required: supporters.status === 'empty' || supporters.status === 'ready',
+          ...supportersStep(supporters),
+        },
+      ] : []
+    ) : [
       {
         id: 'data_source_selected',
         title: 'データ管理方法',

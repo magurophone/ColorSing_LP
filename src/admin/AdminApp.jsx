@@ -11,6 +11,7 @@ import ColorsTab from './tabs/ColorsTab'
 import SheetsTab from './tabs/SheetsTab'
 import ViewsTab from './tabs/ViewsTab'
 import TiersTab from './tabs/TiersTab'
+import SupportersTab from './tabs/SupportersTab'
 import ContentTab from './tabs/ContentTab'
 import EffectsTab from './tabs/EffectsTab'
 import DeployTab from './tabs/DeployTab'
@@ -19,6 +20,8 @@ import DeployTab from './tabs/DeployTab'
 // Google Sheets はデータ元がCentral DBの新規顧客には無関係。
 // デプロイは顧客へGitHubのリポジトリやトークンを触らせない方針のため出さない。
 const LEGACY_ONLY_TABS = new Set(['sheets', 'deploy'])
+// リスナー情報はCentral DBが正本。既存顧客はSheetsのままなので出さない。
+const NEW_ONLY_TABS = new Set(['supporters'])
 
 // 「ティア」は業界語。初めての人には通じないので、新規顧客には言い換える。
 const NEW_TENANT_LABELS = {
@@ -30,6 +33,7 @@ const TABS = [
   { id: 'colors',   label: 'カラー',         short: 'カラー',   icon: 'palette' },
   { id: 'sheets',   label: 'Google Sheets',  short: 'シート',   icon: 'bar-chart-3' },
   { id: 'views',    label: 'ビュー管理',     short: 'ビュー',   icon: 'smartphone' },
+  { id: 'supporters', label: 'リスナー情報', short: 'リスナー', icon: 'users' },
   { id: 'tiers',    label: '特典ティア',     short: 'ティア',   icon: 'trophy' },
   { id: 'content',  label: 'コンテンツ',     short: 'コンテンツ', icon: 'file-text' },
   { id: 'effects',  label: 'エフェクト',     short: 'エフェクト', icon: 'sparkles' },
@@ -42,6 +46,7 @@ const TABS = [
 const SETUP_GUIDES = {
   'setup-colors': { label: 'ページの色を決める', done: '色を選ぶと保存されます。' },
   'setup-tiers': { label: '特典の段階を決める（例: 5K, 10K）', done: '入力すると保存されます。' },
+  'setup-supporters': { label: 'リスナーを登録する', done: '追加すると保存されます。' },
 }
 
 function SetupGuideBar({ guide }) {
@@ -64,7 +69,7 @@ function AdminApp() {
   const [config, setConfig] = useState(() => loadConfig())
   const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
   const visibleTabs = TABS
-    .filter(tab => isLegacyTenant || !LEGACY_ONLY_TABS.has(tab.id))
+    .filter(tab => isLegacyTenant ? !NEW_ONLY_TABS.has(tab.id) : !LEGACY_ONLY_TABS.has(tab.id))
     .map(tab => (isLegacyTenant || !NEW_TENANT_LABELS[tab.id]) ? tab : { ...tab, ...NEW_TENANT_LABELS[tab.id] })
   // セットアップ案内から、作業する場所へ直接来られるようにする。
   // 「色を変える」と言われた人が、どこを開けばよいか探さずに済む。
@@ -244,6 +249,7 @@ function AdminApp() {
     sheets: SheetsTab,
     views: ViewsTab,
     tiers: TiersTab,
+    supporters: SupportersTab,
     content: ContentTab,
     effects: EffectsTab,
     deploy: DeployTab,

@@ -31,16 +31,18 @@ test('設定を足さなくても、商品ページから公開手前まで歩�
   await page.getByTestId('signup-email').fill('walk@example.invalid')
   await page.getByTestId('signup-submit').click()
 
-  await expect(page.getByTestId('fanpage-create')).toBeVisible()
-  await page.getByTestId('page-name-input').fill('通し確認ページ')
+  // 登録が済むと設定へ着く。作成は設定の最初の手順。
+  await expect(page.getByRole('heading', { name: '公開までのセットアップ' })).toBeVisible()
+  await page.getByRole('button', { name: /基本情報/ }).first().click()
+  await page.getByRole('textbox', { name: '表示名' }).fill('通し確認')
+  await page.getByRole('textbox', { name: 'ページ名' }).fill('通し確認ページ')
+  await page.getByRole('button', { name: /歌推しページの準備/ }).first().click()
   await page.getByTestId('address-input').fill('walk-through')
   await expect(page.getByTestId('availability-message')).toHaveAttribute('data-status', 'available', { timeout: 15_000 })
   await page.getByTestId('fanpage-create-submit').click()
-  await expect(page.getByTestId('fanpage-progress')).toHaveAttribute('data-tone', 'ready', { timeout: 20_000 })
-  await page.getByTestId('fanpage-next').click()
+  await expect(page.getByRole('button', { name: /歌推しページの準備/ })).toHaveCount(0, { timeout: 20_000 })
 
-  // 案内へ着き、必須の手順が「永久に完了しない」状態で並んでいないこと。
-  await expect(page.getByRole('heading', { name: '公開までのセットアップ' })).toBeVisible()
+  // 必須の手順が「永久に完了しない」状態で並んでいないこと。
   const blocked = await page.locator('nav button').evaluateAll(buttons => buttons
     .filter(button => button.innerText.includes('必須') && button.innerText.includes('準備中'))
     .map(button => button.innerText.split('\n')[0]))

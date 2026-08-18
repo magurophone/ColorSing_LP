@@ -39,7 +39,11 @@ test('新規顧客のDAPにSheets接続の必須工程を出さない', () => {
   const ids = stepIds(newConfig)
   assert.equal(ids.includes('data_source_selected'), false)
   assert.equal(ids.includes('data_source_connected'), false)
-  assert.equal(ids.includes('supporters_ready'), true)
+  // リスナー情報は接続されてから出す。未接続のうちは並べない。
+  assert.equal(ids.includes('supporters_ready'), false)
+  const connected = deriveOnboardingSteps({ config: newConfig, supporters: { status: 'empty' } })
+    .steps.map(step => step.id)
+  assert.equal(connected.includes('supporters_ready'), true)
 })
 
 test('既存顧客のDAPは従来の手順を変えない', () => {
@@ -49,12 +53,13 @@ test('既存顧客のDAPは従来の手順を変えない', () => {
   assert.equal(ids.includes('supporters_ready'), false)
 })
 
-test('管理画面が未接続のときは、空を完了と誤判定せず準備中にする', () => {
-  const step = deriveOnboardingSteps({ config: newConfig }).steps.find(item => item.id === 'supporters_ready')
-  assert.equal(step.status, S.PENDING)
-  assert.equal(step.canComplete, false)
-  assert.equal(step.guidance.blocking, 'waiting')
-  assert.equal(step.guidance.action, null)
+test('管理画面が未接続のときは、手順そのものを出さない', () => {
+  // 何をすればよいか分からない項目を、番号付きで手順に並べない。
+  for (const supporters of [undefined, null, { status: 'not_configured' }]) {
+    const step = deriveOnboardingSteps({ config: newConfig, supporters })
+      .steps.find(item => item.id === 'supporters_ready')
+    assert.equal(step, undefined, String(supporters))
+  }
 })
 
 test('未登録なら登録への導線を出し、登録済みなら完了にする', () => {
@@ -103,7 +108,11 @@ test('歌推しページを作った人は、設定に古いシートIDが残っ
   const asLegacy = deriveOnboardingSteps({ config: staleConfig }).steps.map(step => step.id)
   assert.equal(asLegacy.includes('data_source_connected'), true)
 
-  const asNew = deriveOnboardingSteps({ config: staleConfig, hasFanPageRecord: true }).steps.map(step => step.id)
+  const asNew = deriveOnboardingSteps({
+    config: staleConfig,
+    hasFanPageRecord: true,
+    supporters: { status: 'empty' },
+  }).steps.map(step => step.id)
   assert.equal(asNew.includes('data_source_connected'), false)
   assert.equal(asNew.includes('supporters_ready'), true)
 })

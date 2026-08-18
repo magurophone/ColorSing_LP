@@ -55,12 +55,13 @@ test('進めない理由を、操作待ち・処理待ち・失敗に分ける',
   assert.equal(classifyBlocking(A.FANPAGE_NOT_CREATED, { status: 'failed' }), 'failed')
 })
 
-test('未作成は行き止まりにせず、次の操作を提示する', () => {
+test('未作成は行き止まりにせず、その場で作らせる', () => {
+  // 作成は設定の手順の中で行う。別画面へ送る導線は持たない。
   const guidance = describeFanPageStep(A.FANPAGE_NOT_CREATED)
   assert.equal(guidance.headline, 'まだ歌推しページを作っていません')
-  assert.equal(guidance.action.label, '歌推しページを作成する')
-  assert.equal(guidance.action.route, '/fanpage/create')
+  assert.equal(guidance.action, null)
   assert.equal(guidance.blocking, 'action_required')
+  assert.equal(guidance.now.includes('公開URL'), true)
 })
 
 test('準備中は待ちであってエラーではない', () => {
@@ -86,7 +87,15 @@ test('利用者向け案内にシステム語彙を残さない', () => {
       assert.equal(text.includes(word), false, `${state} に ${word} が残っている`)
     }
     // 進めない状態では、必ず次の操作か待つ理由のどちらかを示す。
-    assert.equal(Boolean(guidance.action) || guidance.blocking === 'waiting', true, `${state} に次の一手がない`)
+    // 作成の手順だけは、その場に入力欄があるので導線を持たない。
+    const inlineCreation = state === A.FANPAGE_NOT_CREATED
+      || state === A.VISITOR
+      || state === A.ENTITLEMENT_GRANTED
+    assert.equal(
+      Boolean(guidance.action) || guidance.blocking === 'waiting' || inlineCreation,
+      true,
+      `${state} に次の一手がない`,
+    )
   }
 })
 

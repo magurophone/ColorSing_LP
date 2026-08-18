@@ -3,6 +3,13 @@ import { loadBaseConfig, loadConfig, loadConfigMeta, saveConfig, saveConfigMeta 
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
 import { createLegacyClientPublishAdapter, createPublishService, resolvePublishAdapter } from '../productization/publish'
 import { isLocalPreview } from '../productization/localPreview'
+import FanPageCreatePanel from '../fanpage/FanPageCreatePanel'
+import {
+  SUPPORTERS_STATUS,
+  isSupportersApiConfigured,
+  listSupporters,
+  resolveSupportersStatus,
+} from '../productization/supportersApi'
 import { deriveOnboardingSteps } from './state'
 import { loadFanPageCreation, toFanPageStatus } from '../productization/fanPageCreation'
 import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
@@ -12,6 +19,7 @@ import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
 const STATIC_PAGES = {
   '/fanpage/create': './fanpage-create.html',
   '/onboarding': './onboarding.html',
+  '/supporters': './admin.html?tab=supporters&guide=setup-supporters',
   '/products': './products.html',
   '/start': './start.html',
   '/signup': './signup.html',
@@ -37,10 +45,10 @@ const STATUS_STYLES = {
 
 const GUIDANCE = {
   fanpage_created: {
-    now: 'あなたの歌推しページが作成済みか確認します。',
-    why: '設定と公開先を安全に同じ利用者へ結び付けるためです。',
+    now: '公開URLを決めて、歌推しページを作ります。',
+    why: 'このアドレスがリスナーの見に来る場所になります。',
     completion: '歌推しページが作成されていること。',
-    later: 'URL変更は影響が大きいため、運営への確認が必要です。',
+    later: 'URLを後から変えると、配ったリンクが切れます。変更は運営への確認が必要です。',
   },
   basic_profile_complete: {
     now: 'ページに出す名前を決めましょう。表示名はページの一番上に、ページ名はブラウザのタブに出ます。',
@@ -67,7 +75,7 @@ const GUIDANCE = {
     later: '接続先は公開後も変更できます。',
   },
   benefit_structure_complete: {
-    now: '特典の段階を決めましょう。「5K」「10K」のように応援の金額で段階を作り、それぞれ受け取れるものを書きます。',
+    now: '特典の段階を決めましょう。「5K」「10K」のように、貯まった歌推しPtの区切りで段階を作り、それぞれ受け取れるものを書きます。',
     why: 'ここで作った段階と特典が、そのままリスナーの見るページになります。名前は好きなものにもできます。',
     completion: '段階を1つ以上つくること。',
     later: '公開後も追加・変更できます。',
@@ -191,6 +199,10 @@ function OnboardingApp() {
   const [publishResult, setPublishResult] = useState(null)
   // 入力しても何も言われないと、保存されたのか分からない。管理画面と揃える。
   const [savedNotice, setSavedNotice] = useState(false)
+  // 作成が終わったら、進捗を取り直す。
+  const [fanPageRecordVersion, setFanPageRecordVersion] = useState(0)
+  // リスナー情報は実体がCentral DBにある。未接続と0人を取り違えない。
+  const [supporters, setSupporters] = useState(null)
   const [activeId, setActiveId] = useState(null)
   const [sheetInput, setSheetInput] = useState(() => config.sheets?.spreadsheetId || '')
   const [authenticated, setAuthenticated] = useState(
@@ -211,6 +223,25 @@ function OnboardingApp() {
     [config],
   )
   const publishAvailable = publishService.canPublish(config)
+
+  useEffect(() => {
+    const configured = isSupportersApiConfigured(config)
+    if (!configured) {
+      setSupporters({ status: SUPPORTERS_STATUS.NOT_CONFIGURED })
+      return undefined
+    }
+    let cancelled = false
+    listSupporters(config)
+      .then(rows => {
+        if (cancelled) return
+        setSupporters({ status: resolveSupportersStatus({ configured, loaded: true, count: rows.length }), count: rows.length })
+      })
+      .catch(() => {
+        if (cancelled) return
+        setSupporters({ status: resolveSupportersStatus({ configured, failed: true }) })
+      })
+    return () => { cancelled = true }
+  }, [config])
   const publishIsPlaceholder = publishService.id === 'local-preview-publish'
   const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
   // 歌推しページ作成の進行状況を獲得導線の状態へ変換して渡す。これにより未作成や
@@ -222,7 +253,7 @@ function OnboardingApp() {
     account: { status: 'ready' },
     portal: toFanPageStatus(loadFanPageCreation()),
     published: meta.lastPublishVerified === true,
-  }), [meta.lastPublishVerified, publishing])
+  }), [meta.lastPublishVerified, publishing, fanPageRecordVersion])
   const model = deriveOnboardingSteps({
     config,
     pathname: window.location.pathname,
@@ -232,6 +263,7 @@ function OnboardingApp() {
     publishing,
     meta,
     acquisition,
+    supporters,
     hasFanPageRecord: Boolean(acquisition.portal),
     baseConfig,
   })
@@ -429,7 +461,14 @@ function OnboardingApp() {
               <p className="mt-3 text-sm text-green-400" role="status" data-testid="saved-notice">保存しました</p>
             )}
 
-            {guide.action && (
+            {activeStep.id === 'fanpage_created' && (
+              <FanPageCreatePanel
+                pageName={config.brand?.name || ''}
+                onCreated={() => setFanPageRecordVersion(value => value + 1)}
+              />
+            )}
+
+            {guide.action && activeStep.id !== 'fanpage_created' && (
               <a
                 href={STATIC_PAGES[guide.action.route] || guide.action.route}
                 data-testid="step-action"
