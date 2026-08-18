@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { isLocalPreview } from '../productization/localPreview'
-import { inspectSetupState, resetSetupProgress } from '../productization/setupReset'
+import { inspectSetupState, resetCustomerSettings, resetSetupProgress } from '../productization/setupReset'
 
 // 開発・検証用。購入導線をまっさらな状態から確認するためのもので、
 // 顧客設定の初期化ではない。開発機のブラウザ以外では動かさない。
@@ -29,6 +29,13 @@ export default function DevResetApp() {
   const refresh = useCallback(() => {
     setFound(inspectSetupState({ local, session }))
   }, [local, session])
+
+  // 設定の初期化は別操作。色や特典を変えた状態からやり直すときに使う。
+  const resetSettings = useCallback(() => {
+    const result = resetCustomerSettings({ local })
+    setDone({ cleared: result.cleared, clearedSession: [], kept: [] })
+    refresh()
+  }, [local, refresh])
 
   const reset = useCallback(() => {
     const result = resetSetupProgress({ local, session })
@@ -63,16 +70,30 @@ export default function DevResetApp() {
           <button
             type="button"
             onClick={reset}
-            disabled={found.clearable.length === 0 && found.sessionClearable.length === 0}
             data-testid="dev-reset-run"
             className="mt-7 w-full rounded-lg bg-amber px-5 py-3 text-sm font-bold text-deep-blue disabled:opacity-40 sm:w-auto"
           >
             進行状況を消す
           </button>
 
+          <div className="mt-4 border-t border-card-border/20 pt-5">
+            <p className="text-xs font-bold text-gray-400">色や特典も含めて完全にやり直す</p>
+            <p className="mt-2 text-sm text-gray-400">
+              上のボタンは進行状況だけを消します。色や特典など、設定した内容も消して最初から確認する場合はこちらです。
+            </p>
+            <button
+              type="button"
+              onClick={resetSettings}
+              data-testid="dev-reset-settings"
+              className="mt-4 rounded-lg border border-amber/50 px-4 py-2 text-sm font-bold text-amber"
+            >
+              設定も消す
+            </button>
+          </div>
+
           {done && (
             <p className="mt-4 text-sm text-green-400" role="status" data-testid="dev-reset-result">
-              {done.cleared.length + done.clearedSession.length}件を消しました。顧客の設定は{done.kept.length}件そのまま残っています。
+              {done.cleared.length + done.clearedSession.length}件を消しました。{done.kept.length > 0 ? `設定は${done.kept.length}件そのまま残っています。` : ''}
             </p>
           )}
         </section>

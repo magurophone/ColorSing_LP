@@ -57,3 +57,32 @@ test('リセット後は、歌推しページ作成が入力からやり直し�
   await expect(page.getByTestId('page-name-input')).toHaveValue('')
   await expect(page.getByTestId('fanpage-progress')).toHaveCount(0)
 })
+
+test('進行状況だけでは色や特典の設定は消えない', async ({ page }) => {
+  await seedState(page)
+  await page.getByTestId('dev-reset-run').click()
+  await expect(page.getByTestId('dev-reset-result')).toBeVisible()
+  const config = await page.evaluate(() => localStorage.getItem('dashboard_config_default'))
+  expect(config).toContain('顧客の設定')
+})
+
+test('設定も消すを選べば、顧客の設定まで消える', async ({ page }) => {
+  await seedState(page)
+  await page.getByTestId('dev-reset-settings').click()
+  await expect(page.getByTestId('dev-reset-result')).toBeVisible()
+  const remaining = await page.evaluate(() => Object.keys(localStorage).sort())
+  // 顧客設定だけが消え、進行状況は別操作のまま残る。
+  expect(remaining).not.toContain('dashboard_config_default')
+  expect(remaining).not.toContain('config_meta_default')
+  expect(remaining).toContain('fanpage_creation_state_v1')
+})
+
+test('消すものが無くても、やり直す操作は押せる', async ({ page }) => {
+  await page.route('**/customer/config.js*', route => route.fulfill({
+    status: 200, contentType: 'application/javascript',
+    body: 'window.DASHBOARD_CONFIG = {"brand":{},"sheets":{"spreadsheetId":""},"admin":{"password":""}}',
+  }))
+  await page.goto('/dev-reset.html')
+  await expect(page.getByTestId('dev-reset-run')).toBeEnabled()
+  await expect(page.getByTestId('dev-reset-settings')).toBeEnabled()
+})

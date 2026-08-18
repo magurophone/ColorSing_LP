@@ -49,6 +49,13 @@ export function inspectSetupState({ local = null, session = null } = {}) {
   }
 }
 
+// 顧客設定の初期化。導線のやり直しとは別の操作として、明示的に呼ぶ。
+export function resetCustomerSettings({ local = null } = {}) {
+  const removed = keysOf(local).filter(isProtectedKey).sort()
+  for (const key of removed) local.removeItem(key)
+  return { cleared: removed }
+}
+
 export function resetSetupProgress({ local = null, session = null } = {}) {
   const found = inspectSetupState({ local, session })
   for (const key of found.clearable) local.removeItem(key)
