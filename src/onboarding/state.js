@@ -72,7 +72,13 @@ export function deriveOnboardingSteps({
 } = {}) {
   const tenant = createTenantSnapshot({ config, pathname, meta })
   const tenantKind = resolveTenantKind(config, { hasFanPageRecord })
-  const profileComplete = Boolean(tenant.displayName && config.brand?.pageTitle)
+  // 既定のページ名（ColorSing LP - 特典管理）が入っているため、表示名だけで
+  // 両方入力済みに見えていた。顧客が自分で決めたものだけを数える。
+  const profileComplete = Boolean(
+    tenant.displayName
+    && config.brand?.pageTitle
+    && differsFromBase(config.brand?.pageTitle, baseConfig?.brand?.pageTitle),
+  )
   const dataSourceSelected = config.platform?.readSource === 'db'
     ? Boolean(config.platform?.publicApiBaseUrl)
     : Boolean(config.sheets)

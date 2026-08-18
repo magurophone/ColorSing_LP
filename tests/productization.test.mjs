@@ -40,6 +40,44 @@ test('onboarding completion is derived from config, validation, preview, and ver
   assert.equal(model.steps.find(step => step.id === 'published').status, 'complete')
 })
 
+// 既定値のせいで「完了」に見える不具合を4回繰り返した（色・特典・ページ名）。
+// 顧客が触る前の状態を渡したら、必須項目がどれも完了にならないことを固定する。
+test('defaults shipped with the template are never the customer decision', () => {
+  const base = {
+    brand: { name: '', pageTitle: 'ColorSing LP - 特典管理' },
+    colors: CONFIG.colors,
+    benefitTiers: [{ key: '1k' }, { key: '3k' }, { key: '5k' }],
+  }
+  const untouched = { ...CONFIG, ...base, views: [{ id: 'menu', enabled: true }] }
+
+  const model = deriveOnboardingSteps({
+    config: untouched,
+    pathname: '/trial-singer/onboarding.html',
+    baseConfig: base,
+  })
+  const status = id => model.steps.find(step => step.id === id).status
+
+  assert.notEqual(status('theme_complete'), 'complete')
+  assert.notEqual(status('benefit_structure_complete'), 'complete')
+  assert.notEqual(status('basic_profile_complete'), 'complete')
+
+  // 表示名だけでは足りない。ページ名は既定のままなので未完了。
+  const namedOnly = deriveOnboardingSteps({
+    config: { ...untouched, brand: { ...base.brand, name: '歌う人' } },
+    pathname: '/trial-singer/onboarding.html',
+    baseConfig: base,
+  })
+  assert.notEqual(namedOnly.steps.find(step => step.id === 'basic_profile_complete').status, 'complete')
+
+  // 両方を自分で決めたときだけ完了。
+  const decided = deriveOnboardingSteps({
+    config: { ...untouched, brand: { name: '歌う人', pageTitle: '歌う人の特典ページ' } },
+    pathname: '/trial-singer/onboarding.html',
+    baseConfig: base,
+  })
+  assert.equal(decided.steps.find(step => step.id === 'basic_profile_complete').status, 'complete')
+})
+
 test('a failed connection cannot be completed by a user-only confirmation', () => {
   const model = deriveOnboardingSteps({
     config: CONFIG,

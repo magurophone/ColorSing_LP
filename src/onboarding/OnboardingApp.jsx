@@ -42,7 +42,7 @@ const GUIDANCE = {
     later: 'URL変更は影響が大きいため、運営への確認が必要です。',
   },
   basic_profile_complete: {
-    now: '公開ページに表示する名前を入力してください。',
+    now: 'ページに出す名前を決めましょう。表示名はページの一番上に、ページ名はブラウザのタブに出ます。',
     why: '閲覧者が誰のページか分かるようにするためです。',
     completion: '表示名とブラウザに表示するページ名の両方が入力済み。',
     later: '公開後も変更できます。',
@@ -289,8 +289,11 @@ function OnboardingApp() {
     }
   }
 
+  // 別のステップへ移ったら消す。そこで保存したように見えてしまう。
   const selectStep = stepId => {
     setActiveId(stepId)
+    if (savedNoticeTimer.current) clearTimeout(savedNoticeTimer.current)
+    setSavedNotice(false)
     if (window.matchMedia('(max-width: 1023px)').matches) {
       requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     }
