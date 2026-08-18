@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { FAN_PAGE_PLAN_ID, describePrice, findPlan, resolvePlans } from '../src/productization/plans.js'
+import {
+  FAN_PAGE_PLAN_ID,
+  PRODUCT_AVAILABILITY,
+  PRODUCT_ID,
+  describePrice,
+  findPlan,
+  grantsFanPage,
+  resolvePlans,
+  resolvePurchasablePlans,
+} from '../src/productization/plans.js'
 import {
   loadAcquisitionSession,
   recordAccount,
@@ -19,12 +28,37 @@ function memoryStorage() {
   }
 }
 
-test('売っているのは歌推しページだけで、上位ツールやSLTを混ぜない', () => {
+test('いま申し込めるのは歌推しページだけ', () => {
+  // Proは商品として持つが、まだ出さない。準備中のものを選ばせない。
+  const purchasable = resolvePurchasablePlans({})
+  assert.equal(purchasable.length, 1)
+  assert.equal(purchasable[0].id, FAN_PAGE_PLAN_ID)
+  assert.equal(purchasable[0].name, '歌推しページ')
+})
+
+test('商品カタログは歌推しページ単体とProの2つを扱える', () => {
+  // 歌推しページ専用の構造にすると、Proを足すときに獲得導線と利用権を作り直す
+  // ことになる。今すぐ売らなくても、扱える形にしておく。
   const plans = resolvePlans({})
-  assert.equal(plans.length, 1)
-  assert.equal(plans[0].id, FAN_PAGE_PLAN_ID)
-  assert.equal(plans[0].name, '歌推しページ')
-  const text = JSON.stringify(plans)
+  assert.deepEqual(plans.map(plan => plan.id), [PRODUCT_ID.FAN_PAGE, PRODUCT_ID.PRO])
+
+  const fanPage = findPlan({}, PRODUCT_ID.FAN_PAGE)
+  const pro = findPlan({}, PRODUCT_ID.PRO)
+  assert.equal(fanPage.availability, PRODUCT_AVAILABILITY.AVAILABLE)
+  assert.equal(pro.availability, PRODUCT_AVAILABILITY.COMING_SOON)
+
+  // どちらの商品でも歌推しページは作れる。利用権の判定に使う。
+  assert.equal(grantsFanPage(fanPage), true)
+  assert.equal(grantsFanPage(pro), true)
+
+  // 準備中の商品は、金額が入っていても申し込みへ進ませない。
+  const priced = describePrice(findPlan({ plans: [{ id: PRODUCT_ID.PRO, monthlyAmount: 3000 }] }, PRODUCT_ID.PRO))
+  assert.equal(priced.available, false)
+  assert.equal(priced.label, '準備中')
+})
+
+test('歌推しページの商品説明に、上位ツールやSLTを混ぜない', () => {
+  const text = JSON.stringify(findPlan({}, FAN_PAGE_PLAN_ID))
   for (const word of ['Portal', 'SLT', '総合管理', 'OBS']) {
     assert.equal(text.includes(word), false, `${word} が商品説明に混ざっている`)
   }

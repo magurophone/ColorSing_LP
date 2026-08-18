@@ -1,7 +1,16 @@
-# ColorSing LP 現行アーキテクチャ監査
+# ColorSing LP 現行アーキテクチャ監査（既存顧客＝legacy）
 
-更新日: 2026-08-16
+更新日: 2026-08-16（監査時点）／適用範囲の注記を2026-08-18に追記
 対象コミット基準: `main` / `a82ccad` と作業ツリー上の互換性保護差分
+
+> **適用範囲**: この文書は**既存顧客（legacy）の現状**を記録した監査であり、
+> あるべき姿ではない。ここに書かれたGoogle Sheets、顧客ごとのrepository複製、
+> `public/customer/config.js` の配布、GitHub Pagesは、いずれもlegacy経路である。
+>
+> 新規顧客はCentral DBを正本にする（native）。新規顧客へSheetsやrepository複製を
+> 求めない。方針は `product-scope.md`、モデルはSLT
+> `docs/platform-migration/native-tenant-model.md`、進捗は
+> `implementation-status.md` を見ること。
 
 ## 監査結果の要約
 
