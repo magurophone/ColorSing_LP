@@ -71,7 +71,7 @@ bash scripts/sync-all.sh
 
 | パス | 役割 |
 |------|------|
-| `public/customer/config.js` | 顧客固有設定。sync-all.sh で **上書きされない** |
+| `public/customer/config.js` | 顧客固有設定。sync-all.sh で **上書きされない**。main では sanitized placeholder のみ |
 | `public/customer/*.png` | 顧客固有画像。sync-all.sh で **上書きされない** |
 | `scripts/sync-all.sh` | 全顧客リポに main を配布するスクリプト |
 | `customers.json` | 配布対象の顧客リポ名一覧 |
@@ -79,12 +79,39 @@ bash scripts/sync-all.sh
 
 ---
 
+## config.js を main へ commit してよい範囲
+
+**このテンプレートリポジトリは public である。** 顧客リポジトリも public である。
+ここへ置いた値は、消しても履歴に残り、誰でも読める。
+
+1. **template main の `public/customer/config.js` は sanitized placeholder としてのみ
+   version 管理してよい。** 出荷時の初期値を汎用化する変更（他の配信者の名前・特典段階・
+   FAQ・サイドバー名を抜く方向）はここに含まれる。
+2. **顧客固有値・credential・実運用設定を template main へ commit してはいけない。**
+   表示名、特典内容、スプレッドシートID、パスワード、deploy先などが該当する。
+   迷ったら commit しない。
+3. **顧客リポジトリの legacy config は別物である。** あちらは既存互換のための実運用
+   ファイルで、ここの規則は適用しない。sync-all.sh が `--ours` で顧客側を保護し、
+   同期後に書き戻す。
+4. **public repo / public JS へ置いた値は secret として扱わない。**
+   置いてしまった時点で秘密ではない。ローテーションする以外に回復手段はない。
+
+### admin.password は認証根拠にしない
+
+`config.js` の `admin.password` は public JavaScript から誰でも取得できる。
+既存顧客向けの簡易保護としては現状のまま残すが、**native では認証・認可の根拠として
+使用してはいけない。** これは Phase 8 以降の security debt として
+SLT `docs/platform-migration/migration-plan.md` に記録済みである。
+
+---
+
 ## よくあるミス
 
 - `magurophone` ブランチへの push を `git push origin main:magurophone` で行うと失敗する
   → checkout → merge → push で行う
-- `public/customer/config.js` を main に含めると全顧客に配布されてしまう
-  → このファイルは commit しない
+- `public/customer/config.js` に顧客固有値を入れたまま main へ commit する
+  → main のこのファイルは **sanitized placeholder としてのみ** version 管理する。
+    詳細は下の「config.js を main へ commit してよい範囲」を読むこと
 - `git merge main` 後に magurophone の config.js が main のプレースホルダーに上書きされる
   → merge 直後に `git checkout HEAD -- public/customer/config.js` で復元する（push 前に必ず実行）
 
