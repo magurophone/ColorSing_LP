@@ -4,6 +4,7 @@ import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetCon
 import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
 import { deriveOnboardingSteps } from './state'
 import { loadFanPageCreation, toFanPageStatus } from '../productization/fanPageCreation'
+import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
 
 // 論理ルートと、現在の静的構成での実ファイルの対応。最終的なhostingが決まる
 // までの差を、ここだけで吸収する。
@@ -187,11 +188,14 @@ function OnboardingApp() {
   const [validating, setValidating] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [publishResult, setPublishResult] = useState(null)
+  // 入力しても何も言われないと、保存されたのか分からない。管理画面と揃える。
+  const [savedNotice, setSavedNotice] = useState(false)
   const [activeId, setActiveId] = useState(null)
   const [sheetInput, setSheetInput] = useState(() => config.sheets?.spreadsheetId || '')
   const [authenticated, setAuthenticated] = useState(
     () => !config.admin?.password || sessionStorage.getItem('onboarding_auth') === 'true' || sessionStorage.getItem('admin_auth') === 'true',
   )
+  const savedNoticeTimer = useRef(null)
   const validationSignatureRef = useRef('')
   const detailRef = useRef(null)
   const publishService = useMemo(
@@ -199,6 +203,7 @@ function OnboardingApp() {
     [],
   )
   const publishAvailable = publishService.canPublish(config)
+  const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
   // 歌推しページ作成の進行状況を獲得導線の状態へ変換して渡す。これにより未作成や
   // 準備中が、進めない理由として正しく案内される。
   // 利用権とアカウントは /products と /signup を作るまでの暫定値で、
@@ -234,6 +239,9 @@ function OnboardingApp() {
     const nextMeta = { ...meta, lastModified: Date.now() }
     saveConfigMeta(nextMeta)
     setMeta(nextMeta)
+    setSavedNotice(true)
+    if (savedNoticeTimer.current) clearTimeout(savedNoticeTimer.current)
+    savedNoticeTimer.current = setTimeout(() => setSavedNotice(false), 2000)
     if (resetPreview && localState.previewConfirmed) {
       const nextLocal = { ...localState, previewConfirmed: false }
       saveLocalState(nextLocal)
@@ -381,6 +389,9 @@ function OnboardingApp() {
 
             {/* やることを一つだけ大きく出す。理由や条件は見出しごと常設しない。 */}
             <p className="mt-4 text-base leading-relaxed text-gray-100">{guide.now}</p>
+            {savedNotice && (
+              <p className="mt-3 text-sm text-green-400" role="status" data-testid="saved-notice">保存しました</p>
+            )}
 
             {guide.action && (
               <a
@@ -484,9 +495,17 @@ function OnboardingApp() {
           </section>
         </div>
 
+        {/* 従来の初期設定ガイドはメンバーシップ加入から始まる既存顧客向けの手順。
+            新規顧客には意味が通らないので、legacyの顧客にだけ出す。 */}
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-          <span>従来の初期設定ガイドも引き続き利用できます。</span>
-          <div className="flex gap-4"><a href="./setup.html" className="text-light-blue">従来の初期設定ガイド</a><a href="./manual.html" className="text-light-blue">管理マニュアル</a></div>
+          <span>設定はいつでも管理画面から変更できます。</span>
+          {/* 管理マニュアルもスプレッドシート運用の説明書。新規顧客には該当しない。 */}
+          {isLegacyTenant && (
+            <div className="flex gap-4">
+              <a href="./setup.html" className="text-light-blue">従来の初期設定ガイド</a>
+              <a href="./manual.html" className="text-light-blue">管理マニュアル</a>
+            </div>
+          )}
         </footer>
       </div>
     </main>

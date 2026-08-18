@@ -80,3 +80,36 @@ test('設定を変えたあと、案内へ戻れる', async ({ page }) => {
   await page.getByRole('button', { name: /色を変える/ }).first().click()
   await expect(page.locator('section[aria-labelledby="active-step-title"]')).toContainText('完了')
 })
+
+test('新規顧客には、成立しないタブを出さない', async ({ page }) => {
+  await install(page)
+  await page.goto('/admin.html')
+  const tabs = await page.locator('nav button, aside button').evaluateAll(b => b.map(e => e.innerText.trim()))
+  expect(tabs.join(' ')).not.toContain('Google Sheets')
+  expect(tabs.join(' ')).not.toContain('デプロイ')
+
+  // URLで直接指定しても開かない。
+  await page.goto('/admin.html?tab=sheets')
+  await expect(page.getByRole('heading', { name: 'ブランディング' }).first()).toBeVisible()
+  await page.goto('/admin.html?tab=deploy')
+  await expect(page.getByRole('heading', { name: 'ブランディング' }).first()).toBeVisible()
+})
+
+test('既存顧客のタブは今までどおり残す', async ({ page }) => {
+  await page.route('**/customer/config.js*', route => route.fulfill({
+    status: 200, contentType: 'application/javascript',
+    body: 'window.DASHBOARD_CONFIG = {"brand":{},"sheets":{"spreadsheetId":"existing-sheet"},"admin":{"password":""}}',
+  }))
+  await page.goto('/admin.html?tab=sheets')
+  await expect(page.getByRole('heading', { name: 'Google Sheets 設定' }).first()).toBeVisible()
+  await page.goto('/admin.html?tab=deploy')
+  await expect(page.getByRole('heading', { name: 'GitHub デプロイ' }).first()).toBeVisible()
+})
+
+test('新規顧客の案内に、スプレッドシート前提の旧資産を出さない', async ({ page }) => {
+  await install(page)
+  await page.goto('/onboarding.html')
+  const links = await page.locator('a[href]').evaluateAll(a => a.map(e => e.getAttribute('href')))
+  expect(links).not.toContain('./setup.html')
+  expect(links).not.toContain('./manual.html')
+})

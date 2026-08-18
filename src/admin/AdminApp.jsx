@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { loadConfig, saveConfig, deepMerge, saveConfigMeta } from '../lib/configIO'
 import { restoreToken } from '../lib/utils'
 import DEFAULT_CONFIG from '../lib/defaults'
+import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
+import { loadFanPageCreation } from '../productization/fanPageCreation'
 import IconRenderer from '../components/IconRenderer'
 import BrandingTab from './tabs/BrandingTab'
 import ColorsTab from './tabs/ColorsTab'
@@ -12,6 +14,11 @@ import TiersTab from './tabs/TiersTab'
 import ContentTab from './tabs/ContentTab'
 import EffectsTab from './tabs/EffectsTab'
 import DeployTab from './tabs/DeployTab'
+
+// 新規顧客に見せないタブ。
+// Google Sheets はデータ元がCentral DBの新規顧客には無関係。
+// デプロイは顧客へGitHubのリポジトリやトークンを触らせない方針のため出さない。
+const LEGACY_ONLY_TABS = new Set(['sheets', 'deploy'])
 
 const TABS = [
   { id: 'branding', label: 'ブランディング', short: 'ブランド', icon: 'tag' },
@@ -50,11 +57,14 @@ function SetupGuideBar({ guide }) {
 
 function AdminApp() {
   const [config, setConfig] = useState(() => loadConfig())
+  const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
+  const visibleTabs = TABS.filter(tab => isLegacyTenant || !LEGACY_ONLY_TABS.has(tab.id))
   // セットアップ案内から、作業する場所へ直接来られるようにする。
   // 「色を変える」と言われた人が、どこを開けばよいか探さずに済む。
   const [activeTab, setActiveTab] = useState(() => {
     const requested = new URLSearchParams(window.location.search).get('tab')
-    return TABS.some(tab => tab.id === requested) ? requested : 'branding'
+    // 表示しないタブはURLで直接指定されても開かない。
+    return visibleTabs.some(tab => tab.id === requested) ? requested : 'branding'
   })
   // 目的（guide）は場所（tab）とは別。同じタブへ別の用事で来ることがある。
   const [setupGuide] = useState(() => new URLSearchParams(window.location.search).get('guide') || '')
@@ -265,7 +275,7 @@ function AdminApp() {
             </div>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-2 py-2">
-            {TABS.map(tab => (
+            {visibleTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -298,7 +308,7 @@ function AdminApp() {
           </div>
 
           <nav className="flex flex-col gap-0.5 p-3 flex-1">
-            {TABS.map(tab => (
+            {visibleTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
