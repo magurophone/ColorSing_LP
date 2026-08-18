@@ -65,11 +65,45 @@ export function createLegacyClientPublishAdapter(deploy = deployConfigToGitHub) 
   }
 }
 
+// 新規顧客の公開先はまだ無い。旧アダプタはGitHubのトークンを要求するが、
+// それは顧客に触らせない方針のため、本番では公開へ到達できない。準備中と
+// 正直に出すのが正しいが、それだと最後の2画面を誰も確認できない。
+// 開発機のブラウザだけ、仮の公開先を使って通しで歩けるようにする。
+export function createLocalPreviewPublishAdapter() {
+  return {
+    id: 'local-preview-publish',
+    canPublish: () => true,
+    async publish() {
+      return {
+        status: 'published',
+        publishedAt: Date.now(),
+        message: '公開を受け付けました。',
+      }
+    },
+    async verify() {
+      return {
+        status: 'verified',
+        verifiedAt: Date.now(),
+        message: '公開ページに最新設定が反映されています。',
+      }
+    },
+  }
+}
+
+// 注入があればそれを使う。無ければ旧アダプタ。旧アダプタが使えない相手
+// （＝新規顧客）のときだけ、開発機に限って仮の公開先へ落とす。
+export function resolvePublishAdapter({ injected = null, legacyAdapter, config, localPreview = false } = {}) {
+  if (injected) return injected
+  if (legacyAdapter.canPublish(config)) return legacyAdapter
+  return localPreview ? createLocalPreviewPublishAdapter() : legacyAdapter
+}
+
 export function createPublishService(adapter) {
   if (!adapter || typeof adapter.publish !== 'function' || typeof adapter.canPublish !== 'function') {
     throw new Error('A publish adapter is required')
   }
   return {
+    id: adapter.id,
     canPublish: config => adapter.canPublish(config),
     publish: config => adapter.publish(config),
     verify: (config, configUrl) => adapter.verify

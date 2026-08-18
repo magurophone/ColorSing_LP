@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadBaseConfig, loadConfig, loadConfigMeta, saveConfig, saveConfigMeta } from '../lib/configIO'
 import { extractSpreadsheetId, normalizeSpreadsheetInput, validateSpreadsheetConnection } from '../lib/spreadsheetConnection'
-import { createLegacyClientPublishAdapter, createPublishService } from '../productization/publish'
+import { createLegacyClientPublishAdapter, createPublishService, resolvePublishAdapter } from '../productization/publish'
+import { isLocalPreview } from '../productization/localPreview'
 import { deriveOnboardingSteps } from './state'
 import { loadFanPageCreation, toFanPageStatus } from '../productization/fanPageCreation'
 import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
@@ -198,11 +199,19 @@ function OnboardingApp() {
   const savedNoticeTimer = useRef(null)
   const validationSignatureRef = useRef('')
   const detailRef = useRef(null)
+  // 公開先が未接続の相手には、開発機だけ仮の公開先を使う。本番では
+  // 旧アダプタのまま＝準備中として正直に止まる。
   const publishService = useMemo(
-    () => createPublishService(createLegacyClientPublishAdapter()),
-    [],
+    () => createPublishService(resolvePublishAdapter({
+      injected: typeof window !== 'undefined' ? (window.__publishAdapter ?? null) : null,
+      legacyAdapter: createLegacyClientPublishAdapter(),
+      config,
+      localPreview: isLocalPreview(),
+    })),
+    [config],
   )
   const publishAvailable = publishService.canPublish(config)
+  const publishIsPlaceholder = publishService.id === 'local-preview-publish'
   const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
   // 歌推しページ作成の進行状況を獲得導線の状態へ変換して渡す。これにより未作成や
   // 準備中が、進めない理由として正しく案内される。
@@ -229,6 +238,18 @@ function OnboardingApp() {
   const activeStep = model.steps.find(step => step.id === activeId) || model.currentStep || model.steps[0]
   // 状態ごとの案内があるステップは、静的な文言より優先する。
   const guide = activeStep.guidance ?? GUIDANCE[activeStep.id]
+  // 終わったステップに「〜しましょう」と言い続けない。済んだことを伝える。
+  // 公開を受け付けたあとは、静的な案内より「次にやること」を出す。
+  // 反映確認を押さないと完了にならないのに、その説明がどこにも無かった。
+  const nowText = (() => {
+    if (activeStep.id === 'published' && meta.lastPublishRequested && activeStep.status !== 'complete') {
+      return '公開を受け付けました。「公開状態を確認」を押すと、ページに反映されたか確かめます。'
+    }
+    if (activeStep.status === 'complete' && activeStep.validation?.message) {
+      return activeStep.validation.message
+    }
+    return guide.now
+  })()
 
   const updateConfig = (path, value, { resetPreview = true } = {}) => {
     setConfig(previous => {
@@ -348,7 +369,7 @@ function OnboardingApp() {
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-amber">FAN PAGE SETUP</p>
             <h1 className="mt-2 text-3xl md:text-4xl font-bold text-light-blue">公開までのセットアップ</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400">今の状態を自動確認し、次に必要な操作だけを案内します。既存の初期設定ガイドと管理画面はそのまま利用できます。</p>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400">今やることだけを順に出します。入力はその場で保存されます。</p>
           </div>
           <div className="mt-5 md:mt-0 min-w-56 rounded-2xl border border-light-blue/25 bg-black/15 p-4">
             <div className="flex items-baseline justify-between">
@@ -361,6 +382,18 @@ function OnboardingApp() {
             <p className="mt-2 text-xs text-gray-500">必須 {model.completeCount} / {model.requiredCount} 完了</p>
           </div>
         </header>
+
+        {!model.currentStep && (
+          <div className="mb-5 rounded-2xl border border-green-500/35 bg-green-500/5 p-5" data-testid="setup-finished">
+            <p className="text-lg font-bold text-green-400">セットアップは終わりです。</p>
+            <p className="mt-2 text-sm text-gray-300">
+              歌推しページは公開されています。内容の変更はいつでも管理画面からできます。
+            </p>
+            <a href="./admin.html" className="mt-4 inline-flex rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-2.5 text-sm font-bold text-light-blue hover:bg-light-blue/20" data-testid="setup-finished-admin">
+              管理画面を開く
+            </a>
+          </div>
+        )}
 
         <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
           <nav className="glass-effect rounded-2xl border border-light-blue/20 p-3 lg:self-start" aria-label="セットアップ手順">
@@ -391,7 +424,7 @@ function OnboardingApp() {
             <h2 id="active-step-title" className="mt-4 text-2xl font-bold text-light-blue">{activeStep.title}</h2>
 
             {/* やることを一つだけ大きく出す。理由や条件は見出しごと常設しない。 */}
-            <p className="mt-4 text-base leading-relaxed text-gray-100">{guide.now}</p>
+            <p className="mt-4 text-base leading-relaxed text-gray-100">{nowText}</p>
             {savedNotice && (
               <p className="mt-3 text-sm text-green-400" role="status" data-testid="saved-notice">保存しました</p>
             )}
@@ -483,6 +516,12 @@ function OnboardingApp() {
                     {publishAvailable
                       ? '残っている項目を終えると公開できます。'
                       : '公開の受付をこちらで準備しています。準備ができると、ここから公開できます。'}
+                  </p>
+                )}
+                {/* 仮の公開先を使っていることを黙らない。 */}
+                {publishIsPlaceholder && (
+                  <p className="mt-3 text-xs text-amber" data-testid="publish-placeholder-notice">
+                    ※ この端末では動作確認用の仮処理を使っています。実際には公開されません。
                   </p>
                 )}
                 {publishResult && <p role="status" className={`mt-4 rounded-xl border p-4 text-sm ${publishResult.status === 'verified' || publishResult.status === 'published' ? 'border-green-500/35 text-green-400' : 'border-amber/35 text-amber'}`}>{publishResult.message}</p>}

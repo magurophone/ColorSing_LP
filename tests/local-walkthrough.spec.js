@@ -47,12 +47,16 @@ test('設定を足さなくても、商品ページから公開手前まで歩�
   expect(blocked, '必須なのに準備中で止まる手順があると公開へ到達できない').toEqual([])
 })
 
-test('必須の手順を終えると、公開の一歩手前まで進める', async ({ page }) => {
+// 歌推しページ作成済みの状態から案内を開く。
+async function openSetupAsCreatedCustomer(page, { localPreview = null } = {}) {
   await page.route('**/customer/config.js*', route => route.fulfill({
     status: 200,
     contentType: 'application/javascript',
     body: `window.DASHBOARD_CONFIG = ${JSON.stringify(TEMPLATE_CONFIG)}`,
   }))
+  if (localPreview !== null) {
+    await page.addInitScript(`window.__localPreview = ${localPreview}`)
+  }
   await page.addInitScript(() => {
     localStorage.setItem('fanpage_creation_state_v1', JSON.stringify({
       version: 1,
@@ -63,18 +67,59 @@ test('必須の手順を終えると、公開の一歩手前まで進める', as
     }))
   })
   await page.goto('/onboarding.html')
+}
 
+async function finishRequiredSteps(page) {
   await page.getByRole('button', { name: /基本情報/ }).first().click()
   await page.getByRole('textbox', { name: '表示名' }).fill('通し確認')
   await page.getByRole('textbox', { name: 'ページ名' }).fill('通し確認ページ')
 
   await page.getByRole('button', { name: /公開内容/ }).first().click()
-  await expect(page.getByTestId('step-open-tiers')).toBeVisible()
+  await page.getByTestId('step-open-tiers').click()
+  await page.getByTestId('tiers-add').click()
+  await page.getByPlaceholder('5K').fill('5K')
+  await page.getByTestId('setup-guide-back').click()
 
   await page.getByRole('button', { name: /プレビュー確認/ }).first().click()
   await page.getByRole('button', { name: 'プレビューを確認しました' }).click()
+  await page.locator('nav button').filter({ hasText: '公開' }).last().click()
+}
 
-  // 公開だけは受付が未接続なので押せない。押せない理由が出ていること。
-  await page.getByRole('button', { name: /^公開$|公開\s/ }).last().click()
+test('本番では、公開先が未接続なら公開させず、理由を出す', async ({ page }) => {
+  await openSetupAsCreatedCustomer(page, { localPreview: false })
+  await finishRequiredSteps(page)
+
+  await expect(page.getByRole('button', { name: '公開する' })).toBeDisabled()
   await expect(page.getByTestId('publish-blocked-reason')).toBeVisible()
+  await expect(page.getByTestId('publish-placeholder-notice')).toHaveCount(0)
+})
+
+test('開発機では公開まで歩ける。仮処理であることは画面に出す', async ({ page }) => {
+  await openSetupAsCreatedCustomer(page)
+  await finishRequiredSteps(page)
+
+  // 仮処理を黙って動かさない。
+  await expect(page.getByTestId('publish-placeholder-notice')).toBeVisible()
+  await page.getByRole('button', { name: '公開する' }).click()
+
+  // 押したあと、次にやることが出ること。反映確認を押さないと終わらない。
+  const detail = page.locator('section[aria-labelledby="active-step-title"]')
+  await expect(detail).toContainText('公開状態を確認')
+  await page.getByRole('button', { name: '公開状態を確認' }).click()
+
+  // 全部終わったら、終わりだと分かること。
+  await expect(page.getByTestId('setup-finished')).toBeVisible()
+  await expect(page.getByTestId('setup-finished-admin')).toBeVisible()
+})
+
+test('終わったステップに、まだやれとは言わない', async ({ page }) => {
+  await openSetupAsCreatedCustomer(page)
+  await page.getByRole('button', { name: /基本情報/ }).first().click()
+  await page.getByRole('textbox', { name: '表示名' }).fill('通し確認')
+  await page.getByRole('textbox', { name: 'ページ名' }).fill('通し確認ページ')
+
+  const detail = page.locator('section[aria-labelledby="active-step-title"]')
+  await expect(detail).toContainText('完了')
+  await expect(detail).not.toContainText('入力してください')
+  await expect(detail).toContainText('確認しました')
 })

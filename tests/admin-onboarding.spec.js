@@ -33,6 +33,8 @@ async function expectNoHorizontalOverflow(page) {
 
 test('state-driven onboarding reaches preview and blocks publish without exposing infrastructure', async ({ page }) => {
   await installConfig(page)
+  // 公開の受付が未接続のときの本番の見え方を検査する。開発機の仮処理を外す。
+  await page.addInitScript('window.__localPreview = false')
   await page.goto('/onboarding.html')
 
   await expect(page).toHaveTitle('公開までのセットアップ - ColorSing LP')
