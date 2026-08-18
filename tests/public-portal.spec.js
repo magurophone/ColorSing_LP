@@ -16,6 +16,17 @@ const DEMO_CONFIG = {
     { id: 'icons', label: '枠内アイコン', icon: 'image', enabled: true, title: '枠内アイコン' },
     { id: 'events', label: 'イベント', icon: 'calendar', enabled: true, title: 'イベント' },
   ],
+  // 出荷時の既定には特典を入れない方針にしたため、この契約テストが必要とする
+  // 段階はここで持つ。既定値に寄りかかったままだと、既定を変えるたびに壊れる。
+  benefitTiers: [
+    { key: '5k', icon: '🎵', columnIndex: 1, displayTemplate: '強制リクエスト: {value}曲', lockedContent: { text: '', imageUrl: '' } },
+    { key: '10k', icon: '🎮', columnIndex: 2, displayTemplate: '権利: {value}時間分', lockedContent: { text: '', imageUrl: '' } },
+    { key: '20k', icon: '💬', columnIndex: 3, displayTemplate: 'オープンチャット招待済', isBoolean: true, lockedContent: { text: '', imageUrl: '' } },
+    { key: '30k', icon: '🎤', columnIndex: 4, displayTemplate: 'アカペラ音源獲得: {value}曲', lockedContent: { text: '', imageUrl: '' } },
+    { key: '40k', icon: '⚡', columnIndex: 5, displayTemplate: '強制リクエスト: {value}曲', lockedContent: { text: '', imageUrl: '' } },
+    { key: '50k', icon: '🏆', columnIndex: 6, displayTemplate: 'ミックス音源獲得: {value}曲', lockedContent: { text: '', imageUrl: '' } },
+    { key: 'メンバーシップ', icon: '👑', columnIndex: 7, displayTemplate: '月内リクエスト対応中', isMembership: true, lockedContent: { text: '', imageUrl: '' } },
+  ],
 }
 
 async function installConfig(page, config = DEMO_CONFIG) {

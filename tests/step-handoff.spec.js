@@ -43,13 +43,13 @@ test('「色を変える」からカラー設定へ直接着く', async ({ page 
   await expect(page.getByRole('heading', { name: 'カラー' }).first()).toBeVisible()
 })
 
-test('「公開内容」から特典ティアへ直接着く', async ({ page }) => {
+test('「公開内容」から特典の段階へ直接着く', async ({ page }) => {
   await install(page)
   await page.goto('/onboarding.html')
   await page.getByRole('button', { name: /公開内容/ }).first().click()
   await page.getByTestId('step-open-tiers').click()
   await expect(page).toHaveURL(/admin\.html\?tab=tiers/)
-  await expect(page.getByRole('heading', { name: '特典ティア' }).first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: '特典の段階' }).first()).toBeVisible()
 })
 
 test('案内から来た人には、現在地と戻り先を出す', async ({ page }) => {

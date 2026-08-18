@@ -73,10 +73,10 @@ window.DASHBOARD_CONFIG = {
     },
     {
       "id": "rights",
-      "label": "ボトルキープ",
+      "label": "特典一覧",
       "icon": "👥",
       "enabled": true,
-      "title": "ボトルキープ一覧"
+      "title": "特典一覧"
     },
     {
       "id": "icons",
@@ -86,44 +86,7 @@ window.DASHBOARD_CONFIG = {
       "title": "枠内アイコン"
     }
   ],
-  "benefitTiers": [
-    {
-      "key": "1k",
-      "icon": "ph:star",
-      "columnIndex": 1,
-      "displayTemplate": "{value}",
-      "showUsers": true,
-      "showHistory": false,
-      "lockedContent": {
-        "text": "",
-        "imageUrl": ""
-      }
-    },
-    {
-      "key": "3k",
-      "icon": "ph:seal-check",
-      "columnIndex": 2,
-      "displayTemplate": "{value}",
-      "showUsers": true,
-      "showHistory": false,
-      "lockedContent": {
-        "text": "",
-        "imageUrl": ""
-      }
-    },
-    {
-      "key": "5k",
-      "icon": "ph:diamond",
-      "columnIndex": 3,
-      "displayTemplate": "{value}",
-      "showUsers": true,
-      "showHistory": false,
-      "lockedContent": {
-        "text": "",
-        "imageUrl": ""
-      }
-    }
-    ],
+  "benefitTiers": [],
   "home": {
     "rankingTitle": "Ranking",
     "pointsLabel": "歌推しPt",

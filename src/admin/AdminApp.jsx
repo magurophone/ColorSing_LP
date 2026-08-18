@@ -20,6 +20,11 @@ import DeployTab from './tabs/DeployTab'
 // デプロイは顧客へGitHubのリポジトリやトークンを触らせない方針のため出さない。
 const LEGACY_ONLY_TABS = new Set(['sheets', 'deploy'])
 
+// 「ティア」は業界語。初めての人には通じないので、新規顧客には言い換える。
+const NEW_TENANT_LABELS = {
+  tiers: { label: '特典の段階', short: '段階' },
+}
+
 const TABS = [
   { id: 'branding', label: 'ブランディング', short: 'ブランド', icon: 'tag' },
   { id: 'colors',   label: 'カラー',         short: 'カラー',   icon: 'palette' },
@@ -36,7 +41,7 @@ const TABS = [
 // 管理画面を開いた人へチュートリアルを押し付けない。
 const SETUP_GUIDES = {
   'setup-colors': { label: 'ページの色を決める', done: '色を選ぶと保存されます。' },
-  'setup-tiers': { label: '特典の内容を決める', done: '内容を入力すると保存されます。' },
+  'setup-tiers': { label: '特典の段階を決める（例: 5K, 10K）', done: '入力すると保存されます。' },
 }
 
 function SetupGuideBar({ guide }) {
@@ -58,7 +63,9 @@ function SetupGuideBar({ guide }) {
 function AdminApp() {
   const [config, setConfig] = useState(() => loadConfig())
   const isLegacyTenant = resolveTenantKind(config, { hasFanPageRecord: Boolean(loadFanPageCreation()) }) === TENANT_KIND.LEGACY
-  const visibleTabs = TABS.filter(tab => isLegacyTenant || !LEGACY_ONLY_TABS.has(tab.id))
+  const visibleTabs = TABS
+    .filter(tab => isLegacyTenant || !LEGACY_ONLY_TABS.has(tab.id))
+    .map(tab => (isLegacyTenant || !NEW_TENANT_LABELS[tab.id]) ? tab : { ...tab, ...NEW_TENANT_LABELS[tab.id] })
   // セットアップ案内から、作業する場所へ直接来られるようにする。
   // 「色を変える」と言われた人が、どこを開けばよいか探さずに済む。
   const [activeTab, setActiveTab] = useState(() => {
@@ -269,9 +276,11 @@ function AdminApp() {
               <a href="./index.html" target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" title="プレビュー">
                 <IconRenderer icon="monitor" size={15} />
               </a>
-              <a href="./manual.html" target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" title="マニュアル">
-                <IconRenderer icon="book-open" size={15} />
-              </a>
+              {isLegacyTenant && (
+                <a href="./manual.html" target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" title="マニュアル">
+                  <IconRenderer icon="book-open" size={15} />
+                </a>
+              )}
             </div>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-2 py-2">
@@ -333,14 +342,16 @@ function AdminApp() {
             >
               プレビューを開く
             </a>
-            <a
-              href="./manual.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full px-3 py-2 bg-light-blue/10 hover:bg-light-blue/20 border border-light-blue/30 rounded-lg transition-all text-light-blue text-xs font-body text-center"
-            >
-              管理マニュアル
-            </a>
+            {isLegacyTenant && (
+              <a
+                href="./manual.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full px-3 py-2 bg-light-blue/10 hover:bg-light-blue/20 border border-light-blue/30 rounded-lg transition-all text-light-blue text-xs font-body text-center"
+              >
+                管理マニュアル
+              </a>
+            )}
           </div>
         </div>
       </aside>
@@ -355,7 +366,7 @@ function AdminApp() {
 
         <div className="max-w-3xl">
           <SetupGuideBar guide={setupGuide} />
-          <ActiveTab config={config} updateConfig={updateConfig} onSyncFromGitHub={handleSyncFromGitHub} />
+          <ActiveTab config={config} updateConfig={updateConfig} onSyncFromGitHub={handleSyncFromGitHub} isLegacyTenant={isLegacyTenant} />
         </div>
 
       </main>
