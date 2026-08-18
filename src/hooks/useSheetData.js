@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { createGoogleSheetsDataSource } from '../dataSources/googleSheetsDataSource'
+import { createGoogleSheetsDataSource, NOT_CONFIGURED } from '../dataSources/googleSheetsDataSource'
 import { resolvePortalDataSources } from '../dataSources/registry'
 import { countSemanticDifferences } from '../lib/platformData'
 
@@ -106,7 +106,10 @@ export function usePortalData(sheetsConfig, platformConfig = {}) {
       setLastUpdate(new Date())
       setError(null)
     } catch (err) {
-      console.error('Failed to load data:', err)
+      // 保存先をまだ決めていない顧客に、障害のログを出さない。設定前は正常な
+      // 途中の状態であって、直すべき異常ではない。設定済みなのに取れなかった
+      // ときは本当の障害なので、従来どおり出す。
+      if (err?.code !== NOT_CONFIGURED) console.error('Failed to load data:', err)
       setError('データの読み込みに失敗しました。しばらくしてから再度お試しください。')
     } finally {
       setLoading(false)

@@ -14,6 +14,17 @@ function demoViewModel() {
     icons: DEMO_ICONS,
   }
 }
+// 未設定は障害ではない。まだシートを作っていない、まだ登録していない、という
+// 正常な途中の状態である。設定済みなのに取れなかったときだけが本当の障害なので、
+// 呼ぶ側が二つを区別できるようにする。
+export const NOT_CONFIGURED = 'not_configured'
+
+function notConfiguredError(message) {
+  const error = new Error(message)
+  error.code = NOT_CONFIGURED
+  return error
+}
+
 export function createGoogleSheetsDataSource(sheetsConfig = {}) {
   const ranges = sheetsConfig.ranges || {}
 
@@ -22,7 +33,7 @@ export function createGoogleSheetsDataSource(sheetsConfig = {}) {
     async loadPortalData() {
       if (sheetsConfig.spreadsheetId === 'demo') return demoViewModel()
       if (!sheetsConfig.spreadsheetId) {
-        throw new Error('スプレッドシートIDが設定されていません。管理画面（admin.html）から設定してください。')
+        throw notConfiguredError('スプレッドシートIDが設定されていません。管理画面（admin.html）から設定してください。')
       }
 
       const [rankingData, goalsData, benefitsData, rawRightsData, historyData, eventData] = await Promise.all([

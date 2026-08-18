@@ -85,6 +85,39 @@ test('missing primary data source keeps the current full-page retry state', asyn
   await expectNoHorizontalOverflow(page)
 })
 
+// 保存先をまだ決めていない顧客がいる。質問の回答待ちで、意図的に未設定のままに
+// してある。それは直すべき異常ではないので、障害として記録しない。
+test('未設定はまだ決めていないだけなので、障害として記録しない', async ({ page }) => {
+  const errors = []
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+  page.on('pageerror', error => errors.push(String(error.message)))
+
+  await installConfig(page, {
+    brand: { pageTitle: '未設定テスト' },
+    sheets: { spreadsheetId: '' },
+  })
+  await page.goto('/index.html')
+  await expect(page.getByRole('heading', { name: 'エラー' })).toBeVisible()
+
+  expect(errors, errors.join(' | ')).toHaveLength(0)
+})
+
+// 設定済みなのに取れなかったときは本当の障害である。黙って飲み込まない。
+test('設定済みで取得できないときは、障害として記録する', async ({ page }) => {
+  const errors = []
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+
+  await installConfig(page, {
+    brand: { pageTitle: '取得失敗テスト' },
+    sheets: { spreadsheetId: 'configured-but-unreachable' },
+  })
+  await page.route('**/sheets.googleapis.com/**', route => route.abort())
+  await page.goto('/index.html')
+  await expect(page.getByRole('heading', { name: 'エラー' })).toBeVisible()
+
+  await expect.poll(() => errors.some(text => text.includes('Failed to load data'))).toBe(true)
+})
+
 test('all protected public entry points remain reachable', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium-desktop', 'one URL smoke pass is sufficient')
   await installConfig(page)
