@@ -24,6 +24,30 @@ const TABS = [
   { id: 'deploy',   label: 'デプロイ',       short: 'デプロイ', icon: 'rocket' },
 ]
 
+
+// セットアップ案内から来た人にだけ、現在地と戻り先を出す。目的を持たずに
+// 管理画面を開いた人へチュートリアルを押し付けない。
+const SETUP_GUIDES = {
+  'setup-colors': { label: 'ページの色を決める', done: '色を選ぶと保存されます。' },
+  'setup-tiers': { label: '特典の内容を決める', done: '内容を入力すると保存されます。' },
+}
+
+function SetupGuideBar({ guide }) {
+  const info = SETUP_GUIDES[guide]
+  if (!info) return null
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-light-blue/35 bg-light-blue/10 px-4 py-3" data-testid="setup-guide-bar">
+      <div>
+        <p className="text-xs font-bold text-light-blue">歌推しページの初期設定</p>
+        <p className="mt-1 text-sm text-gray-200">{info.label}。{info.done}</p>
+      </div>
+      <a href="./onboarding.html" data-testid="setup-guide-back" className="rounded-lg border border-light-blue/50 bg-light-blue/15 px-4 py-2 text-sm font-bold text-light-blue">
+        設定の続きへ戻る
+      </a>
+    </div>
+  )
+}
+
 function AdminApp() {
   const [config, setConfig] = useState(() => loadConfig())
   // セットアップ案内から、作業する場所へ直接来られるようにする。
@@ -32,6 +56,8 @@ function AdminApp() {
     const requested = new URLSearchParams(window.location.search).get('tab')
     return TABS.some(tab => tab.id === requested) ? requested : 'branding'
   })
+  // 目的（guide）は場所（tab）とは別。同じタブへ別の用事で来ることがある。
+  const [setupGuide] = useState(() => new URLSearchParams(window.location.search).get('guide') || '')
   const [authenticated, setAuthenticated] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [saveMessage, setSaveMessage] = useState(null)
@@ -318,6 +344,7 @@ function AdminApp() {
         )}
 
         <div className="max-w-3xl">
+          <SetupGuideBar guide={setupGuide} />
           <ActiveTab config={config} updateConfig={updateConfig} onSyncFromGitHub={handleSyncFromGitHub} />
         </div>
 

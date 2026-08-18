@@ -51,3 +51,32 @@ test('「公開内容」から特典ティアへ直接着く', async ({ page }) 
   await expect(page).toHaveURL(/admin\.html\?tab=tiers/)
   await expect(page.getByRole('heading', { name: '特典ティア' }).first()).toBeVisible()
 })
+
+test('案内から来た人には、現在地と戻り先を出す', async ({ page }) => {
+  await install(page)
+  await page.goto('/admin.html?tab=colors&guide=setup-colors')
+  const bar = page.getByTestId('setup-guide-bar')
+  await expect(bar).toBeVisible()
+  await expect(bar).toContainText('ページの色を決める')
+  await expect(page.getByTestId('setup-guide-back')).toBeVisible()
+})
+
+test('目的なしで管理画面を開いた人へ案内を押し付けない', async ({ page }) => {
+  await install(page)
+  await page.goto('/admin.html?tab=colors')
+  await expect(page.getByTestId('setup-guide-bar')).toHaveCount(0)
+  await page.goto('/admin.html')
+  await expect(page.getByTestId('setup-guide-bar')).toHaveCount(0)
+})
+
+test('設定を変えたあと、案内へ戻れる', async ({ page }) => {
+  await install(page)
+  await page.goto('/onboarding.html')
+  await page.getByRole('button', { name: /色を変える/ }).first().click()
+  await page.getByTestId('step-open-colors').click()
+  await page.getByText('夜桜').first().click()
+  await page.getByTestId('setup-guide-back').click()
+  await expect(page.getByRole('heading', { name: '公開までのセットアップ' })).toBeVisible()
+  await page.getByRole('button', { name: /色を変える/ }).first().click()
+  await expect(page.locator('section[aria-labelledby="active-step-title"]')).toContainText('完了')
+})

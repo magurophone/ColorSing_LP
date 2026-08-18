@@ -412,7 +412,7 @@ function OnboardingApp() {
             )}
 
             {activeStep.id === 'theme_complete' && (
-              <a href="./admin.html?tab=colors" data-testid="step-open-colors" className="mt-6 inline-flex rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-3 text-sm font-bold text-light-blue hover:bg-light-blue/20">カラー設定を開く</a>
+              <a href="./admin.html?tab=colors&guide=setup-colors" data-testid="step-open-colors" className="mt-6 inline-flex rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-3 text-sm font-bold text-light-blue hover:bg-light-blue/20">カラー設定を開く</a>
             )}
 
             {activeStep.id === 'data_source_connected' && (
@@ -433,7 +433,7 @@ function OnboardingApp() {
             )}
 
             {activeStep.id === 'benefit_structure_complete' && (
-              <a href="./admin.html?tab=tiers" data-testid="step-open-tiers" className="mt-6 inline-flex rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-3 text-sm font-bold text-light-blue hover:bg-light-blue/20">特典の内容を決める</a>
+              <a href="./admin.html?tab=tiers&guide=setup-tiers" data-testid="step-open-tiers" className="mt-6 inline-flex rounded-xl border border-light-blue/40 bg-light-blue/10 px-4 py-3 text-sm font-bold text-light-blue hover:bg-light-blue/20">特典の内容を決める</a>
             )}
 
             {activeStep.id === 'preview_verified' && (
