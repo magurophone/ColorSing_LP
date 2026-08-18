@@ -6,6 +6,7 @@
 #   bash scripts/sync-all.sh --dry-run     # 変更内容だけ出す。push しない
 #   bash scripts/sync-all.sh               # 実際に同期して push する
 #   bash scripts/sync-all.sh --branch main # テンプレート側のブランチ指定
+#   bash scripts/sync-all.sh --only magurophone --dry-run  # 1顧客だけ
 #
 # 配布の考え方:
 #   scripts/sync-allowlist.txt に書いたものだけを配る。書いていないものは配らない。
@@ -31,11 +32,13 @@ ALLOWLIST_FILE="$SCRIPT_DIR/sync-allowlist.txt"
 WORK_DIR=$(mktemp -d)
 TEMPLATE_BRANCH="main"
 DRY_RUN=0
+ONLY=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=1; shift ;;
     --branch)  TEMPLATE_BRANCH="$2"; shift 2 ;;
+    --only)    ONLY="$2"; shift 2 ;;
     *)         TEMPLATE_BRANCH="$1"; shift ;;
   esac
 done
@@ -60,6 +63,15 @@ else
 fi
 
 [ -n "$REPOS" ] || { warn "customers.json に顧客リポジトリが登録されていません"; exit 0; }
+
+# --only: 1顧客だけへ適用する。新しい配布方式は、まず1件で実証してから広げる。
+if [ -n "$ONLY" ]; then
+  if ! echo "$REPOS" | grep -qFx "$ONLY"; then
+    error "--only $ONLY は customers.json にありません"
+    exit 1
+  fi
+  REPOS="$ONLY"
+fi
 
 # allowlist を読む（空行と # を捨てる）
 ALLOW_ENTRIES=$(grep -vE '^\s*(#|$)' "$ALLOWLIST_FILE" | sed 's/[[:space:]]*$//')
