@@ -229,7 +229,15 @@ runtimeから参照されない内部資料。
 | 現在この値を使っている顧客 | **0件**。公開中8顧客の `config.js` を確認し、全員が独自値、magurophoneは空 |
 | rotate必須 | この値を他のサービスで使い回している場合のみ。サイト側では不要 |
 
-**履歴のrewriteは行っていない。** 実施するかどうかは判断を仰ぐ。
+### 決定: 履歴rewriteはしない。失効済み値として扱う
+
+過去値はすでに公開済みであり、現役顧客の誰も使っていない。git履歴のrewriteは行わない。
+次を維持する。
+
+- **失効済み値として記録する。** 復活させない
+- **再利用禁止。** 新規顧客の初期値にも、他サービスにも使わない
+- **nativeの認証・認可の根拠として使用禁止。** サーバー側entitlementを正とする
+  （SLT `migration-plan.md` Phase 8 の security debt）
 
 なお `admin.password` はrotateしても解決しない。`config.js` はPUBLICなJavaScriptとして
 配信されており、**現役8顧客全員の値が今この瞬間も誰でも読める**。これは履歴の問題では
@@ -347,7 +355,36 @@ npm run test:e2e
 今回このセッションで最初にgreenを取れたのは、たまたま build より先に E2E を
 実行していたからである。
 
-## 対応案（未実施）
+## 追試: distが原因ではなかった
+
+上の表だけを見て `dist/` を原因と書いたが、**それは誤りだった**。追試で否定された。
+
+| 追試 | 条件 | 結果 |
+|---|---|---|
+| 5回目 | dist 有り（55ファイル/5.8MB） | 162 passed / **0 failed** |
+| 6回目 | dist 有り ＋ optimizeDepsキャッシュ削除 | 162 passed / **0 failed** |
+
+`vite.config.js` の変更でoptimizeDepsのキャッシュが捨てられ、再最適化中のfull reloadが
+navigationを中断したのではないかとも考えたが、`node_modules/.vite`（34MB）を消して
+走らせても通った。
+
+したがって **原因は未特定** である。4回目までの相関はサンプルの偶然だった。
+
+分かっているのは次だけである。
+
+- 失敗2回はいずれも `page.goto` の `net::ERR_ABORTED; maybe frame was detached?`
+- 落ちるspecは毎回違い、projectも違う（mobileとdesktop）
+- assertionの失敗ではなく、テストの中身に依存しない
+- 単体実行では3回とも通る
+- フル実行の並列負荷下でのみ起きた
+
+再現しないため **watch除外は入れていない**。否定された仮説にもとづいて、全顧客へ配布
+されるファイルを変更しない。
+
+次に起きたときに原因を追えるよう、SLTの `flake-forensics-reporter.mjs` 相当を
+LP側にも入れるかどうかは別途判断する。
+
+## 旧・対応案（採用しない）
 
 `vite.config.js` へ watcher の除外を足す案がある。ただし `vite.config.js` は
 allowlistのA分類で全顧客へ配布されるファイルなので、判断を仰ぐ。
