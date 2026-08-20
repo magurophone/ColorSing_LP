@@ -1,0 +1,52 @@
+[
+  {
+    "key": "npe",
+    "tenantSlug": "npe",
+    "displayName": "吊され版(旧)",
+    "repo": "npe",
+    "branch": "main",
+    "configUrl": "https://colorsing-dashboard.github.io/npe/customer/config.js",
+    "publicUrl": "https://colorsing-dashboard.github.io/npe/",
+    "expectedEnabledViews": ["home", "menu", "rights", "icons", "events"]
+  },
+  {
+    "key": "yuzukkuma",
+    "tenantSlug": "yuzukkuma",
+    "displayName": "ゆずにぃの蜜壺🍯",
+    "repo": "yuzukkuma",
+    "branch": "main",
+    "configUrl": "https://colorsing-dashboard.github.io/yuzukkuma/customer/config.js",
+    "publicUrl": "https://colorsing-dashboard.github.io/yuzukkuma/",
+    "expectedEnabledViews": ["home", "menu", "rights", "icons", "events"]
+  },
+  {
+    "key": "aruma",
+    "tenantSlug": "aruma",
+    "displayName": "あるま",
+    "repo": "aruma",
+    "branch": "main",
+    "configUrl": "https://colorsing-dashboard.github.io/aruma/customer/config.js",
+    "publicUrl": "https://colorsing-dashboard.github.io/aruma/",
+    "expectedEnabledViews": ["home", "menu", "rights", "icons", "events"]
+  },
+  {
+    "key": "NaNa7",
+    "tenantSlug": "nana7",
+    "displayName": "NaNa❼🐾の犬小屋",
+    "repo": "NaNa7",
+    "branch": "main",
+    "configUrl": "https://colorsing-dashboard.github.io/NaNa7/customer/config.js",
+    "publicUrl": "https://colorsing-dashboard.github.io/NaNa7/",
+    "expectedEnabledViews": ["home", "menu", "rights", "icons", "events"]
+  },
+  {
+    "key": "war-mi",
+    "tenantSlug": "war-mi",
+    "displayName": "waon",
+    "repo": "war-mi",
+    "branch": "main",
+    "configUrl": "https://colorsing-dashboard.github.io/war-mi/customer/config.js",
+    "publicUrl": "https://colorsing-dashboard.github.io/war-mi/",
+    "expectedEnabledViews": ["menu"]
+  }
+]

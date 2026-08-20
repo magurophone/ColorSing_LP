@@ -7,10 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:contracts": "node --test tests/lp-compatibility.test.mjs tests/spreadsheet-connection.test.mjs tests/productization.test.mjs tests/rights-columns.test.mjs tests/questionnaire.test.mjs tests/acquisition.test.mjs tests/public-address.test.mjs tests/fanpage-creation.test.mjs tests/address-availability.test.mjs tests/tenant-kind.test.mjs tests/entry-flow.test.mjs tests/setup-reset.test.mjs",
+    "test:contracts": "node --test tests/lp-compatibility.test.mjs tests/spreadsheet-connection.test.mjs tests/productization.test.mjs tests/rights-columns.test.mjs tests/questionnaire.test.mjs tests/acquisition.test.mjs tests/public-address.test.mjs tests/fanpage-creation.test.mjs tests/address-availability.test.mjs tests/tenant-kind.test.mjs tests/entry-flow.test.mjs tests/setup-reset.test.mjs tests/existing-customer-rollout.test.mjs",
     "test:e2e": "playwright test",
     "test": "npm run test:contracts && npm run test:e2e",
-    "platform:export-source": "node scripts/export-platform-source.mjs"
+    "platform:export-source": "node scripts/export-platform-source.mjs",
+    "platform:rollout-customer": "node scripts/rollout-existing-customer.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
