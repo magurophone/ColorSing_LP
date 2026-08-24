@@ -61,7 +61,7 @@ const ParticleEffect = () => {
   return (
     <>
       <style>{KEYFRAMES_CSS}</style>
-      <div style={{
+      <div data-testid="particle-layer" style={{
         position: 'absolute',
         inset: 0,
         overflow: 'hidden',
