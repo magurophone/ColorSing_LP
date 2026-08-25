@@ -40,6 +40,7 @@ export async function resolveLpRuntime(platformConfig = {}) {
     resolvedFromServer: false,
     pageSettings: null,
     settingsRevision: null,
+    benefitDisplays: null,
   }
   const baseUrl = String(platformConfig.publicApiBaseUrl || '').trim()
   const tenantSlug = String(platformConfig.tenantSlug || '').trim()
@@ -58,6 +59,9 @@ export async function resolveLpRuntime(platformConfig = {}) {
     // 公開ページの見た目と文言の正本。写しより優先する。
     pageSettings: data.pageSettings ?? null,
     settingsRevision: data.settingsRevision ?? null,
+    /* 権利一覧に出す特典の名前と単位。設定ではなく特典の定義が正本なので、
+     * ページ設定とは別に受け取る。 */
+    benefitDisplays: data.benefitDisplays ?? null,
   }
 }
 

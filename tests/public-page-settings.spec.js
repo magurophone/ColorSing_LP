@@ -130,3 +130,46 @@ test('設定がまだ無いテナントは、写しのまま描かれる', async
   await expect(page.getByText('写しMenu').filter({ visible: true }).first()).toBeVisible()
   await expect(page.getByTestId('particle-layer')).toHaveCount(0)
 })
+
+test('権利一覧の文字は、特典の定義の名前と単位で出る', async ({ page }) => {
+  await page.route('**/customer/config.js*', route => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: `window.DASHBOARD_CONFIG = ${JSON.stringify({
+      ...SNAPSHOT_CONFIG,
+      views: [
+        { id: 'home', label: '写しHome', icon: '🏠', enabled: true },
+        { id: 'rights', label: '権利', icon: '👥', enabled: true, title: '権利一覧' },
+      ],
+      /* 配布物にある古い文言。定義が届いたらこちらは使わない。 */
+      benefitTiers: [
+        { key: '10k', icon: '🎮', columnIndex: 2, displayTemplate: '権利: {value}時間分' },
+        { key: '20k', icon: '💬', columnIndex: 3, displayTemplate: 'オープンチャット招待済', isBoolean: true },
+      ],
+    })}`,
+  }))
+  await page.route(`${PLATFORM_BASE}/api/public/v1/runtime-config?*`, route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      version: 1,
+      tenant: 'magurophone',
+      lpReadSource: 'sheets',
+      shadowCompareEnabled: false,
+      pageSettings: {},
+      settingsRevision: 1,
+      benefitDisplays: {
+        '10k': { title: 'ツナコイン', unit: '枚', tierLabel: '10k' },
+        '20k': { title: 'オープンチャット招待', unit: '回', tierLabel: '20k' },
+      },
+    }),
+  }))
+
+  await page.goto('/index.html')
+  await page.getByText('権利', { exact: true }).filter({ visible: true }).first().click()
+  await page.getByText('星空リスナー', { exact: true }).filter({ visible: true }).first().click()
+
+  const popup = page.locator('.fixed').filter({ hasText: '星空リスナー' }).first()
+  await expect(popup.getByText(/ツナコイン: \d+枚/)).toBeVisible()
+  await expect(popup.getByText('時間分')).toHaveCount(0)
+})

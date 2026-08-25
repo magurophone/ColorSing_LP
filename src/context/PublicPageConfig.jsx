@@ -22,7 +22,13 @@ export function PublicPageConfig({ initialConfig, children }) {
     }
     resolveLpRuntime(platformConfig).then(runtime => {
       if (cancelled) return
-      setConfig(current => applyPageSettings(current, runtime.pageSettings))
+      setConfig(current => {
+        const next = applyPageSettings(current, runtime.pageSettings)
+        /* 特典の名前と単位は設定ではないので、写しへ混ぜず別に持つ。
+         * 届かなければ配布物の文言のままにする。 */
+        if (!runtime.benefitDisplays) return next
+        return { ...next, benefitDisplays: runtime.benefitDisplays }
+      })
     })
     return () => { cancelled = true }
   }, [initialConfig])

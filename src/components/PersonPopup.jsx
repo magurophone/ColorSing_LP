@@ -80,9 +80,17 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
 
             if (!active && !hasPastHistory) return null
 
-            const displayText = tier.isBoolean
-              ? tier.displayTemplate
-              : tier.displayTemplate.replace('{value}', value)
+            /* 権利一覧に出す文字は、特典の定義（名前と単位）が正本。
+             * 定義が届いていない特典と、まだ移していない配信者は、配布物にある
+             * これまでの文言をそのまま使う。 */
+            const definition = config.benefitDisplays?.[tier.key]
+            const displayText = definition
+              ? (tier.isBoolean
+                ? definition.title
+                : `${definition.title}: ${value}${definition.unit}`)
+              : (tier.isBoolean
+                ? tier.displayTemplate
+                : tier.displayTemplate.replace('{value}', value))
 
             return (
               <div

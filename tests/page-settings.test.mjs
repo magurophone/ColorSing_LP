@@ -74,3 +74,9 @@ test('受け取ってよいキーだけを抜き出す', () => {
   assert.deepEqual(pickRuntimeSettings({ brand: { name: 'x' }, sheets: { spreadsheetId: 'y' } }), { brand: { name: 'x' } })
   assert.equal(pickRuntimeSettings({ sheets: { spreadsheetId: 'y' } }), null)
 })
+
+test('特典の名前と単位は、設定ではなく別で受け取る', () => {
+  /* 権利一覧に出す文字の正本は特典の定義。ページ設定へ混ぜると二重に持つことになる。 */
+  const applied = applyPageSettings(SNAPSHOT, { benefitDisplays: { '10k': { title: 'x', unit: '枚' } } })
+  assert.equal(applied.benefitDisplays, undefined, '設定として取り込まない')
+})
