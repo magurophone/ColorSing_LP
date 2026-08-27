@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test'
 
-// 獲得者を表示しないティアは「特典管理」に列を作らないため、権利者一覧が参照して
-// はいけない columnIndex を持つ。0 は A列＝ユーザー名と同じ値なので、そのまま
-// 読むと表示名を権利値として評価してしまう。hasRight() は数字だけの文字列を
-// 権利ありと判定するため、権利のない人が一覧へ出て、アイコンまで付いた。
+// 獲得者を表示しないティアが有効な権利列を持っていても、showUsers=falseなら
+// 一覧・アイコン・詳細のどこにも出さない。列番号やtier名で除外すると、tenantごとの
+// 運用判断を表せないため、表示設定そのものを判定する。
 //
 // 判定はSheets由来でもDB由来でも同じ正規化済みview modelに対して行われる。
 // 理屈だけで片方を省かず、両方の取得経路で同じ結果になることを実測する。
@@ -14,18 +13,19 @@ const BENEFIT_ROWS = [
   ['1k', '入門', '枠内専用ノーマルアイコン', '獲得者一覧には表示しない', ''],
   ['3k', 'サポーター', '名前入りの枠内専用アイコン', '獲得者一覧に表示する', ''],
 ]
-// 0列目が表示名、1列目が3kの権利値、2列目がSpecial。
+// 0列目が表示名、1列目が1k、2列目が3k、3列目がSpecial。
 const RIGHTS_ROWS = [
-  ['777', '', ''],
-  ['888', 'TRUE', ''],
+  ['777', 'TRUE', '', ''],
+  ['888', 'TRUE', 'TRUE', ''],
 ]
 
 const BENEFIT_TIERS = [
-  { key: '1k', label: '入門', icon: '⭐', columnIndex: 0, displayTemplate: '獲得済', isBoolean: true, showUsers: false },
-  { key: '3k', label: 'サポーター', icon: '✅', columnIndex: 1, displayTemplate: '獲得済', isBoolean: true, showUsers: true },
+  { key: '1k', label: '入門', icon: '⭐', columnIndex: 1, displayTemplate: '獲得済', isBoolean: true, showUsers: false },
+  { key: '3k', label: 'サポーター', icon: '✅', columnIndex: 2, displayTemplate: '獲得済', isBoolean: true, showUsers: true },
 ]
 
 const VIEWS = [
+  { id: 'menu', label: '特典案内', icon: 'gift', enabled: true, title: '特典案内' },
   { id: 'rights', label: '権利者', icon: 'users', enabled: true, title: '権利者一覧' },
 ]
 
@@ -54,13 +54,20 @@ async function installDatabaseSource(page) {
       shadowCompareEnabled: false,
       useRuntimeConfig: true,
     },
-    benefitTiers: BENEFIT_TIERS,
+    /* 配布物は古く、1kを表示する設定のまま。D1がOFFへ上書きする。 */
+    benefitTiers: BENEFIT_TIERS.map(tier => tier.key === '1k' ? { ...tier, showUsers: true } : tier),
     views: VIEWS,
   })
   await page.route(`${PLATFORM_BASE}/api/public/v1/runtime-config?*`, route => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ version: 1, tenant: 'magurophone', lpReadSource: 'db', shadowCompareEnabled: false }),
+    body: JSON.stringify({
+      version: 1,
+      tenant: 'magurophone',
+      lpReadSource: 'db',
+      shadowCompareEnabled: false,
+      benefitDisplays: { '1k': { showUsers: false }, '3k': { showUsers: true } },
+    }),
   }))
   await page.route(`${PLATFORM_BASE}/api/public/v1/lp-data?*`, route => route.fulfill({
     status: 200,
@@ -74,7 +81,7 @@ async function installDatabaseSource(page) {
         goals: [],
         benefits: BENEFIT_ROWS,
         rights: RIGHTS_ROWS,
-        specialIndex: 2,
+        specialIndex: 3,
         history: [],
         events: { upcoming: null, past: [] },
         icons: { _orderedKeys: [] },
@@ -96,7 +103,7 @@ async function installSheetsSource(page) {
     let rows = []
     if (sheet.includes('特典管理')) {
       // 見出し行の Special を現行parserが検出し、以降を権利者行として扱う。
-      rows = [['ユーザー名', '3k', 'Special'], ...RIGHTS_ROWS]
+      rows = [['ユーザー名', '1k', '3k', 'Special'], ...RIGHTS_ROWS]
     } else if (sheet.includes('特典内容')) {
       rows = BENEFIT_ROWS
     }
@@ -110,9 +117,25 @@ const SOURCES = [
 ]
 
 for (const source of SOURCES) {
+  test(`${source.name}経路: 権利者一覧で非表示でも特典案内には表示できる`, async ({ page }) => {
+    await source.install(page)
+    await page.goto('/index.html')
+
+    await expect(page.getByRole('heading', { name: '特典案内' })).toBeVisible()
+    const catalogCard = page.locator('section .grid > div').filter({ hasText: '1k' }).filter({ hasText: '入門' }).first()
+    await expect(catalogCard).toBeVisible()
+    if ((page.viewportSize()?.width ?? 1000) < 768) {
+      await catalogCard.click()
+      await expect(page.locator('.fixed.inset-0').getByText('枠内専用ノーマルアイコン', { exact: true })).toBeVisible()
+    } else {
+      await expect(catalogCard.getByText('枠内専用ノーマルアイコン', { exact: true })).toBeVisible()
+    }
+  })
+
   test(`${source.name}経路: 数字だけの表示名を獲得者非表示ティアの列指定で権利ありと判定しない`, async ({ page }) => {
     await source.install(page)
     await page.goto('/index.html')
+    await page.getByText('権利者', { exact: true }).filter({ visible: true }).first().click()
     await expect(page.getByRole('heading', { name: '権利者一覧' })).toBeVisible()
 
     // 権利を持つ人は従来どおり出る。
@@ -124,6 +147,7 @@ for (const source of SOURCES) {
   test(`${source.name}経路: 獲得者非表示ティアのアイコンを一覧へ付けない`, async ({ page }) => {
     await source.install(page)
     await page.goto('/index.html')
+    await page.getByText('権利者', { exact: true }).filter({ visible: true }).first().click()
     await expect(page.getByRole('heading', { name: '888', level: 3 })).toBeVisible()
 
     await expect(page.getByText('✅', { exact: true })).toBeVisible()
@@ -133,6 +157,7 @@ for (const source of SOURCES) {
   test(`${source.name}経路: 詳細でも獲得者非表示ティアを権利として見せない`, async ({ page }) => {
     await source.install(page)
     await page.goto('/index.html')
+    await page.getByText('権利者', { exact: true }).filter({ visible: true }).first().click()
 
     await page.getByRole('heading', { name: '888', level: 3 }).click()
     await expect(page.getByRole('heading', { name: '888', level: 2 })).toBeVisible()

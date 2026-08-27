@@ -24,10 +24,17 @@ export function PublicPageConfig({ initialConfig, children }) {
       if (cancelled) return
       setConfig(current => {
         const next = applyPageSettings(current, runtime.pageSettings)
-        /* 特典の名前と単位は設定ではないので、写しへ混ぜず別に持つ。
-         * 届かなければ配布物の文言のままにする。 */
+        /* 特典の名前と単位は写しへ混ぜず別に持つ。権利者一覧へ出すかどうかだけは
+         * tier単位の表示設定なので、配布物のtierへ重ねる。どちらも届かなければ
+         * 配布物の値のままにする。 */
         if (!runtime.benefitDisplays) return next
-        return { ...next, benefitDisplays: runtime.benefitDisplays }
+        const benefitTiers = (next.benefitTiers || []).map(tier => {
+          const display = runtime.benefitDisplays?.[tier.key]
+          return typeof display?.showUsers === 'boolean'
+            ? { ...tier, showUsers: display.showUsers }
+            : tier
+        })
+        return { ...next, benefitDisplays: runtime.benefitDisplays, benefitTiers }
       })
     })
     return () => { cancelled = true }

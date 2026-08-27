@@ -35,6 +35,7 @@ const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 
   const getRightsIcons = useCallback((person) => {
     const icons = []
     config.benefitTiers.forEach((tier) => {
+      if (tier.showUsers === false) return
       if (!isRightsColumn(tier.columnIndex)) return
       if (hasRight(person[tier.columnIndex])) {
         icons.push(tier.icon)
@@ -62,7 +63,7 @@ const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 
       if (!name.toLowerCase().includes(searchTerm.toLowerCase())) return false
 
       const hasAnyRight = config.benefitTiers.some(
-        tier => isRightsColumn(tier.columnIndex) && hasRight(person[tier.columnIndex])
+        tier => tier.showUsers !== false && isRightsColumn(tier.columnIndex) && hasRight(person[tier.columnIndex])
       )
       const specialValue = String(person[specialIndex] ?? '').trim()
       const normalizedSpecial = specialValue.toUpperCase()

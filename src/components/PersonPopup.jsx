@@ -70,6 +70,7 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
 
         <div className="space-y-6 overflow-y-auto pr-2 flex-1">
           {config.benefitTiers.map((tier) => {
+            if (tier.showUsers === false) return null
             if (!isRightsColumn(tier.columnIndex)) return null
             const value = person[tier.columnIndex]
 
@@ -84,7 +85,8 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
              * 定義が届いていない特典と、まだ移していない配信者は、配布物にある
              * これまでの文言をそのまま使う。 */
             const definition = config.benefitDisplays?.[tier.key]
-            const displayText = definition
+            const hasDefinition = typeof definition?.title === 'string'
+            const displayText = hasDefinition
               ? (tier.isBoolean
                 ? definition.title
                 : `${definition.title}: ${value}${definition.unit}`)
