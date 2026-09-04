@@ -12,12 +12,13 @@ const FaqSection = ({ faq }) => {
 
   return (
     <section className="max-w-4xl mx-auto">
-      <h2 className="text-2xl md:text-4xl font-body mb-8 text-center text-glow-soft text-highlight">{faq.title}</h2>
+      <h2 data-page-setting-target="home.faq.title" className="text-2xl md:text-4xl font-body mb-8 text-center text-glow-soft text-highlight">{faq.title}</h2>
       <div className="glass-effect rounded-2xl p-8 border border-card-border/30 space-y-2">
         {faq.items.map((item, i) => (
           <div key={`faq-${i}-${item.question}`} className="border-b border-card-border/20 last:border-0 pb-2 last:pb-0">
             {accordion ? (
               <button
+                data-page-setting-target="home.faq.items"
                 className="w-full text-left flex items-center justify-between gap-2 py-2 text-xl font-body text-highlight"
                 onClick={() => toggle(i)}
               >
@@ -25,7 +26,7 @@ const FaqSection = ({ faq }) => {
                 <span className="text-base shrink-0 transition-transform duration-200" style={{ transform: open[i] ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span>
               </button>
             ) : (
-              <h3 className="text-xl font-body text-highlight mb-2 py-2">▸ {item.question}</h3>
+              <h3 data-page-setting-target="home.faq.items" className="text-xl font-body text-highlight mb-2 py-2">▸ {item.question}</h3>
             )}
             {(!accordion || open[i]) && (
               <p className="text-content-text ml-6 pb-2">{item.answer}</p>
@@ -120,7 +121,7 @@ const HomeView = ({ ranking, goals, events }) => {
     <>
       {/* ランキング */}
       <section className="text-center">
-        <h2 className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-glow-soft text-primary">{config.home.rankingTitle}</h2>
+        <h2 data-page-setting-target="home.rankingTitle" className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-glow-soft text-primary">{config.home.rankingTitle}</h2>
         <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 md:gap-6">
           {ranking.slice(0, 3).map((person, index) => (
             <div
@@ -152,11 +153,12 @@ const HomeView = ({ ranking, goals, events }) => {
 
       {/* 目標 */}
       <section className="text-center">
-        <h2 className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-glow-soft text-primary">{config.home.targetsTitle}</h2>
+        <h2 data-page-setting-target="home.targetsTitle" className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-glow-soft text-primary">{config.home.targetsTitle}</h2>
         <div className="grid grid-cols-2 gap-3 md:gap-6 max-w-4xl mx-auto">
           {config.home.targetLabels.map((label, colIndex) => (
             <div
               key={colIndex}
+              data-page-setting-target="home.targetLabels"
               className={`glass-effect rounded-2xl p-4 md:p-6 border border-card-hover/30 ${
                 goals.length === 0 || !goals[0] || !goals[0][colIndex] ? 'opacity-50' : ''
               }`}

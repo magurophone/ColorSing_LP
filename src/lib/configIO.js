@@ -98,6 +98,10 @@ export function loadStoredConfig() {
 // 設定を読み込む（config.js + デフォルト → localStorage で上書き）
 export function loadConfig() {
   const baseConfig = loadBaseConfig()
+  return loadConfigFromBase(baseConfig)
+}
+
+function loadConfigFromBase(baseConfig) {
   let config = baseConfig
 
   // localStorage からの上書き（管理画面で編集した値を優先）
@@ -136,6 +140,18 @@ export function loadConfig() {
   config.admin = baseConfig.admin
 
   return config
+}
+
+// 正式cutover済みtenantだけは、確定済みconfigを正本としてlegacy localStorageを読まない。
+// markerが無い既存tenantは必ず従来経路へ残す。
+export function loadPublicConfig(platformOverride = null) {
+  let baseConfig = loadBaseConfig()
+  if (platformOverride) {
+    baseConfig = deepMerge(baseConfig, { platform: platformOverride })
+  }
+  return baseConfig.platform?.configAuthority === 'control_plane'
+    ? baseConfig
+    : loadConfigFromBase(baseConfig)
 }
 
 // 設定を localStorage に保存

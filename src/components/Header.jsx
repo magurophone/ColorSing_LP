@@ -106,6 +106,7 @@ const TitleText = ({ config, glowClass, compact = false }) => {
             background: `linear-gradient(90deg, transparent, rgba(255,255,255,${sp * 0.85}) 30%, rgba(255,255,255,${sp}) 50%, rgba(255,255,255,${sp * 0.85}) 70%, transparent)`,
           }} />
           <h1
+            data-page-setting-target="brand.name"
             className={`relative ${textFill === 'gradient' ? `${baseClass} bg-clip-text text-transparent` : baseClass}`}
             style={h1Style}
           >
@@ -119,6 +120,7 @@ const TitleText = ({ config, glowClass, compact = false }) => {
   if (effectiveStyle === 'gradient') {
     return (
       <h1
+        data-page-setting-target="brand.name"
         className={`${baseClass} bg-clip-text text-transparent`}
         style={{
           ...titleVisualStyle,
@@ -132,6 +134,7 @@ const TitleText = ({ config, glowClass, compact = false }) => {
 
   return (
     <h1
+      data-page-setting-target="brand.name"
       className={baseClass}
       style={{ ...titleVisualStyle, color: 'var(--color-title, var(--color-primary))' }}
     >
@@ -228,12 +231,13 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
     >
       {imgFit === 'contain' ? (
         <>
-          {mobileSrc  && <img className="md:hidden  w-full block" src={mobileSrc}  alt="" onError={() => setImgFailed(true)} />}
-          {desktopSrc && <img className="hidden md:block w-full" src={desktopSrc} alt="" onError={() => setImgFailed(true)} />}
+          {mobileSrc  && <img data-page-setting-target="images.headerMobile" className="md:hidden  w-full block" src={mobileSrc}  alt="" onError={() => setImgFailed(true)} />}
+          {desktopSrc && <img data-page-setting-target="images.headerDesktop" className="hidden md:block w-full" src={desktopSrc} alt="" onError={() => setImgFailed(true)} />}
         </>
       ) : (
         <>
           <div
+            data-page-setting-target="images.headerDesktop"
             className="absolute inset-0 hidden md:block"
             style={{
               backgroundImage: sanitizeCssUrl(desktopSrc) || undefined,
@@ -243,6 +247,7 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
             }}
           ></div>
           <div
+            data-page-setting-target="images.headerMobile"
             className="absolute inset-0 md:hidden"
             style={{
               backgroundImage: sanitizeCssUrl(mobileSrc) || undefined,
