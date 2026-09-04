@@ -92,22 +92,20 @@ async function inkGaps(page) {
   })
 }
 
-/* 上下のすき間の差の許容。
- *
- * 補正量そのものは本番の実描画で詰めてある（PC・スマホとも 0.5px 以内）。
- * ここで見るのは、帯の上辺を突き抜けていないことと、極端に偏っていないこと。
- * canvas の字形計測は環境で数px揺れるため、ここを詰めすぎると環境差で落ちる。 */
-const ALLOWED = 4
+/* 見た目の中央に寄せるため、字の実体の上下は意図的に非対称にしてある。
+ * ここで守るのは「帯からはみ出して切られない」こと。寄せ量そのものは
+ * 本番の実描画で選び、値の根拠は src/lib/titleFontMetrics.js に書いてある。 */
+const MIN_GAP = 0.5
 
-test('Sacramento でも、字が帯の中で上下ほぼ均等に収まる', async ({ page }, testInfo) => {
+test('Sacramento でも、字が帯からはみ出さず見た目の中央に収まる', async ({ page }, testInfo) => {
   await install(page, configFor("'Sacramento', cursive"))
   await page.goto(PUBLIC_URL)
   const gaps = await inkGaps(page)
   expect(gaps.実際の書体, '想定の書体で描かれていない').toContain('Sacramento')
   expect(gaps.書体読み込み済み, 'Sacramento が読み込まれていない').toBe(true)
-  expect(Math.abs(gaps.ずれ), `上${gaps.上} / 下${gaps.下}（${testInfo.project.name}）`).toBeLessThanOrEqual(ALLOWED)
-  // 帯の上辺を突き抜けていない
-  expect(gaps.上).toBeGreaterThan(0)
+  // 帯の上辺も下辺も突き抜けていない（切られていない）
+  expect(gaps.上, `上のすき間（${testInfo.project.name}）`).toBeGreaterThanOrEqual(MIN_GAP)
+  expect(gaps.下, `下のすき間（${testInfo.project.name}）`).toBeGreaterThanOrEqual(MIN_GAP)
 })
 
 test('補正を持たない書体は、これまでどおり -0.12em のまま', async ({ page }) => {
@@ -127,6 +125,6 @@ test('利用者が決めた値は、書き換えられずそのまま効く', as
   await install(page, configFor("'Sacramento', cursive", { titleOffsetY: 0.05 }))
   await page.goto(PUBLIC_URL)
   const gaps = await inkGaps(page)
-  const expected = (0.05 + 0.115) * gaps.fontSize
+  const expected = (0.05 + 0.20) * gaps.fontSize
   expect(gaps.transform).toBe(`matrix(1, 0, 0, 1, 0, ${Math.round(expected * 100) / 100})`)
 })
