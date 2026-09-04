@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
 import { GRADIENT_DIR } from '../lib/constants'
+import { titleOffsetCorrection } from '../lib/titleFontMetrics'
 
 const TITLE_POS = {
   center:         'items-center justify-center',
@@ -31,9 +32,12 @@ const TitleText = ({ config, glowClass, compact = false }) => {
   const dir = GRADIENT_DIR[config.brand.titleGradientDirection] || 'to right'
   const fontSize = TITLE_SIZE[config.brand.titleSize || (compact ? 'small' : 'large')]
   const rawTitleOffsetY = Number(config.brand.titleOffsetY ?? -0.12)
-  const titleOffsetY = Number.isFinite(rawTitleOffsetY)
+  const userTitleOffsetY = Number.isFinite(rawTitleOffsetY)
     ? Math.max(-0.3, Math.min(0.3, rawTitleOffsetY))
     : -0.12
+  /* 利用者が決めた値に、書体のクセを打ち消す分だけを足す。設定値そのものは
+   * 書き換えない。補正を持たない書体は 0 なので、これまでと変わらない。 */
+  const titleOffsetY = userTitleOffsetY + titleOffsetCorrection(config.fonts?.display)
   const glassBg = config.brand.titleGlassBg ?? 0.35
   const glassBlur = config.brand.titleGlassBlur ?? 12
   const paddingY = config.brand.titlePaddingY ?? 12
