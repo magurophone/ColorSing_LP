@@ -1,5 +1,6 @@
 import DEFAULT_CONFIG from './defaults.js'
 import { reverseToken, restoreToken } from './utils.js'
+import { markAdminBrowser as markAdminBrowserIn, migrateStoredViews } from './viewsCompatMigration.js'
 
 // パス第1セグメント（リポジトリ名）でキーを分離。同一ドメインの複数顧客が混在しないように
 const _pathSegment = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : ''
@@ -98,6 +99,10 @@ export function loadStoredConfig() {
 // 設定を読み込む（config.js + デフォルト → localStorage で上書き）
 export function loadConfig() {
   const baseConfig = loadBaseConfig()
+  return loadConfigFromBase(baseConfig)
+}
+
+function loadConfigFromBase(baseConfig) {
   let config = baseConfig
 
   // localStorage からの上書き（管理画面で編集した値を優先）
@@ -136,6 +141,49 @@ export function loadConfig() {
   config.admin = baseConfig.admin
 
   return config
+}
+
+// この端末で管理画面のパスワード認証に成功したことを、ブラウザを閉じても残る形で
+// 記録する。sessionStorage.admin_auth は終了時に消えるため永続判定には使えない。
+// 認証画面を開いただけでは呼ばない。呼び出しは AdminApp の認証成功時だけ。
+export function markAdminBrowser() {
+  if (typeof window === 'undefined') return
+  markAdminBrowserIn({ storage: localStorage, repoSlug: _repoSlug })
+}
+
+// 公開済み views と、端末に残った古い views の食い違いを一度だけ直す。
+// tenant の config.js が compat.viewsMigrationVersion を宣言している場合のみ動く。
+// 宣言していない tenant では何も読まず、何も書かない。
+function runViewsCompatMigration() {
+  if (typeof window === 'undefined') return
+  const published = window.DASHBOARD_CONFIG
+  const version = Number(published?.compat?.viewsMigrationVersion)
+  if (!Number.isInteger(version) || version < 1) return
+  try {
+    migrateStoredViews({
+      storage: localStorage,
+      repoSlug: _repoSlug,
+      publishedViews: published.views,
+      version,
+    })
+  } catch {
+    // 移行に失敗しても公開ページは従来どおり表示する
+  }
+}
+
+// 正式cutover済みtenantだけは、確定済みconfigを正本としてlegacy localStorageを読まない。
+// markerが無い既存tenantは必ず従来経路へ残す。
+export function loadPublicConfig(platformOverride = null) {
+  let baseConfig = loadBaseConfig()
+  if (platformOverride) {
+    baseConfig = deepMerge(baseConfig, { platform: platformOverride })
+  }
+  if (baseConfig.platform?.configAuthority === 'control_plane') {
+    return baseConfig
+  }
+  // localStorage を読む前に走らせる。読み込み優先順位そのものは変えない。
+  runViewsCompatMigration()
+  return loadConfigFromBase(baseConfig)
 }
 
 // 設定を localStorage に保存

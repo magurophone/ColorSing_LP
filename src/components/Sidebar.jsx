@@ -4,7 +4,9 @@ import { GRADIENT_DIR } from '../lib/constants'
 
 const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
   const config = useConfig()
-  const enabledViews = config.views.filter(v => v.enabled)
+  const enabledViews = config.views
+    .map((view, sourceIndex) => ({ view, sourceIndex }))
+    .filter(({ view }) => view.enabled)
   const glowClass = config.brand.titleGlow !== false ? 'text-glow-soft' : ''
 
   return (
@@ -35,9 +37,10 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
       </div>
 
       <nav className="flex-1 space-y-2">
-        {enabledViews.map((view) => (
+        {enabledViews.map(({ view, sourceIndex }) => (
           <button
             key={view.id}
+            data-page-setting-target={`views:${sourceIndex}`}
             onClick={() => onViewChange(view.id)}
             className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
               currentView === view.id

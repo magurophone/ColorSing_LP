@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { loadConfig, saveConfig, deepMerge, saveConfigMeta } from '../lib/configIO'
+import { loadConfig, saveConfig, deepMerge, saveConfigMeta, markAdminBrowser } from '../lib/configIO'
 import { restoreToken } from '../lib/utils'
 import DEFAULT_CONFIG from '../lib/defaults'
 import { TENANT_KIND, resolveTenantKind } from '../productization/tenantKind'
@@ -201,6 +201,9 @@ function AdminApp() {
     if (passwordInput === config.admin.password) {
       setAuthenticated(true)
       sessionStorage.setItem('admin_auth', 'true')
+      // ブラウザを閉じても残る印。公開ページの自動修復から、この端末の
+      // 未デプロイのローカル設定を守るために使う。認証成功時だけ立てる。
+      markAdminBrowser()
     } else {
       alert('パスワードが違います')
     }

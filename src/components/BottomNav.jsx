@@ -3,7 +3,9 @@ import IconRenderer from './IconRenderer'
 
 const BottomNav = ({ currentView, onViewChange }) => {
   const config = useConfig()
-  const enabledViews = config.views.filter(v => v.enabled)
+  const enabledViews = config.views
+    .map((view, sourceIndex) => ({ view, sourceIndex }))
+    .filter(({ view }) => view.enabled)
 
   return (
     <nav
@@ -19,9 +21,10 @@ const BottomNav = ({ currentView, onViewChange }) => {
         className="h-16"
         style={{ display: 'grid', gridTemplateColumns: `repeat(${enabledViews.length}, minmax(0, 1fr))` }}
       >
-        {enabledViews.map((view) => (
+        {enabledViews.map(({ view, sourceIndex }) => (
           <button
             key={view.id}
+            data-page-setting-target={`views:${sourceIndex}`}
             onClick={() => onViewChange(view.id)}
             className={`flex flex-col items-center justify-center gap-1 transition-all ${
               currentView === view.id

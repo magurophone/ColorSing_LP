@@ -29,10 +29,18 @@ export default defineConfig({
       use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true },
     },
   ],
-  webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 4175',
-    url: 'http://127.0.0.1:4175/index.html',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'npm run dev -- --host 127.0.0.1 --port 4175',
+      url: 'http://127.0.0.1:4175/index.html',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: 'node tests/page-preview-host-server.mjs',
+      url: 'http://127.0.0.1:4185/health',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
 })
