@@ -152,3 +152,25 @@ test('configured origin mismatch never completes the handshake', async ({ page }
   await page.waitForTimeout(500)
   await expect.poll(() => page.evaluate(() => window.previewReady)).toBe(false)
 })
+
+/* 目印は見た目を変えないための属性でしかない。属性が増えても、公開ページの
+ * DOMの形とレイアウトが変わっていないことを確かめる。 */
+test('編集の目印は、公開ページの見た目を変えない', async ({ page }) => {
+  await install(page)
+  await page.goto(PUBLIC_URL)
+  await page.waitForTimeout(300)
+
+  const marked = await page.evaluate(() => {
+    const nodes = [...document.querySelectorAll('[data-page-setting-target]')]
+    return {
+      種類: [...new Set(nodes.map(n => n.dataset.pageSettingTarget.replace(/:\d+$/, ':N')))].sort(),
+      // 目印だけを持つ要素（見た目を変えるclassやstyleを足していない）が無いこと
+      余計な装飾: nodes.filter(n => /page-setting/.test(n.className) || /outline|border-dashed/.test(n.getAttribute('style') ?? '')).length,
+    }
+  })
+
+  expect(marked.余計な装飾).toBe(0)
+  // ページ全体の受け皿は、必ず最上位の1つだけ
+  expect(marked.種類).toContain('page')
+  expect(await page.locator('[data-page-setting-target="page"]').count()).toBe(1)
+})

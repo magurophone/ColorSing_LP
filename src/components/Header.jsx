@@ -164,11 +164,12 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
         )}
         <div className="absolute top-4 right-4 flex items-center gap-3">
           {lastUpdate && (
-            <div className="hidden md:block text-xs text-sub-text">
+            <div data-page-setting-target="ui.lastUpdate" className="hidden md:block text-xs text-sub-text">
               {config.ui.lastUpdate}: {lastUpdate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
           <button
+            data-page-setting-target="ui.refreshButton"
             onClick={onRefresh}
             disabled={loading}
             className="glass-effect px-4 py-2 rounded-lg border border-card-border/30 hover:border-card-hover transition-all text-sm font-body text-primary disabled:opacity-50 disabled:cursor-not-allowed"
@@ -278,11 +279,12 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
 
       <div className="absolute top-4 right-4 flex items-center gap-3">
         {lastUpdate && (
-          <div className="hidden md:block text-xs text-sub-text">
+          <div data-page-setting-target="ui.lastUpdate" className="hidden md:block text-xs text-sub-text">
             {config.ui.lastUpdate}: {lastUpdate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
         <button
+          data-page-setting-target="ui.refreshButton"
           onClick={onRefresh}
           disabled={loading}
           className="glass-effect px-4 py-2 rounded-lg border border-card-border/30 hover:border-card-hover transition-all text-sm font-body text-primary disabled:opacity-50 disabled:cursor-not-allowed"

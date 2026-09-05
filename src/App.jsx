@@ -128,7 +128,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    /* ページ全体。Control Planeの編集では、どの要素でもない所を押したときの
+     * 受け皿になる（背景の演出や本文の書体など、ページ全体にかかる設定）。
+     * closest() は最も近い目印を拾うので、個別の要素の邪魔はしない。 */
+    <div data-page-setting-target="page" className="min-h-screen relative">
       <ParticleEffect />
 
       <Sidebar currentView={effectiveView} onViewChange={setCurrentView} lastUpdate={lastUpdate} />

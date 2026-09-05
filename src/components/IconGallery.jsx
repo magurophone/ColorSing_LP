@@ -192,6 +192,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            data-page-setting-target="ui.searchPlaceholder"
             placeholder={config.ui.searchPlaceholder}
             className="w-full max-w-md px-4 py-2 glass-effect border border-card-border/30 rounded-xl focus:outline-none focus:border-card-hover transition-all text-white placeholder-gray-500 text-sm"
           />
@@ -233,7 +234,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
               ×
             </button>
 
-            <h2 className="text-2xl font-body mb-6 text-highlight text-center">
+            <h2 data-page-setting-target="ui.userIconTitle" className="text-2xl font-body mb-6 text-highlight text-center">
               {config.ui.userIconTitle.replace('{user}', popupUser)}
             </h2>
 

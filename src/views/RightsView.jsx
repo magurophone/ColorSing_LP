@@ -84,6 +84,7 @@ const RightsView = ({ rights, history, benefits, onSelectPerson, specialIndex = 
       <div className="mb-6 max-w-2xl mx-auto">
         <input
           type="text"
+          data-page-setting-target="ui.searchPlaceholder"
           placeholder={config.ui.searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

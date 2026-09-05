@@ -155,7 +155,7 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
             <div className="bg-gradient-to-r from-highlight/20 to-primary/20 p-6 rounded-xl border border-highlight/30 text-center">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <span className="text-3xl">✨</span>
-                <h3 className="text-xl font-body text-highlight">{config.ui.specialRightLabel}</h3>
+                <h3 data-page-setting-target="ui.specialRightLabel" className="text-xl font-body text-highlight">{config.ui.specialRightLabel}</h3>
               </div>
               <p className="text-content-text">{person[specialIndex]}</p>
             </div>
