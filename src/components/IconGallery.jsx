@@ -118,7 +118,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
     return (
       <div className="text-center py-16">
         <div className="text-4xl mb-4 animate-pulse">🖼️</div>
-        <div className="text-xl text-primary animate-shimmer">{config.ui.iconLoading}</div>
+        <div data-page-setting-target="ui.iconLoading" className="text-xl text-primary animate-shimmer">{config.ui.iconLoading}</div>
       </div>
     )
   }
@@ -136,7 +136,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
     return (
       <div className="text-center py-16">
         <div className="text-4xl mb-4">📭</div>
-        <div className="text-xl text-sub-text">{config.ui.iconEmpty}</div>
+        <div data-page-setting-target="ui.iconEmpty" className="text-xl text-sub-text">{config.ui.iconEmpty}</div>
       </div>
     )
   }
@@ -199,7 +199,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
 
           {/* ユーザー名グリッド */}
           {filteredUsers.length === 0 ? (
-            <div className="text-center py-8 text-sub-text">{config.ui.iconNoImages}</div>
+            <div data-page-setting-target="ui.iconNoImages" className="text-center py-8 text-sub-text">{config.ui.iconNoImages}</div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {filteredUsers.map((user) => (
@@ -239,7 +239,7 @@ const IconGallery = ({ icons, selectedMonth, setSelectedMonth, loading, iconErro
             </h2>
 
             {popupIcons.length === 0 ? (
-              <div className="text-center py-8 text-sub-text">{config.ui.iconNoImages}</div>
+              <div data-page-setting-target="ui.iconNoImages" className="text-center py-8 text-sub-text">{config.ui.iconNoImages}</div>
             ) : (
               <div className="flex flex-wrap gap-4 justify-center">
                 {popupIcons.map((icon, index) => (

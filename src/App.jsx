@@ -90,8 +90,8 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4 animate-pulse">{config.brand.loadingEmoji}</div>
-          <div className="text-xl text-primary animate-shimmer">{config.brand.loadingText}</div>
+          <div data-page-setting-target="brand.loadingEmoji" className="text-4xl mb-4 animate-pulse">{config.brand.loadingEmoji}</div>
+          <div data-page-setting-target="brand.loadingText" className="text-xl text-primary animate-shimmer">{config.brand.loadingText}</div>
         </div>
       </div>
     )
@@ -102,14 +102,31 @@ function App() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="glass-effect rounded-2xl p-8 border border-tuna-red/30 max-w-md w-full text-center">
           <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-body mb-4 text-tuna-red">{config.ui.errorTitle}</h2>
-          <p className="text-gray-300 mb-6">{config.ui.errorMessage || error}</p>
+          <h2 data-page-setting-target="ui.errorTitle" className="text-2xl font-body mb-4 text-tuna-red">{config.ui.errorTitle}</h2>
+          <p data-page-setting-target="ui.errorMessage" className="text-gray-300 mb-6">{config.ui.errorMessage || error}</p>
           <button
             onClick={loadData}
             className="px-6 py-3 bg-amber/20 hover:bg-amber/30 border border-amber/50 rounded-xl transition-all text-amber font-body"
           >
-            {config.ui.retryButton}
+            <span data-page-setting-target="ui.retryButton">{config.ui.retryButton}</span>
           </button>
+        </div>
+      </div>
+    )
+  }
+
+  /* アイコンが無いときの文字は、実際にはアイコンのページで、条件が揃った
+   * ときにしか出ない。4つとも同時には出ないので、preview では並べて出す。
+   * 一般公開では previewState は常に 'normal' なので、ここへは来ない。 */
+  if (previewState === 'icons-empty') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center space-y-2">
+          <div className="text-4xl mb-4">📭</div>
+          <div data-page-setting-target="ui.iconEmpty" className="text-xl text-sub-text">{config.ui.iconEmpty}</div>
+          <div data-page-setting-target="ui.iconLoading" className="text-sub-text">読み込み中：{config.ui.iconLoading}</div>
+          <div data-page-setting-target="ui.iconNoImages" className="text-sub-text">1枚も無いとき：{config.ui.iconNoImages}</div>
+          <div data-page-setting-target="ui.imageError" className="text-sub-text">画像が出せないとき：{config.ui.imageError}</div>
         </div>
       </div>
     )

@@ -3,6 +3,7 @@ import { useConfig } from '../context/ConfigContext'
 import { convertDriveUrl } from '../lib/sheets'
 import { GRADIENT_DIR } from '../lib/constants'
 import { titleOffsetCorrection } from '../lib/titleFontMetrics'
+import PreviewGhost from './PreviewGhost'
 
 const TITLE_POS = {
   center:         'items-center justify-center',
@@ -157,11 +158,15 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
   if (config.brand.showHeader === false) {
     return (
       <div className="w-full relative px-6 py-4">
-        {config.brand.showTitle !== false && (
+        {config.brand.showTitle !== false ? (
           <div className="text-center">
             <TitleText config={config} glowClass={glowClass} compact />
           </div>
+        ) : (
+          <PreviewGhost target="brand.name" label="サイト名（出していません）" />
         )}
+        {/* ヘッダーを出していないので画像が画面に無い。編集中だけ入口を置く。 */}
+        <PreviewGhost target="images.headerDesktop" label="ヘッダー画像（ヘッダーを出していません）" />
         <div className="absolute top-4 right-4 flex items-center gap-3">
           {lastUpdate && (
             <div data-page-setting-target="ui.lastUpdate" className="hidden md:block text-xs text-sub-text">
@@ -269,11 +274,21 @@ const Header = ({ lastUpdate, loading, onRefresh }) => {
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuNSIgZmlsbD0icmdiYSgxMzgsIDE4MCwgMjQ4LCAwLjA1KSIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9InJnYmEoMTM4LCAxODAsIDI0OCwgMC4wOCkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDEzOCwgMTgwLCAyNDgsIDAuMDMpIi8+PC9zdmc+')] opacity-20 animate-float"></div>
         </>
       )}
-      {config.brand.showTitle !== false && (
+      {config.brand.showTitle !== false ? (
         <div className={`absolute inset-0 flex ${posClass}`}>
           <div className={`${isCenter ? 'text-center' : ''} px-4`}>
             <TitleText config={config} glowClass={glowClass} />
           </div>
+        </div>
+      ) : (
+        <div className={`absolute inset-0 flex ${posClass}`}>
+          <div className="px-4"><PreviewGhost target="brand.name" label="サイト名（出していません）" /></div>
+        </div>
+      )}
+      {/* 画像を入れていないと押す所が無い。編集中だけ入口を置く。 */}
+      {!hasImage && (
+        <div className="absolute inset-x-0 bottom-2 px-6">
+          <PreviewGhost target="images.headerDesktop" label="ヘッダー画像（未設定）" />
         </div>
       )}
 

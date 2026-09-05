@@ -13,7 +13,7 @@ const MenuView = ({ benefits, onSelectBenefit }) => {
 
   return (
     <section>
-      <h2 className="text-2xl md:text-4xl font-body mb-6 md:mb-12 text-center text-glow-soft text-primary">{viewConfig.title || viewConfig.label || config.menu.title}</h2>
+      <h2 data-page-setting-target="menu.title" className="text-2xl md:text-4xl font-body mb-6 md:mb-12 text-center text-glow-soft text-primary">{viewConfig.title || viewConfig.label || config.menu.title}</h2>
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6">
         {benefits.filter(b => b[BENEFIT_FIELDS.TITLE]).map((benefit, index) => {
           const title = String(benefit[BENEFIT_FIELDS.TITLE] || '').trim()

@@ -1,12 +1,17 @@
 import { useConfig } from '../context/ConfigContext'
+import { useEditingPreview } from '../context/PublicPageConfig'
 import IconRenderer from './IconRenderer'
 import { GRADIENT_DIR } from '../lib/constants'
 
 const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
   const config = useConfig()
-  const enabledViews = config.views
-    .map((view, sourceIndex) => ({ view, sourceIndex }))
-    .filter(({ view }) => view.enabled)
+  const editing = useEditingPreview()
+  const allViews = config.views.map((view, sourceIndex) => ({ view, sourceIndex }))
+  const enabledViews = allViews.filter(({ view }) => view.enabled)
+  /* 出していないページは、編集中だけ「非表示」の見た目でここへ並べる。
+   * そうしないと、出していないページの名前やアイコンへ手が届かない。
+   * 一般公開では editing が false なので、DOMにも出ない。 */
+  const hiddenViews = editing ? allViews.filter(({ view }) => !view.enabled) : []
   const glowClass = config.brand.titleGlow !== false ? 'text-glow-soft' : ''
 
   return (
@@ -19,6 +24,7 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
             決めていないだけでテンプレートの名前が顧客のページに残っていた。 */}
         {config.brand.titleGradient !== false ? (
           <h1
+            data-page-setting-target="brand.sidebarTitle"
             className={`text-2xl font-display font-black text-transparent bg-clip-text ${glowClass}`}
             style={{
               backgroundImage: `linear-gradient(${GRADIENT_DIR[config.brand.titleGradientDirection] || 'to right'}, var(--color-title-gradient-start, var(--color-ocean-teal)), var(--color-title-gradient-mid, var(--color-light-blue)), var(--color-title-gradient-end, var(--color-amber)))`,
@@ -28,6 +34,7 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
           </h1>
         ) : (
           <h1
+            data-page-setting-target="brand.sidebarTitle"
             className={`text-2xl font-display font-black text-primary ${glowClass}`}
             style={{ color: 'var(--color-title, var(--color-primary))' }}
           >
@@ -50,6 +57,19 @@ const Sidebar = ({ currentView, onViewChange, lastUpdate }) => {
           >
             <IconRenderer icon={view.icon} size={20} />
             <span className="font-body">{view.label}</span>
+          </button>
+        ))}
+        {hiddenViews.map(({ view, sourceIndex }) => (
+          <button
+            key={view.id}
+            data-page-setting-target={`views:${sourceIndex}`}
+            data-preview-ghost="true"
+            onClick={() => onViewChange(view.id)}
+            className="w-full text-left px-4 py-3 rounded-lg border border-dashed border-sub-text/40 text-sub-text/70 flex items-center gap-3"
+          >
+            <IconRenderer icon={view.icon} size={20} />
+            <span className="font-body">{view.label}</span>
+            <span className="ml-auto text-xs">非表示</span>
           </button>
         ))}
       </nav>

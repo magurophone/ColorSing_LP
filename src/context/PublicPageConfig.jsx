@@ -8,8 +8,21 @@ import { installPagePreviewBridge } from '../lib/pagePreviewBridge'
 /* Control Planeのpreviewが選んだ表示状態。一般公開では常に 'normal'。 */
 const PreviewStateContext = createContext('normal')
 
+/* Control Planeのpreviewの操作モード。一般公開ではbridge自体が入らないので
+ * 常に 'off'。'edit' のときだけ、編集用の薄い枠を出してよい。 */
+const PreviewModeContext = createContext('off')
+
 export function usePreviewState() {
   return useContext(PreviewStateContext)
+}
+
+export function usePreviewMode() {
+  return useContext(PreviewModeContext)
+}
+
+/** 編集モードのときだけ true。公開ページの通常表示では必ず false。 */
+export function useEditingPreview() {
+  return useContext(PreviewModeContext) === 'edit'
 }
 
 /**
@@ -24,6 +37,7 @@ export function PublicPageConfig({ initialConfig, children }) {
   const [previewDraft, setPreviewDraft] = useState(null)
   /* Control Planeが選んだ表示状態。普段は出ない画面の文字を実物で直すためのもの。 */
   const [previewState, setPreviewState] = useState('normal')
+  const [previewMode, setPreviewMode] = useState('off')
 
   useEffect(() => {
     let cancelled = false
@@ -40,9 +54,10 @@ export function PublicPageConfig({ initialConfig, children }) {
 
   useEffect(() => installPagePreviewBridge({
     initialConfig,
-    onState: ({ draft, previewState: next }) => {
+    onState: ({ draft, mode, previewState: next }) => {
       setPreviewDraft(draft)
       setPreviewState(next ?? 'normal')
+      setPreviewMode(mode ?? 'off')
     },
   }) || undefined, [initialConfig])
 
@@ -66,8 +81,10 @@ export function PublicPageConfig({ initialConfig, children }) {
   /* 表示状態はconfigとは別に配る。configへ混ぜると、保存される設定と
    * 見分けがつかなくなる。 */
   return (
+    <PreviewModeContext.Provider value={previewMode}>
     <PreviewStateContext.Provider value={previewState}>
       <ConfigProvider config={config}>{children}</ConfigProvider>
     </PreviewStateContext.Provider>
+    </PreviewModeContext.Provider>
   )
 }

@@ -91,7 +91,31 @@ test('control_plane preview uses generated config, then applies and removes memo
     ],
   }, 'edit'))
   await expect(frame.getByText('Memory Draft Name').filter({ visible: true }).first()).toBeVisible()
+  /* 出していないページは、編集モードのときだけメニューへ「非表示」で並ぶ。
+   * そうしないと、出していないページの名前やアイコンへ手が届かない。 */
+  const hiddenPage = frame.locator('[data-preview-ghost]').filter({ hasText: 'Draft Events' })
+  await expect(hiddenPage.filter({ visible: true }).first()).toBeVisible()
+  await expect(hiddenPage.filter({ visible: true }).first()).toContainText('非表示')
+
+  /* 編集をやめれば、公開ページの見え方に戻る。補助の枠も跡形もなく消える。 */
+  await page.evaluate(() => window.sendPreviewState({
+    brand: { name: 'Memory Draft Name', footerText: '' },
+    home: { rankingTitle: '', pointsLabel: 0 },
+    views: [
+      { id: 'home', label: 'Draft Home', title: 'Home', icon: 'home', enabled: true, unknownField: { raw: 0 } },
+      { id: 'events', label: 'Draft Events', title: 'Events page', icon: 'calendar', enabled: false },
+    ],
+  }, 'readonly'))
   await expect(frame.getByText('Draft Events')).toHaveCount(0)
+  await expect(frame.locator('[data-preview-ghost]')).toHaveCount(0)
+  await page.evaluate(() => window.sendPreviewState({
+    brand: { name: 'Memory Draft Name', footerText: '' },
+    home: { rankingTitle: '', pointsLabel: 0 },
+    views: [
+      { id: 'home', label: 'Draft Home', title: 'Home', icon: 'home', enabled: true, unknownField: { raw: 0 } },
+      { id: 'events', label: 'Draft Events', title: 'Events page', icon: 'calendar', enabled: false },
+    ],
+  }, 'edit'))
   await expect(frame.locator('[data-page-setting-target="home.rankingTitle"]')).toHaveText('')
   await expect(frame.locator('[data-page-setting-target="brand.footerText"]')).toHaveText('')
 

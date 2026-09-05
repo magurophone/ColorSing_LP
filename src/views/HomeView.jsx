@@ -4,6 +4,7 @@ import { convertDriveUrl } from '../lib/sheets'
 import { formatEventDate, isEventEnded } from '../lib/utils'
 import CountUp from '../components/CountUp'
 import closedImg from '../assets/closed.png'
+import PreviewGhost from '../components/PreviewGhost'
 
 const FaqSection = ({ faq }) => {
   const accordion = faq.accordion !== false
@@ -145,7 +146,8 @@ const HomeView = ({ ranking, goals, events }) => {
               >
                 <CountUp end={person[RANKING_FIELDS.POINTS]} unit={config.home.pointsUnit ?? 'k'} />
               </div>
-              <div className="text-xs md:text-sm text-sub-text mt-1 md:mt-2">{config.home.pointsLabel}</div>
+              {/* ポイントの呼び方と単位は、押すとランキングの設定として出す。 */}
+              <div data-page-setting-target="home.pointsLabel" className="text-xs md:text-sm text-sub-text mt-1 md:mt-2">{config.home.pointsLabel}</div>
             </div>
           ))}
         </div>
@@ -155,6 +157,9 @@ const HomeView = ({ ranking, goals, events }) => {
       <section className="text-center">
         <h2 data-page-setting-target="home.targetsTitle" className="text-2xl md:text-4xl font-body mb-4 md:mb-8 text-glow-soft text-primary">{config.home.targetsTitle}</h2>
         <div className="grid grid-cols-2 gap-3 md:gap-6 max-w-4xl mx-auto">
+          {config.home.targetLabels.length === 0 && (
+            <PreviewGhost target="home.targetLabels" label="目標カード（まだありません）" className="col-span-2" />
+          )}
           {config.home.targetLabels.map((label, colIndex) => (
             <div
               key={colIndex}
@@ -235,8 +240,12 @@ const HomeView = ({ ranking, goals, events }) => {
       </section>}
 
       {/* FAQ */}
-      {config.home.faq.enabled !== false && config.home.faq.items.length > 0 && (
+      {config.home.faq.enabled !== false && config.home.faq.items.length > 0 ? (
         <FaqSection faq={config.home.faq} />
+      ) : (
+        /* FAQを出していない、または質問が1つも無いときは画面に何も無い。
+         * 編集中だけ入口を置く。一般公開ではDOMにも出ない。 */
+        <PreviewGhost target="home.faq.title" label="FAQ（出していません）" />
       )}
     </>
   )

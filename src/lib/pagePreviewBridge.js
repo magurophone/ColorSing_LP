@@ -152,9 +152,16 @@ export function installPagePreviewBridge({ initialConfig, onState }) {
 
     event.preventDefault()
     event.stopImmediatePropagation()
+    /* 押した要素がページの縦のどのあたりにあるかを添える。Control Plane が
+     * 設定を上下どちらへ出すかの判断にだけ使う。 */
+    const rect = target.getBoundingClientRect()
+    const ratio = window.innerHeight > 0
+      ? Math.max(0, Math.min(1, (rect.top + rect.height / 2) / window.innerHeight))
+      : 0
     session.source.postMessage({
       ...commonEnvelope(identity, session.nonce, PAGE_PREVIEW_MESSAGE.selection),
       target: target.dataset.pageSettingTarget,
+      ratio,
     }, session.origin)
   }
 
