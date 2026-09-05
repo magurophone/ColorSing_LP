@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfig } from './context/ConfigContext'
+import { usePreviewState } from './context/PublicPageConfig'
 import { usePortalData } from './hooks/useSheetData'
 import Sidebar from './components/Sidebar'
 import BottomNav from './components/BottomNav'
@@ -13,6 +14,7 @@ import { resolveTenantSlug } from './productization/tenant'
 
 function App() {
   const config = useConfig()
+  const previewState = usePreviewState()
   const enabledViews = config.views.filter(v => v.enabled)
 
   // 最初の有効なビューをデフォルトに
@@ -81,8 +83,10 @@ function App() {
     return () => { document.body.style.overflow = 'unset' }
   }, [selectedPerson, selectedBenefit])
 
-  // ローディング表示
-  if (loading) {
+  /* Control Planeのpreviewが状態を指定しているときは、その画面を出す。
+   * 普段は出ない文字を、実物を見ながら直せるようにするため。
+   * 一般公開では previewState は常に 'normal' なので、何も変わらない。 */
+  if (previewState === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -93,8 +97,7 @@ function App() {
     )
   }
 
-  // エラー表示
-  if (error) {
+  if (previewState === 'error' || error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="glass-effect rounded-2xl p-8 border border-tuna-red/30 max-w-md w-full text-center">

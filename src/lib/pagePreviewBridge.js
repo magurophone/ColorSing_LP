@@ -10,6 +10,10 @@ export const PAGE_PREVIEW_MESSAGE = Object.freeze({
 
 const MODES = new Set(['readonly', 'edit', 'operate'])
 
+/* Control Planeが確かめたい表示状態。普段は出ない画面の文字を、実物を見ながら
+ * 直せるようにするためのもの。preview のときだけ効く。 */
+const PREVIEW_STATES = new Set(['normal', 'loading', 'error', 'icons-empty'])
+
 function isPlainObject(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
   const prototype = Object.getPrototypeOf(value)
@@ -82,6 +86,7 @@ function matchesState(data, identity, nonce) {
   if (!isPlainObject(data.payload) || !MODES.has(data.payload.mode)) return false
   if (!isPlainObject(data.payload.draft)) return false
   if (data.payload.selectedTarget !== null && typeof data.payload.selectedTarget !== 'string') return false
+  if (data.payload.previewState !== undefined && !PREVIEW_STATES.has(data.payload.previewState)) return false
   try {
     return JSON.stringify(data.payload.draft).length <= 512_000
   } catch {
@@ -119,7 +124,7 @@ export function installPagePreviewBridge({ initialConfig, onState }) {
     if (matchesHello(event.data, identity)) {
       session = { nonce: event.data.nonce, source: event.source, origin: event.origin }
       mode = 'readonly'
-      onState({ draft: null, mode, selectedTarget: null })
+      onState({ draft: null, mode, selectedTarget: null, previewState: 'normal' })
       event.source.postMessage({
         ...commonEnvelope(identity, session.nonce, PAGE_PREVIEW_MESSAGE.ready),
         configAuthority: 'control_plane',
@@ -131,13 +136,11 @@ export function installPagePreviewBridge({ initialConfig, onState }) {
     if (!matchesState(event.data, identity, session.nonce)) return
 
     mode = event.data.payload.mode
-    const { draft, selectedTarget } = event.data.payload
-    onState({ draft, mode, selectedTarget })
+    const { draft, selectedTarget, previewState } = event.data.payload
+    onState({ draft, mode, selectedTarget, previewState: previewState ?? 'normal' })
 
-    if (selectedTarget) {
-      const target = document.querySelector(`[data-page-setting-target="${CSS.escape(selectedTarget)}"]`)
-      target?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
+    /* 選ばれたからといって公開ページを勝手に動かさない。利用者が見ている場所を
+     * 奪うと、確認したい所を見失う。押した要素はもともと画面に見えている。 */
   }
 
   const onClick = (event) => {

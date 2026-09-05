@@ -1,9 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { ConfigProvider } from './ConfigContext'
 import { applyPageSettings } from '../lib/pageSettings'
 import { resolveLpRuntime } from '../lib/platformData'
 import { resolveTenantSlug } from '../productization/tenant'
 import { installPagePreviewBridge } from '../lib/pagePreviewBridge'
+
+/* Control Planeのpreviewが選んだ表示状態。一般公開では常に 'normal'。 */
+const PreviewStateContext = createContext('normal')
+
+export function usePreviewState() {
+  return useContext(PreviewStateContext)
+}
 
 /**
  * 公開ページの設定をD1から受け取って適用する。
@@ -15,6 +22,8 @@ import { installPagePreviewBridge } from '../lib/pagePreviewBridge'
 export function PublicPageConfig({ initialConfig, children }) {
   const [runtime, setRuntime] = useState(null)
   const [previewDraft, setPreviewDraft] = useState(null)
+  /* Control Planeが選んだ表示状態。普段は出ない画面の文字を実物で直すためのもの。 */
+  const [previewState, setPreviewState] = useState('normal')
 
   useEffect(() => {
     let cancelled = false
@@ -31,7 +40,10 @@ export function PublicPageConfig({ initialConfig, children }) {
 
   useEffect(() => installPagePreviewBridge({
     initialConfig,
-    onState: ({ draft }) => setPreviewDraft(draft),
+    onState: ({ draft, previewState: next }) => {
+      setPreviewDraft(draft)
+      setPreviewState(next ?? 'normal')
+    },
   }) || undefined, [initialConfig])
 
   const config = useMemo(() => {
@@ -51,5 +63,11 @@ export function PublicPageConfig({ initialConfig, children }) {
     return { ...next, benefitDisplays: runtime.benefitDisplays, benefitTiers }
   }, [initialConfig, previewDraft, runtime])
 
-  return <ConfigProvider config={config}>{children}</ConfigProvider>
+  /* 表示状態はconfigとは別に配る。configへ混ぜると、保存される設定と
+   * 見分けがつかなくなる。 */
+  return (
+    <PreviewStateContext.Provider value={previewState}>
+      <ConfigProvider config={config}>{children}</ConfigProvider>
+    </PreviewStateContext.Provider>
+  )
 }
