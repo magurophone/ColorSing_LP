@@ -65,17 +65,50 @@ export function PublicPageConfig({ initialConfig, children }) {
     // preview draftは毎回immutableな初期configへ適用する。現在表示中configへ累積しない。
     const pageSettings = previewDraft ?? runtime?.pageSettings
     const next = applyPageSettings(initialConfig, pageSettings)
-    /* 特典の名前と単位は写しへ混ぜず別に持つ。権利者一覧へ出すかどうかだけは
-     * tier単位の表示設定なので、配布物のtierへ重ねる。どちらも届かなければ
-     * 配布物の値のままにする。 */
-    if (!runtime?.benefitDisplays) return next
-    const benefitTiers = (next.benefitTiers || []).map(tier => {
-      const display = runtime.benefitDisplays?.[tier.key]
-      return typeof display?.showUsers === 'boolean'
-        ? { ...tier, showUsers: display.showUsers }
-        : tier
-    })
-    return { ...next, benefitDisplays: runtime.benefitDisplays, benefitTiers }
+    /* 特典の名前と単位は写しへ混ぜず別に持つ。tier単位の表示設定は、配布物のtierへ
+     * 項目ごとに重ねる。届かなかった項目は配布物の値のままにする。
+     *
+     * 判定は必ず「型かどうか」で行う。値の有無で判定すると、空文字で保存した
+     * 「絵文字なし」「合言葉なし」が未設定に化けて、配布物の値が復活する。
+     * 同じ理由で `||` を使わない。 */
+    const perKeyIcon = next.benefitTierDisplay || {}
+    const overlay = tier => {
+      let merged = tier
+      const icon = perKeyIcon[tier.key]?.icon
+      if (typeof icon === 'string') merged = { ...merged, icon }
+      const display = runtime?.benefitDisplays?.[tier.key]
+      if (!display) return merged
+      if (typeof display.showUsers === 'boolean') merged = { ...merged, showUsers: display.showUsers }
+      if (typeof display.template === 'string') merged = { ...merged, displayTemplate: display.template }
+      /* キーごとの絵文字（benefitTierDisplay）のほうが細かいので、そちらを優先する。
+       * まとめて見せている特典は、定義側の絵文字がまとめた全キーへ同じように配られる。 */
+      if (typeof display.icon === 'string' && typeof icon !== 'string') {
+        merged = { ...merged, icon: display.icon }
+      }
+      if (typeof display.membershipCard === 'boolean') merged = { ...merged, isMembership: display.membershipCard }
+      if (typeof display.locked === 'boolean') merged = { ...merged, useKey: display.locked }
+      if (typeof display.accessKey === 'string') merged = { ...merged, accessKey: display.accessKey }
+      if (typeof display.lockedText === 'string' || typeof display.lockedImageUrl === 'string') {
+        merged = {
+          ...merged,
+          lockedContent: {
+            ...(merged.lockedContent || {}),
+            ...(typeof display.lockedText === 'string' ? { text: display.lockedText } : {}),
+            ...(typeof display.lockedImageUrl === 'string' ? { imageUrl: display.lockedImageUrl } : {}),
+          },
+        }
+      }
+      /* D1の表示文が届いた特典では、配布物の isBoolean を使わない。値を出すかどうかは
+       * 表示文に {value} があるかで決まる。届いていない特典は今までどおり。 */
+      if (typeof display.template === 'string') merged = { ...merged, templateFromControlPlane: true }
+      return merged
+    }
+    const benefitTiers = (next.benefitTiers || []).map(overlay)
+    return {
+      ...next,
+      ...(runtime?.benefitDisplays ? { benefitDisplays: runtime.benefitDisplays } : {}),
+      benefitTiers,
+    }
   }, [initialConfig, previewDraft, runtime])
 
   /* 表示状態はconfigとは別に配る。configへ混ぜると、保存される設定と

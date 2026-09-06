@@ -81,18 +81,39 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
 
             if (!active && !hasPastHistory) return null
 
-            /* 権利一覧に出す文字は、特典の定義（名前と単位）が正本。
-             * 定義が届いていない特典と、まだ移していない配信者は、配布物にある
-             * これまでの文言をそのまま使う。 */
+            /* 権利一覧に出す文字の決め方。
+             *
+             *   表示文がある     … {value} があれば残数を入れる。無ければ固定の文章
+             *   表示文が空文字   … 表示名と単位から自動で作る
+             *   表示文が無い     … 表示名があれば自動で作る。無ければ何も出さない
+             *
+             * 表示文は Control Plane から届いたものが優先で、届かなければ配布物の
+             * displayTemplate を使う（合流は PublicPageConfig で済んでいる）。
+             *
+             * 配布物の表示文には、値を出さない指定 isBoolean が別に付いている。
+             * Control Plane から届いた表示文では isBoolean を見ない。値を出すかどうかは
+             * {value} の有無で決まるため。届いていない特典は今までどおり isBoolean を見る。 */
             const definition = config.benefitDisplays?.[tier.key]
             const hasDefinition = typeof definition?.title === 'string'
-            const displayText = hasDefinition
-              ? (tier.isBoolean
-                ? definition.title
-                : `${definition.title}: ${value}${definition.unit}`)
-              : (tier.isBoolean
-                ? tier.displayTemplate
-                : tier.displayTemplate.replace('{value}', value))
+            const autoText = hasDefinition ? `${definition.title}: ${value}${definition.unit ?? ''}` : ''
+            const template = tier.displayTemplate
+            let displayText
+            if (tier.templateFromControlPlane) {
+              /* Control Plane で決めた表示文。空文字なら自動生成という意思表示。 */
+              displayText = typeof template === 'string' && template !== ''
+                ? (template.includes('{value}') ? template.replaceAll('{value}', value) : template)
+                : autoText
+            } else if (hasDefinition) {
+              /* 表示文が未設定でも、定義が届いていれば自動生成を使う。
+               * ここで配布物の表示文へ落とすと、すでに本番へ出ている
+               * 「強制リクエスト権: 3曲」が「強制リクエスト: 3曲」へ戻ってしまう。
+               * 配布物の表示文を使うのは、定義そのものが無い特典だけ。 */
+              displayText = autoText
+            } else {
+              displayText = tier.isBoolean
+                ? template
+                : String(template ?? '').replace('{value}', value)
+            }
 
             return (
               <div
