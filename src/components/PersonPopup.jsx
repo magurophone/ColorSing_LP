@@ -107,8 +107,12 @@ const PersonPopup = ({ person, benefits, history, specialIndex = 8, onClose, onS
               /* 表示文が未設定でも、定義が届いていれば自動生成を使う。
                * ここで配布物の表示文へ落とすと、すでに本番へ出ている
                * 「強制リクエスト権: 3曲」が「強制リクエスト: 3曲」へ戻ってしまう。
-               * 配布物の表示文を使うのは、定義そのものが無い特典だけ。 */
-              displayText = autoText
+               * 配布物の表示文を使うのは、定義そのものが無い特典だけ。
+               *
+               * ただし配布物が「値を出さない」と指定している特典では、値を出さない。
+               * 出すと権利表の内部値がそのまま見える（20kが「招待: TRUE回」になる）。
+               * 表示文をControl Planeへ移すまでのあいだ、この指定を尊重する。 */
+              displayText = tier.isBoolean ? definition.title : autoText
             } else {
               displayText = tier.isBoolean
                 ? template

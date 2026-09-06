@@ -32,6 +32,7 @@ const BENEFIT_TIERS = [
     icon: '👑',
     columnIndex: 3,
     displayTemplate: '月内リクエスト対応中',
+    isBoolean: true,
     isMembership: true,
     useKey: false,
     accessKey: 'あああ',
@@ -184,6 +185,19 @@ test('表示文: 未設定で定義が届いていれば、表示名と単位か
   await expect(page.getByText('強制リクエスト権: 56曲', { exact: true })).toBeVisible()
   // 配布物の言い回しへ戻らない。
   await expect(page.getByText('強制リクエスト: 3曲', { exact: true })).toHaveCount(0)
+})
+
+test('表示文: 未設定で配布物が値を出さない指定なら、内部値を出さない', async ({ page }) => {
+  // 移行前の20kと同じ形。定義は届いているが表示文はまだ未設定。
+  await install(page, {
+    benefitDisplays: {
+      ...DEFINITION_ONLY,
+      memb: { title: 'オープンチャット招待', unit: '回', tierLabel: '20k', showUsers: true },
+    },
+  })
+  await openPerson(page)
+  await expect(page.getByText('オープンチャット招待', { exact: true })).toBeVisible()
+  await expect(page.getByText('オープンチャット招待: TRUE回', { exact: true })).toHaveCount(0)
 })
 
 test('表示文: 空文字は自動生成という意思表示', async ({ page }) => {
