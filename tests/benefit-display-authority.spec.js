@@ -44,7 +44,7 @@ const VIEWS = [
   { id: 'rights', label: '権利者', icon: 'users', enabled: true, title: '権利者一覧' },
 ]
 
-async function install(page, { benefitDisplays = {}, benefitTierDisplay = undefined } = {}) {
+async function install(page, { benefitDisplays = {}, benefitTierDisplay = undefined, benefitTiers = BENEFIT_TIERS } = {}) {
   await page.route('**/customer/config.js', route => route.fulfill({
     status: 200,
     contentType: 'application/javascript',
@@ -58,7 +58,7 @@ async function install(page, { benefitDisplays = {}, benefitTierDisplay = undefi
         shadowCompareEnabled: false,
         useRuntimeConfig: true,
       },
-      benefitTiers: BENEFIT_TIERS,
+      benefitTiers,
       views: VIEWS,
     })}`,
   }))
@@ -263,6 +263,24 @@ test('合言葉で開く: 入が届いたら配布物が切でも合言葉の入
   await page.goto('/index.html')
   await expect(page.getByRole('heading', { name: '特典案内' })).toBeVisible()
   await expect(page.getByText('限定コンテンツ', { exact: false }).filter({ visible: true }).first()).toBeVisible()
+})
+
+/* 配布物が合言葉で閉じている状態。Control Planeで切ったときに、本当に開くかを見る。
+ * membershipCard には両方向の検査があるのに、合言葉は入れる方向しか無かった。
+ * 切る方向が落ちていると、管理画面で切っても公開ページが閉じたままの断線に気付けない。 */
+test('合言葉で開く: 切が届いたら配布物が入でも入口を出さない', async ({ page }) => {
+  await install(page, {
+    benefitTiers: BENEFIT_TIERS.map(tier => (
+      tier.key === 'memb' ? { ...tier, useKey: true, accessKey: 'ひらけ' } : tier
+    )),
+    benefitDisplays: {
+      ...DEFINITION_ONLY,
+      memb: { ...DEFINITION_ONLY.memb, locked: false, accessKey: '' },
+    },
+  })
+  await page.goto('/index.html')
+  await expect(page.getByRole('heading', { name: '特典案内' })).toBeVisible()
+  await expect(page.getByText('限定コンテンツ', { exact: false }).filter({ visible: true })).toHaveCount(0)
 })
 
 test('合言葉で開く: 未設定なら配布物のまま入口を出さない', async ({ page }) => {
