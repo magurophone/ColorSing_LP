@@ -43,7 +43,7 @@ function has(name) {
 
 const customerKey = argument('--customer')
 const through = argument('--through', 'plan')
-const apiBaseUrl = argument('--api-base', 'https://song-list-tool.pages.dev').replace(/\/+$/, '')
+const apiBaseUrl = argument('--api-base', 'https://tsumuen.com').replace(/\/+$/, '')
 const confirmSlug = argument('--confirm')
 const execute = has('--execute')
 const resume = has('--resume')

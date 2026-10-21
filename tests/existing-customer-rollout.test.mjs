@@ -73,10 +73,10 @@ test('platform patch preserves Sheets as local fallback and enables runtime-cont
   const customer = selectCustomer(customers, 'war-mi')
   const original = configFor(customer)
   validateCustomerConfig(customer, original)
-  const patched = buildPlatformConfig(original, customer, 'https://song-list-tool.pages.dev/')
+  const patched = buildPlatformConfig(original, customer, 'https://tsumuen.com/')
   assert.deepEqual(patched.platform, {
     tenantSlug: 'war-mi',
-    publicApiBaseUrl: 'https://song-list-tool.pages.dev',
+    publicApiBaseUrl: 'https://tsumuen.com',
     readSource: 'sheets',
     shadowCompareEnabled: true,
     useRuntimeConfig: true,
@@ -84,7 +84,7 @@ test('platform patch preserves Sheets as local fallback and enables runtime-cont
   assert.equal(patched.sheets, original.sheets)
   validateCustomerConfig(customer, patched, {
     allowPlatform: true,
-    publicApiBaseUrl: 'https://song-list-tool.pages.dev',
+    publicApiBaseUrl: 'https://tsumuen.com',
   })
 })
 
