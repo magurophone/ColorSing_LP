@@ -22,6 +22,7 @@ const MenuView = ({ benefits, onSelectBenefit }) => {
           return (
             <div
               key={index}
+              data-page-setting-target="menu.benefitCard"
               onClick={(e) => {
                 const hasLabel = !!benefit[BENEFIT_FIELDS.LABEL]
                 if (!hasLabel || window.matchMedia('(max-width: 767.98px)').matches) {

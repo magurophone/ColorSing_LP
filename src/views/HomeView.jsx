@@ -127,6 +127,7 @@ const HomeView = ({ ranking, goals, events }) => {
           {ranking.slice(0, 3).map((person, index) => (
             <div
               key={`${person[RANKING_FIELDS.NAME] ?? 'rank'}-${index}`}
+              {...(index === 0 ? { 'data-page-setting-target': 'home.rankingCard' } : {})}
               className={`glass-effect rounded-2xl p-4 md:p-8 border transition-all hover:scale-105 water-shimmer flex flex-col ${index === 0 ? 'box-glow-soft' : 'border-card-border/30'}`}
               style={index === 0 ? { borderColor: `var(--color-rank1-card, var(--base-accent))` } : undefined}
             >

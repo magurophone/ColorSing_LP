@@ -194,7 +194,7 @@ test('編集の目印は、公開ページの見た目を変えない', async ({
   })
 
   expect(marked.余計な装飾).toBe(0)
-  // ページ全体の受け皿は、必ず最上位の1つだけ
-  expect(marked.種類).toContain('page')
-  expect(await page.locator('[data-page-setting-target="page"]').count()).toBe(1)
+  // ページ全体の目印は無い（目印の無い所を押しても、Control Planeでは何も出さない）
+  expect(marked.種類).not.toContain('page')
+  expect(await page.locator('[data-page-setting-target="page"]').count()).toBe(0)
 })
