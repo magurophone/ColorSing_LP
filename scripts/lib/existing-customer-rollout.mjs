@@ -176,7 +176,8 @@ export async function runDbCutoverProof({ setSource, verifyDb, verifySheets, onA
 
 export function createAdminClient(baseUrl, environment = process.env) {
   const endpoint = baseUrl.replace(/\/+$/, '')
-  const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
+  // TSUMUEN の /api は本人の書き込みに同じ origin の Origin を求める（ブラウザが付けるものを、この道具は自分で付ける）
+  const headers = { 'Content-Type': 'application/json', Accept: 'application/json', Origin: new URL(endpoint).origin }
   if (environment.SLT_ADMIN_COOKIE) headers.Cookie = environment.SLT_ADMIN_COOKIE
   if (environment.CF_ACCESS_CLIENT_ID && environment.CF_ACCESS_CLIENT_SECRET) {
     headers['CF-Access-Client-Id'] = environment.CF_ACCESS_CLIENT_ID
