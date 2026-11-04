@@ -234,8 +234,10 @@ function isSheetsRequest(url) {
   return url.startsWith('https://docs.google.com/spreadsheets/')
 }
 
+// 画面の切り替えボタン（Sidebar・BottomNav）は「絵柄（IconRenderer）＋名前の span」。絵柄が絵文字の旧ページでは
+// ボタンの名前が「🏠 Home」になるので、ボタンの名前ではなく、名前の文字がぴったり同じ要素を中に持つボタンで探す。
 export async function clickConfiguredView(page, view) {
-  const buttons = page.getByRole('button', { name: view.label, exact: true })
+  const buttons = page.getByRole('button').filter({ has: page.getByText(view.label, { exact: true }) })
   for (let index = 0; index < await buttons.count(); index += 1) {
     const button = buttons.nth(index)
     if (await button.isVisible()) {

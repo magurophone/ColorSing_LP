@@ -197,12 +197,33 @@ test('DB cutover proof verifies DB, rollback, then DB in order', async () => {
 
 test('browser gate stops when an enabled view button cannot be found', async () => {
   const missingPage = {
-    getByRole: () => ({ count: async () => 0 }),
+    getByRole: () => ({ filter: () => ({ count: async () => 0 }) }),
+    getByText: () => ({}),
   }
   await assert.rejects(
     () => clickConfiguredView(missingPage, { id: 'icons', label: 'Icons' }),
     /Enabled view button was not found: icons/,
   )
+})
+
+test('browser gate finds view buttons whose icon is an emoji (live legacy pages) or an svg', async () => {
+  const { chromium } = await import('playwright')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    // Sidebar.jsx と同じ形：絵柄（絵文字の span か svg）＋名前の span。旧ページの実物は「🏠 Home」。
+    await page.setContent(`
+      <button onclick="window.clicked='home'"><span style="font-size:20px">🏠</span><span class="font-body">Home</span></button>
+      <button onclick="window.clicked='menu'"><svg width="20" height="20"></svg><span class="font-body">特典一覧</span></button>
+      <button onclick="window.clicked='menu-long'"><span class="font-body">特典一覧の説明</span></button>
+    `)
+    await clickConfiguredView(page, { id: 'home', label: 'Home' })
+    assert.equal(await page.evaluate(() => window.clicked), 'home')
+    await clickConfiguredView(page, { id: 'menu', label: '特典一覧' })
+    assert.equal(await page.evaluate(() => window.clicked), 'menu')
+  } finally {
+    await browser.close()
+  }
 })
 
 test('rollout evidence directory is ignored by git', async () => {
