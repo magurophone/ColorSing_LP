@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   buildPlatformConfig,
   clickConfiguredView,
+  readSettledText,
   requireImportSuccess,
   requireSecondApplyZero,
   requireSemanticDiffZero,
@@ -221,6 +222,26 @@ test('browser gate finds view buttons whose icon is an emoji (live legacy pages)
     assert.equal(await page.evaluate(() => window.clicked), 'home')
     await clickConfiguredView(page, { id: 'menu', label: '特典一覧' })
     assert.equal(await page.evaluate(() => window.clicked), 'menu')
+  } finally {
+    await browser.close()
+  }
+})
+
+test('browser gate reads the page text only after a counting-up number has settled', async () => {
+  // 2026-11-04：旧ページのホームは数え上がる動き（CountUp）の途中で文字を取り、同じページでもハッシュが変わった。
+  const { chromium } = await import('playwright')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    await page.setContent(`<div id="box"><span id="n">0</span>kg</div><script>
+      const start = performance.now()
+      const step = now => { const p = Math.min((now - start) / 1500, 1); document.getElementById('n').textContent = String(Math.floor(25 * p)); if (p < 1) requestAnimationFrame(step) }
+      requestAnimationFrame(step)
+    </script>`)
+    assert.equal(await readSettledText(page.locator('#box'), { quietMs: 500 }), '25kg')
+    // 動き続ける画面は、落ち着かないものとして止める。
+    await page.setContent(`<div id="box">0</div><script>let i = 0; setInterval(() => { document.getElementById('box').textContent = String(++i) }, 50)</script>`)
+    await assert.rejects(() => readSettledText(page.locator('#box'), { quietMs: 500, timeoutMs: 1500 }), /落ち着かなかった/)
   } finally {
     await browser.close()
   }

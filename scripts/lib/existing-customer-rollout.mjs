@@ -257,6 +257,29 @@ async function waitUntil(predicate, timeoutMs, message) {
   throw new Error(message)
 }
 
+/**
+ * 画面の文字が落ち着く（quietMs のあいだ変わらない）まで待ってから返す。
+ * ホームの数は数え上がる動き（src/components/CountUp.jsx、既定 2 秒）で毎フレーム変わるので、
+ * 決まった時間だけ待って取ると途中の数を取り、同じページでも見え方のハッシュが変わる（2026-11-04、yuzukkuma のホームで「25kg→24kg」）。
+ * timeoutMs までに落ち着かなければ止める（動き続ける画面を見比べたことにしない）。
+ */
+export async function readSettledText(locator, { quietMs = 1000, timeoutMs = 15_000, intervalMs = 100 } = {}) {
+  const started = Date.now()
+  let last = await locator.innerText()
+  let since = Date.now()
+  while (Date.now() - started < timeoutMs) {
+    await new Promise(resolve => setTimeout(resolve, intervalMs))
+    const current = await locator.innerText()
+    if (current !== last) {
+      last = current
+      since = Date.now()
+    } else if (Date.now() - since >= quietMs) {
+      return current
+    }
+  }
+  throw new Error(`画面の文字が ${timeoutMs}ms のあいだ落ち着かなかった。`)
+}
+
 export async function verifyLivePage({
   customer,
   config,
@@ -351,7 +374,7 @@ export async function verifyLivePage({
           ).catch(error => localErrors.push(`icons:${error.message}`))
         }
         await page.waitForTimeout(view.id === 'icons' ? 500 : 250)
-        const text = await page.locator('.md\\:ml-64 .max-w-7xl').innerText()
+        const text = await readSettledText(page.locator('.md\\:ml-64 .max-w-7xl'))
         const key = `${viewport.name}:${view.id}`
         const digest = hashText(normalizeVisibleText(text))
         results.viewHashes[key] = digest
