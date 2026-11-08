@@ -242,6 +242,17 @@ test('browser gate reads the page text only after a counting-up number has settl
     // 動き続ける画面は、落ち着かないものとして止める。
     await page.setContent(`<div id="box">0</div><script>let i = 0; setInterval(() => { document.getElementById('box').textContent = String(++i) }, 50)</script>`)
     await assert.rejects(() => readSettledText(page.locator('#box'), { quietMs: 500, timeoutMs: 1500 }), /落ち着かなかった/)
+    // 読み込み中の表示（止まって見える）が quietMs より長く出ても、それを取らずに中身を待つ（2026-11-04、npe のアイコン画面）。
+    // 同じタブで setContent を続けると前の中身のタイマーが残って書き換えるので、1件ずつ新しいタブで見る。
+    const loadingPage = async () => {
+      const fresh = await browser.newPage()
+      await fresh.setContent(`<div id="box"><div data-page-setting-target="ui.iconLoading">検索中....</div></div><script>
+        setTimeout(() => { document.getElementById('box').textContent = '2026年7月' }, 1500)
+      </script>`)
+      return fresh.locator('#box')
+    }
+    assert.equal(await readSettledText(await loadingPage(), { quietMs: 500 }), '検索中....')
+    assert.equal(await readSettledText(await loadingPage(), { quietMs: 500, busySelector: '[data-page-setting-target="ui.iconLoading"]' }), '2026年7月')
   } finally {
     await browser.close()
   }

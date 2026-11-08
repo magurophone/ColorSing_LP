@@ -262,15 +262,22 @@ async function waitUntil(predicate, timeoutMs, message) {
  * ホームの数は数え上がる動き（src/components/CountUp.jsx、既定 2 秒）で毎フレーム変わるので、
  * 決まった時間だけ待って取ると途中の数を取り、同じページでも見え方のハッシュが変わる（2026-11-04、yuzukkuma のホームで「25kg→24kg」）。
  * timeoutMs までに落ち着かなければ止める（動き続ける画面を見比べたことにしない）。
+ * busySelector があれば、それが画面にある間（読み込み中の表示）は落ち着いたとみなさない。
+ * 読み込み中の表示は止まって見えるので、quietMs だけでは途中の文字を取る（2026-11-04、npe のスマホのアイコン画面で
+ * 「🔍手配犯検索中🔍....」を取り、前後の両方で取れば中身を比べないまま同じと出る）。
  */
-export async function readSettledText(locator, { quietMs = 1000, timeoutMs = 15_000, intervalMs = 100 } = {}) {
+export async function readSettledText(locator, { quietMs = 1000, timeoutMs = 15_000, intervalMs = 100, busySelector = null } = {}) {
   const started = Date.now()
+  const isBusy = async () => Boolean(busySelector) && await locator.locator(busySelector).count() > 0
   let last = await locator.innerText()
   let since = Date.now()
   while (Date.now() - started < timeoutMs) {
     await new Promise(resolve => setTimeout(resolve, intervalMs))
     const current = await locator.innerText()
-    if (current !== last) {
+    if (await isBusy()) {
+      last = current
+      since = Date.now()
+    } else if (current !== last) {
       last = current
       since = Date.now()
     } else if (Date.now() - since >= quietMs) {
@@ -374,7 +381,8 @@ export async function verifyLivePage({
           ).catch(error => localErrors.push(`icons:${error.message}`))
         }
         await page.waitForTimeout(view.id === 'icons' ? 500 : 250)
-        const text = await readSettledText(page.locator('.md\\:ml-64 .max-w-7xl'))
+        // 読み込み中の表示は src/components/IconGallery.jsx の ui.iconLoading だけ（全体の読み込み中は .max-w-7xl が出る前）。
+        const text = await readSettledText(page.locator('.md\\:ml-64 .max-w-7xl'), { busySelector: '[data-page-setting-target="ui.iconLoading"]' })
         const key = `${viewport.name}:${view.id}`
         const digest = hashText(normalizeVisibleText(text))
         results.viewHashes[key] = digest
